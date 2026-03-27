@@ -34,7 +34,7 @@
   /* ── AUTH ── */
   #auth-screen {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #1a3a38 0%, #2c6e6a 60%, #3d8c87 100%);
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #b8860b 100%);
   }
   .auth-box {
     background: #fff; border-radius: 16px; padding: 48px 40px; width: 380px;
@@ -74,7 +74,7 @@
 
   /* ── SIDEBAR ── */
   .sidebar {
-    width: var(--sidebar); background: #1a3a38; color: #fff;
+    width: var(--sidebar); background: #1a1a1a; color: #fff;
     display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh;
     z-index: 100;
   }
@@ -211,7 +211,7 @@
 
   /* ── PROFILE ── */
   .profile-header {
-    background: linear-gradient(135deg, #1a3a38, #2c6e6a);
+    background: linear-gradient(135deg, #1a1a1a, #b8860b);
     color: #fff; border-radius: var(--radius); padding: 28px; margin-bottom: 20px;
     display: flex; align-items: center; gap: 20px;
   }
@@ -1414,7 +1414,7 @@ function renderAnalytics() {
   const ctx1 = document.getElementById('chart-weekly').getContext('2d');
   weeklyChart = new Chart(ctx1, {
     type: 'bar',
-    data: { labels: weekLabels, datasets: [{ label: 'Notes', data: weeks, backgroundColor: '#2c6e6a', borderRadius: 6 }] },
+    data: { labels: weekLabels, datasets: [{ label: 'Notes', data: weeks, backgroundColor: '#b8860b', borderRadius: 6 }] },
     options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
   });
 
