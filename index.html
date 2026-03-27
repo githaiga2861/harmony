@@ -1,1 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harmony Living House — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --surface2: #f0f2f5;
+    --border: #e2e6ea;
+    --accent: #2c6e6a;
+    --accent2: #3d8c87;
+    --accent-light: #e8f4f3;
+    --danger: #c0392b;
+    --danger-light: #fdf0ef;
+    --warn: #d68910;
+    --warn-light: #fef9ec;
+    --text: #1a2332;
+    --text2: #4a5568;
+    --text3: #8a9ab0;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+    --radius: 10px;
+    --sidebar: 240px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
+  /* ── AUTH ── */
+  #auth-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1a3a38 0%, #2c6e6a 60%, #3d8c87 100%);
+  }
+  .auth-box {
+    background: #fff; border-radius: 16px; padding: 48px 40px; width: 380px;
+    box-shadow: var(--shadow-lg);
+  }
+  .auth-logo { text-align: center; margin-bottom: 32px; }
+  .auth-logo .org { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--accent); line-height: 1.2; }
+  .auth-logo .sub { font-size: 12px; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
+  .auth-box h2 { font-size: 18px; font-weight: 600; margin-bottom: 24px; color: var(--text); }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: inherit; font-size: 14px; color: var(--text); background: #fff;
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer;
+    font-family: inherit; font-size: 14px; font-weight: 600; transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-secondary { background: var(--surface2); color: var(--text2); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-danger { background: var(--danger-light); color: var(--danger); }
+  .btn-danger:hover { background: #f5c6c2; }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+  .btn-full { width: 100%; justify-content: center; }
+  .auth-error { color: var(--danger); font-size: 13px; margin-top: 12px; display: none; }
+
+  /* ── LAYOUT ── */
+  #app { display: none; min-height: 100vh; }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar); background: #1a3a38; color: #fff;
+    display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar-brand .org { font-family: 'DM Serif Display', serif; font-size: 16px; line-height: 1.3; }
+  .sidebar-brand .sub { font-size: 10px; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+  .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 8px; cursor: pointer;
+    font-size: 13.5px; font-weight: 500; color: rgba(255,255,255,0.65);
+    transition: all 0.15s; border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .nav-item.active { background: var(--accent); color: #fff; }
+  .nav-item svg { flex-shrink: 0; }
+  .sidebar-footer {
+    padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .staff-badge {
+    display: flex; align-items: center; gap: 10px; padding: 8px;
+  }
+  .staff-avatar {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0;
+  }
+  .staff-info .name { font-size: 13px; font-weight: 600; color: #fff; }
+  .staff-info .role { font-size: 11px; color: rgba(255,255,255,0.45); }
+  .btn-logout {
+    margin-top: 8px; width: 100%; text-align: left; padding: 8px 12px;
+    border-radius: 8px; border: none; background: none; color: rgba(255,255,255,0.45);
+    font-family: inherit; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  }
+  .btn-logout:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+  /* ── MAIN ── */
+  .main { margin-left: var(--sidebar); flex: 1; display: flex; flex-direction: column; }
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-title { font-size: 16px; font-weight: 600; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .content { padding: 28px; flex: 1; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .card-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-header h3 { font-size: 15px; font-weight: 600; }
+  .card-body { padding: 20px; }
+
+  /* ── STATS ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; box-shadow: var(--shadow);
+  }
+  .stat-card .label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-card .value { font-size: 32px; font-weight: 600; color: var(--text); margin: 6px 0 2px; font-variant-numeric: tabular-nums; }
+  .stat-card .sub { font-size: 12px; color: var(--text3); }
+  .stat-icon { float: right; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .stat-icon.green { background: var(--accent-light); color: var(--accent); }
+  .stat-icon.blue { background: #e8f0fe; color: #1a73e8; }
+  .stat-icon.warn { background: var(--warn-light); color: var(--warn); }
+  .stat-icon.red { background: var(--danger-light); color: var(--danger); }
+
+  /* ── TABLE ── */
+  .search-bar { display: flex; gap: 10px; margin-bottom: 16px; }
+  .search-input {
+    flex: 1; padding: 9px 14px; border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: inherit; font-size: 14px; color: var(--text);
+  }
+  .search-input:focus { outline: none; border-color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600;
+    color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: 12px 14px; font-size: 14px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+  .resident-name { font-weight: 600; color: var(--accent); cursor: pointer; }
+  .resident-name:hover { text-decoration: underline; }
+  .badge {
+    display: inline-block; padding: 3px 8px; border-radius: 20px;
+    font-size: 11px; font-weight: 600;
+  }
+  .badge-green { background: var(--accent-light); color: var(--accent); }
+  .badge-warn { background: var(--warn-light); color: var(--warn); }
+  .badge-red { background: var(--danger-light); color: var(--danger); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    display: none; align-items: center; justify-content: center; z-index: 200;
+    padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 14px; box-shadow: var(--shadow-lg);
+    width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+    animation: slideUp 0.2s ease;
+  }
+  .modal-lg { max-width: 800px; }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .modal-header {
+    padding: 20px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; background: var(--surface); z-index: 1;
+  }
+  .modal-header h3 { font-size: 16px; font-weight: 600; }
+  .modal-body { padding: 24px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-close {
+    background: none; border: none; cursor: pointer; color: var(--text3);
+    padding: 4px; border-radius: 6px; display: flex; align-items: center;
+  }
+  .btn-close:hover { background: var(--surface2); color: var(--text); }
+
+  /* ── PROFILE ── */
+  .profile-header {
+    background: linear-gradient(135deg, #1a3a38, #2c6e6a);
+    color: #fff; border-radius: var(--radius); padding: 28px; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .profile-avatar {
+    width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif; font-size: 26px; color: #fff; flex-shrink: 0;
+  }
+  .profile-name { font-family: 'DM Serif Display', serif; font-size: 24px; }
+  .profile-meta { display: flex; gap: 20px; margin-top: 8px; font-size: 13px; opacity: 0.8; }
+  .back-btn {
+    background: none; border: none; cursor: pointer; color: var(--accent);
+    font-family: inherit; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 4px;
+    margin-bottom: 16px; padding: 0;
+  }
+  .back-btn:hover { text-decoration: underline; }
+
+  /* ── NOTES ── */
+  .notes-list { display: flex; flex-direction: column; gap: 12px; }
+  .note-card {
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 16px;
+    transition: border-color 0.15s; cursor: pointer;
+  }
+  .note-card:hover { border-color: var(--accent); }
+  .note-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .note-date { font-size: 13px; font-weight: 700; color: var(--accent); }
+  .note-staff { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .note-preview { font-size: 13px; color: var(--text2); margin-top: 8px; line-height: 1.5; }
+  .note-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  /* ── NOTE DETAIL ── */
+  .note-section { margin-bottom: 20px; }
+  .note-section-title {
+    font-size: 11px; font-weight: 700; color: var(--text3); text-transform: uppercase;
+    letter-spacing: 0.07em; margin-bottom: 10px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .note-field { margin-bottom: 10px; }
+  .note-field .field-label { font-size: 11px; font-weight: 600; color: var(--text3); margin-bottom: 3px; }
+  .note-field .field-value { font-size: 14px; color: var(--text); line-height: 1.6; }
+  .note-field .field-value.empty { color: var(--text3); font-style: italic; }
+  .note-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── TIMELINE ── */
+  .timeline { position: relative; }
+  .timeline::before {
+    content: ''; position: absolute; left: 16px; top: 0; bottom: 0; width: 2px;
+    background: var(--border);
+  }
+  .timeline-item { display: flex; gap: 16px; margin-bottom: 20px; position: relative; }
+  .timeline-dot {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--accent);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    color: #fff; font-size: 12px; z-index: 1;
+  }
+  .timeline-content { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+  .timeline-date { font-size: 12px; font-weight: 700; color: var(--accent); }
+  .timeline-staff { font-size: 11px; color: var(--text3); }
+  .timeline-text { font-size: 13px; color: var(--text2); margin-top: 6px; line-height: 1.5; }
+
+  /* ── FORM ── */
+  .form-section-title {
+    font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase;
+    letter-spacing: 0.06em; margin: 20px 0 12px; padding-bottom: 6px;
+    border-bottom: 2px solid var(--accent-light);
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .span2 { grid-column: span 2; }
+
+  /* ── PRINT ── */
+  @media print {
+    .sidebar, .topbar, .nav-item, .btn, .modal-footer, .back-btn, #auth-screen { display: none !important; }
+    .main { margin-left: 0; }
+    .content { padding: 0; }
+    body { background: #fff; }
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state { text-align: center; padding: 60px 24px; }
+  .empty-state svg { color: var(--text3); margin-bottom: 16px; }
+  .empty-state h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .empty-state p { font-size: 14px; color: var(--text3); }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    background: #1a2332; color: #fff; padding: 12px 20px; border-radius: 10px;
+    font-size: 14px; box-shadow: var(--shadow-lg); display: none;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .span2 { grid-column: span 1; }
+    .note-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    :root { --sidebar: 0px; }
+    .sidebar { transform: translateX(-100%); transition: transform 0.2s; }
+    .sidebar.open { transform: translateX(0); width: 240px; }
+    .stats-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Page views */
+  .page { display: none; }
+  .page.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="org">Harmony Living House</div>
+      <div class="sub">Adult Family LLC</div>
+    </div>
+    <h2>Staff Login</h2>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="staff@harmonyliving.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()" style="margin-top:8px;">
+      Sign In
+    </button>
+    <div class="auth-error" id="auth-error">Invalid credentials. Please try again.</div>
+    <p style="margin-top:20px; font-size:12px; color:var(--text3); text-align:center;">
+      Demo: admin@harmony.com / harmony2024
+    </p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="layout">
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <div class="org">Harmony Living<br>House</div>
+        <div class="sub">Admin Portal</div>
+      </div>
+      <div class="sidebar-nav">
+        <button class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </button>
+        <button class="nav-item" onclick="showPage('residents')" id="nav-residents">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Residents
+        </button>
+        <button class="nav-item" onclick="showPage('notes')" id="nav-notes">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          All Notes
+        </button>
+        <button class="nav-item" onclick="showPage('analytics')" id="nav-analytics">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Analytics
+        </button>
+      </div>
+      <div class="sidebar-footer">
+        <div class="staff-badge">
+          <div class="staff-avatar" id="sidebar-avatar">A</div>
+          <div class="staff-info">
+            <div class="name" id="sidebar-name">Admin</div>
+            <div class="role">Staff</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="doLogout()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+        <div class="topbar-right">
+          <span style="font-size:12px;color:var(--text3);" id="topbar-date"></span>
+        </div>
+      </div>
+      <div class="content">
+
+        <!-- DASHBOARD -->
+        <div class="page active" id="page-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon green" style="float:right">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              </div>
+              <div class="label">Total Residents</div>
+              <div class="value" id="stat-residents">0</div>
+              <div class="sub">Active in facility</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon blue" style="float:right">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div class="label">Total Notes</div>
+              <div class="value" id="stat-notes">0</div>
+              <div class="sub">Progress notes</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon warn" style="float:right">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <div class="label">Notes This Week</div>
+              <div class="value" id="stat-week">0</div>
+              <div class="sub">Last 7 days</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon red" style="float:right">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <div class="label">Concern Flags</div>
+              <div class="value" id="stat-flags">0</div>
+              <div class="sub">High-priority notes</div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap: 20px;">
+            <div class="card">
+              <div class="card-header">
+                <h3>Recent Notes</h3>
+                <button class="btn btn-secondary btn-sm" onclick="showPage('notes')">View All</button>
+              </div>
+              <div class="card-body" style="padding:0;">
+                <table>
+                  <thead><tr>
+                    <th>Resident</th><th>Date</th><th>Staff</th><th>Preview</th>
+                  </tr></thead>
+                  <tbody id="recent-notes-table">
+                    <tr><td colspan="4" style="text-align:center;color:var(--text3);padding:32px;">No notes yet</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Quick Actions</h3></div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+                <button class="btn btn-primary" onclick="openAddResident()">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add New Resident
+                </button>
+                <button class="btn btn-secondary" onclick="showPage('residents')">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  View All Residents
+                </button>
+                <button class="btn btn-secondary" onclick="showPage('notes')">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Browse All Notes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESIDENTS -->
+        <div class="page" id="page-residents">
+          <div class="card">
+            <div class="card-header">
+              <h3>All Residents</h3>
+              <button class="btn btn-primary btn-sm" onclick="openAddResident()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Resident
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="search-bar">
+                <input class="search-input" id="resident-search" placeholder="Search by name..." oninput="renderResidentTable()">
+              </div>
+              <table>
+                <thead><tr>
+                  <th>Name</th><th>Date of Birth</th><th>Age</th><th>Date Added</th><th>Notes</th><th>Actions</th>
+                </tr></thead>
+                <tbody id="residents-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- RESIDENT PROFILE -->
+        <div class="page" id="page-profile">
+          <button class="back-btn" onclick="showPage('residents')">
+            ← Back to Residents
+          </button>
+          <div class="profile-header" id="profile-header">
+            <div class="profile-avatar" id="profile-avatar">T</div>
+            <div>
+              <div class="profile-name" id="profile-name">Resident Name</div>
+              <div class="profile-meta">
+                <span id="profile-dob">DOB: —</span>
+                <span id="profile-age">Age: —</span>
+                <span id="profile-admitted">Added: —</span>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+            <h3 style="font-size:15px; font-weight:600;">Progress Notes</h3>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-secondary btn-sm" onclick="showTimeline()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                Timeline
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="openAddNote()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Note
+              </button>
+            </div>
+          </div>
+          <div id="profile-notes-list" class="notes-list"></div>
+        </div>
+
+        <!-- ALL NOTES -->
+        <div class="page" id="page-notes">
+          <div class="card">
+            <div class="card-header">
+              <h3>All Progress Notes</h3>
+            </div>
+            <div class="card-body">
+              <div class="search-bar">
+                <input class="search-input" id="notes-search" placeholder="Search notes by keyword..." oninput="renderAllNotes()">
+                <input type="date" id="notes-date-filter" class="search-input" style="max-width:180px;" oninput="renderAllNotes()">
+                <select id="notes-resident-filter" class="search-input" style="max-width:200px;" onchange="renderAllNotes()">
+                  <option value="">All Residents</option>
+                </select>
+              </div>
+              <div id="all-notes-list" class="notes-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ANALYTICS -->
+        <div class="page" id="page-analytics">
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom:20px;">
+            <div class="card">
+              <div class="card-header"><h3>Notes Per Week</h3></div>
+              <div class="card-body"><canvas id="chart-weekly" height="200"></canvas></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><h3>Notes by Resident</h3></div>
+              <div class="card-body"><canvas id="chart-resident" height="200"></canvas></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Staff Activity Log</h3></div>
+            <div class="card-body" style="padding:0">
+              <table>
+                <thead><tr><th>Staff</th><th>Notes Created</th><th>Last Activity</th></tr></thead>
+                <tbody id="staff-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Resident -->
+<div class="modal-overlay" id="modal-resident">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add New Resident</h3>
+      <button class="btn-close" onclick="closeModal('modal-resident')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Full Name *</label>
+          <input type="text" id="res-name" placeholder="e.g. Teresa Johnson">
+        </div>
+        <div class="field">
+          <label>Date of Birth *</label>
+          <input type="date" id="res-dob">
+        </div>
+        <div class="field">
+          <label>Room / Unit</label>
+          <input type="text" id="res-room" placeholder="e.g. Room 3A">
+        </div>
+        <div class="field span2">
+          <label>Primary Diagnosis / Condition</label>
+          <input type="text" id="res-diagnosis" placeholder="e.g. Alcohol use disorder, COPD">
+        </div>
+        <div class="field span2">
+          <label>Emergency Contact</label>
+          <input type="text" id="res-contact" placeholder="Name and phone number">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-resident')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveResident()">Save Resident</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Note -->
+<div class="modal-overlay" id="modal-note">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="note-modal-title">Add Progress Note</h3>
+      <button class="btn-close" onclick="closeModal('modal-note')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="note-edit-id">
+
+      <div class="form-section-title">Note Details</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Date of Note *</label>
+          <input type="date" id="note-date">
+        </div>
+        <div class="field">
+          <label>Staff Name *</label>
+          <input type="text" id="note-staff" placeholder="Your name">
+        </div>
+        <div class="field">
+          <label>Shift</label>
+          <select id="note-shift">
+            <option value="">— Select —</option>
+            <option>Day</option>
+            <option>Evening</option>
+            <option>Night</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Priority Flag</label>
+          <select id="note-flag">
+            <option value="routine">Routine</option>
+            <option value="concern">Concern</option>
+            <option value="critical">Critical</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section-title">Behavior & Mood</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Mood/Affect</label>
+          <select id="note-mood">
+            <option value="">— Select —</option>
+            <option>Calm / Stable</option>
+            <option>Anxious</option>
+            <option>Irritable</option>
+            <option>Depressed</option>
+            <option>Elevated / Manic</option>
+            <option>Confused</option>
+            <option>Unresponsive</option>
+            <option>Intoxicated</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Behavior</label>
+          <select id="note-behavior">
+            <option value="">— Select —</option>
+            <option>Cooperative</option>
+            <option>Resistant</option>
+            <option>Agitated</option>
+            <option>Withdrawn</option>
+            <option>Elopement attempt</option>
+            <option>Self-isolating</option>
+          </select>
+        </div>
+        <div class="field span2">
+          <label>Behavior / Mood Narrative</label>
+          <textarea id="note-behavior-notes" rows="3" placeholder="Describe observed behavior and mood in detail..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section-title">Physical Health</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Sleep</label>
+          <select id="note-sleep">
+            <option value="">— Select —</option>
+            <option>Good — slept through night</option>
+            <option>Fair — occasional waking</option>
+            <option>Poor — minimal sleep</option>
+            <option>Excessive — sleeping most of day</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Appetite</label>
+          <select id="note-appetite">
+            <option value="">— Select —</option>
+            <option>Good — ate full meals</option>
+            <option>Fair — ate partial meals</option>
+            <option>Poor — minimal intake</option>
+            <option>Refused meals</option>
+          </select>
+        </div>
+        <div class="field span2">
+          <label>Physical Health Notes</label>
+          <textarea id="note-health-notes" rows="2" placeholder="Note any physical complaints, vitals, or observations..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section-title">Medications</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Medication Compliance</label>
+          <select id="note-med-compliance">
+            <option value="">— Select —</option>
+            <option>Compliant — took all medications</option>
+            <option>Partial — refused some medications</option>
+            <option>Non-compliant — refused all medications</option>
+            <option>Requires persuasion</option>
+            <option>Attempted to hide medications</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>PRN Medications Given</label>
+          <input type="text" id="note-prn" placeholder="e.g. Tylenol 500mg at 2pm">
+        </div>
+        <div class="field span2">
+          <label>Medication Notes</label>
+          <textarea id="note-med-notes" rows="2" placeholder="Additional medication observations..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section-title">Incidents & Safety</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Incident Type</label>
+          <select id="note-incident">
+            <option value="none">None</option>
+            <option value="alcohol">Alcohol / Substance found</option>
+            <option value="elopement">Left facility</option>
+            <option value="fall">Fall</option>
+            <option value="aggression">Aggression</option>
+            <option value="medical">Medical emergency</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Incident Reported To</label>
+          <input type="text" id="note-incident-reported" placeholder="Supervisor name / agency">
+        </div>
+        <div class="field span2">
+          <label>Incident Description</label>
+          <textarea id="note-incident-desc" rows="3" placeholder="Describe the incident, staff response, and outcome..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section-title">Activities & Engagement</div>
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Activities / Social Engagement</label>
+          <textarea id="note-activities" rows="2" placeholder="Activities attended, social interactions, community outings..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section-title">Plan & Follow-Up</div>
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Interventions / Staff Actions</label>
+          <textarea id="note-interventions" rows="3" placeholder="Redirection, education provided, monitoring, room search, etc..."></textarea>
+        </div>
+        <div class="field span2">
+          <label>Plan / Follow-Up Actions</label>
+          <textarea id="note-plan" rows="3" placeholder="Continued monitoring, referrals, next steps..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-note')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNote()">Save Progress Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: View Note -->
+<div class="modal-overlay" id="modal-view-note">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3>Progress Note</h3>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-secondary btn-sm" onclick="printNote()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="exportPDF()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          PDF
+        </button>
+        <button class="btn-close" onclick="closeModal('modal-view-note')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body" id="note-view-body"></div>
+    <div class="modal-footer" id="note-view-footer"></div>
+  </div>
+</div>
+
+<!-- MODAL: Timeline -->
+<div class="modal-overlay" id="modal-timeline">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3>Resident Timeline</h3>
+      <button class="btn-close" onclick="closeModal('modal-timeline')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="timeline" id="timeline-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════
+// DATA LAYER — localStorage
+// ══════════════════════════════════
+const USERS = [
+  { email: 'admin@harmony.com', password: 'harmony2024', name: 'Admin Staff' },
+  { email: 'staff@harmony.com', password: 'staff2024', name: 'Care Staff' }
+];
+
+let currentUser = null;
+let currentResidentId = null;
+let viewingNoteId = null;
+let weeklyChart = null;
+let residentChart = null;
+
+function getData(key) {
+  try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
+}
+function setData(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+function getResidents() { return getData('hlh_residents'); }
+function getNotes() { return getData('hlh_notes'); }
+function saveResidents(r) { setData('hlh_residents', r); }
+function saveNotes(n) { setData('hlh_notes', n); }
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+// ══════════════════════════════════
+// AUTH
+// ══════════════════════════════════
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const pass = document.getElementById('login-password').value;
+  const user = USERS.find(u => u.email === email && u.password === pass);
+  if (!user) {
+    document.getElementById('auth-error').style.display = 'block';
+    return;
+  }
+  currentUser = user;
+  localStorage.setItem('hlh_session', JSON.stringify(user));
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  initApp();
+}
+
+function doLogout() {
+  localStorage.removeItem('hlh_session');
+  currentUser = null;
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+function checkSession() {
+  const s = localStorage.getItem('hlh_session');
+  if (s) {
+    try {
+      currentUser = JSON.parse(s);
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      initApp();
+    } catch {}
+  }
+}
+
+function initApp() {
+  const name = currentUser.name;
+  document.getElementById('sidebar-name').textContent = name;
+  document.getElementById('sidebar-avatar').textContent = name.charAt(0).toUpperCase();
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  refreshDashboard();
+  renderResidentTable();
+}
+
+// Login on Enter key
+document.getElementById('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+// ══════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════
+const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics' };
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('page-' + name);
+  if (pg) pg.classList.add('active');
+  const nav = document.getElementById('nav-' + name);
+  if (nav) nav.classList.add('active');
+  document.getElementById('topbar-title').textContent = pageTitles[name] || name;
+  if (name === 'dashboard') refreshDashboard();
+  if (name === 'notes') { renderAllNotes(); populateResidentFilter(); }
+  if (name === 'analytics') renderAnalytics();
+  if (name === 'residents') renderResidentTable();
+}
+
+// ══════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════
+function refreshDashboard() {
+  const residents = getResidents();
+  const notes = getNotes();
+  const now = Date.now();
+  const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+  const weekNotes = notes.filter(n => new Date(n.created_at).getTime() > weekAgo);
+  const flagged = notes.filter(n => n.flag === 'concern' || n.flag === 'critical');
+
+  document.getElementById('stat-residents').textContent = residents.length;
+  document.getElementById('stat-notes').textContent = notes.length;
+  document.getElementById('stat-week').textContent = weekNotes.length;
+  document.getElementById('stat-flags').textContent = flagged.length;
+
+  const recent = [...notes].sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5);
+  const tbody = document.getElementById('recent-notes-table');
+  if (!recent.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text3);padding:32px;">No notes yet. Add a resident and start documenting!</td></tr>';
+    return;
+  }
+  tbody.innerHTML = recent.map(n => {
+    const res = residents.find(r => r.id === n.resident_id);
+    const preview = (n.behavior_notes || n.incident_desc || n.plan || '—').slice(0, 50) + '…';
+    return `<tr>
+      <td><span class="resident-name" onclick="openProfile('${n.resident_id}')">${res ? res.name : 'Unknown'}</span></td>
+      <td>${fmtDate(n.note_date)}</td>
+      <td>${n.created_by}</td>
+      <td style="color:var(--text2);font-size:13px;">${preview}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════
+// RESIDENTS
+// ══════════════════════════════════
+function calcAge(dob) {
+  if (!dob) return '—';
+  const b = new Date(dob), now = new Date();
+  let age = now.getFullYear() - b.getFullYear();
+  if (now < new Date(now.getFullYear(), b.getMonth(), b.getDate())) age--;
+  return age;
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d + 'T00:00:00');
+  return dt.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+function renderResidentTable() {
+  const q = (document.getElementById('resident-search')?.value || '').toLowerCase();
+  const residents = getResidents().filter(r => r.name.toLowerCase().includes(q));
+  const notes = getNotes();
+  const tbody = document.getElementById('residents-table');
+  if (!residents.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:40px;">No residents found. Add your first resident!</td></tr>';
+    return;
+  }
+  tbody.innerHTML = residents.map(r => {
+    const noteCount = notes.filter(n => n.resident_id === r.id).length;
+    return `<tr>
+      <td><span class="resident-name" onclick="openProfile('${r.id}')">${r.name}</span></td>
+      <td>${fmtDate(r.dob)}</td>
+      <td>${calcAge(r.dob)}</td>
+      <td>${fmtDate(r.created_at?.split('T')[0])}</td>
+      <td><span class="badge badge-green">${noteCount} note${noteCount !== 1 ? 's' : ''}</span></td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-secondary btn-sm" onclick="openProfile('${r.id}')">View</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteResident('${r.id}')">Delete</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openAddResident() {
+  ['res-name','res-dob','res-room','res-diagnosis','res-contact'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  openModal('modal-resident');
+}
+
+function saveResident() {
+  const name = document.getElementById('res-name').value.trim();
+  const dob = document.getElementById('res-dob').value;
+  if (!name || !dob) { toast('Please fill in Name and Date of Birth'); return; }
+  const res = {
+    id: uid(), name, dob,
+    room: document.getElementById('res-room').value.trim(),
+    diagnosis: document.getElementById('res-diagnosis').value.trim(),
+    emergency_contact: document.getElementById('res-contact').value.trim(),
+    created_at: new Date().toISOString(),
+    created_by: currentUser.name
+  };
+  const residents = getResidents();
+  residents.push(res);
+  saveResidents(residents);
+  closeModal('modal-resident');
+  toast('Resident added successfully');
+  openProfile(res.id);
+}
+
+function deleteResident(id) {
+  if (!confirm('Delete this resident and all their notes? This cannot be undone.')) return;
+  saveResidents(getResidents().filter(r => r.id !== id));
+  saveNotes(getNotes().filter(n => n.resident_id !== id));
+  renderResidentTable();
+  toast('Resident deleted');
+}
+
+// ══════════════════════════════════
+// PROFILE
+// ══════════════════════════════════
+function openProfile(id) {
+  const residents = getResidents();
+  const res = residents.find(r => r.id === id);
+  if (!res) return;
+  currentResidentId = id;
+  document.getElementById('profile-name').textContent = res.name;
+  document.getElementById('profile-avatar').textContent = res.name.charAt(0).toUpperCase();
+  document.getElementById('profile-dob').textContent = 'DOB: ' + fmtDate(res.dob);
+  document.getElementById('profile-age').textContent = 'Age: ' + calcAge(res.dob);
+  document.getElementById('profile-admitted').textContent = 'Added: ' + fmtDate(res.created_at?.split('T')[0]);
+  renderProfileNotes();
+  showPage('profile');
+}
+
+function renderProfileNotes() {
+  const notes = getNotes().filter(n => n.resident_id === currentResidentId)
+    .sort((a,b) => new Date(b.note_date) - new Date(a.note_date));
+  const container = document.getElementById('profile-notes-list');
+  if (!notes.length) {
+    container.innerHTML = `<div class="empty-state">
+      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <h4>No Progress Notes Yet</h4>
+      <p>Add the first note for this resident using the button above.</p>
+    </div>`;
+    return;
+  }
+  container.innerHTML = notes.map(n => {
+    const flagBadge = n.flag === 'critical' ? '<span class="badge badge-red">Critical</span>' : n.flag === 'concern' ? '<span class="badge badge-warn">Concern</span>' : '<span class="badge badge-green">Routine</span>';
+    const preview = (n.behavior_notes || n.incident_desc || n.plan || 'No description').slice(0, 100);
+    return `<div class="note-card" onclick="viewNote('${n.id}')">
+      <div class="note-card-header">
+        <div>
+          <div class="note-date">${fmtDate(n.note_date)} &middot; ${n.shift || ''} Shift</div>
+          <div class="note-staff">By ${n.created_by} &middot; ${flagBadge}</div>
+        </div>
+        <div class="note-actions" onclick="event.stopPropagation()">
+          <button class="btn btn-secondary btn-sm" onclick="editNote('${n.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteNote('${n.id}')">Delete</button>
+        </div>
+      </div>
+      <div class="note-preview">${preview}${preview.length >= 100 ? '…' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════
+// NOTES CRUD
+// ══════════════════════════════════
+function openAddNote() {
+  document.getElementById('note-modal-title').textContent = 'Add Progress Note';
+  document.getElementById('note-edit-id').value = '';
+  document.getElementById('note-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('note-staff').value = currentUser.name;
+  document.getElementById('note-flag').value = 'routine';
+  ['note-shift','note-mood','note-behavior','note-sleep','note-appetite','note-med-compliance','note-incident'].forEach(id => {
+    document.getElementById(id).value = id === 'note-incident' ? 'none' : '';
+  });
+  ['note-behavior-notes','note-health-notes','note-prn','note-med-notes','note-incident-desc','note-incident-reported','note-activities','note-interventions','note-plan'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  openModal('modal-note');
+}
+
+function editNote(id) {
+  const note = getNotes().find(n => n.id === id);
+  if (!note) return;
+  document.getElementById('note-modal-title').textContent = 'Edit Progress Note';
+  document.getElementById('note-edit-id').value = id;
+  document.getElementById('note-date').value = note.note_date;
+  document.getElementById('note-staff').value = note.created_by;
+  document.getElementById('note-shift').value = note.shift || '';
+  document.getElementById('note-flag').value = note.flag || 'routine';
+  document.getElementById('note-mood').value = note.mood || '';
+  document.getElementById('note-behavior').value = note.behavior || '';
+  document.getElementById('note-behavior-notes').value = note.behavior_notes || '';
+  document.getElementById('note-sleep').value = note.sleep || '';
+  document.getElementById('note-appetite').value = note.appetite || '';
+  document.getElementById('note-health-notes').value = note.health_notes || '';
+  document.getElementById('note-med-compliance').value = note.med_compliance || '';
+  document.getElementById('note-prn').value = note.prn || '';
+  document.getElementById('note-med-notes').value = note.med_notes || '';
+  document.getElementById('note-incident').value = note.incident || 'none';
+  document.getElementById('note-incident-reported').value = note.incident_reported || '';
+  document.getElementById('note-incident-desc').value = note.incident_desc || '';
+  document.getElementById('note-activities').value = note.activities || '';
+  document.getElementById('note-interventions').value = note.interventions || '';
+  document.getElementById('note-plan').value = note.plan || '';
+  closeModal('modal-view-note');
+  openModal('modal-note');
+}
+
+function saveNote() {
+  const noteDate = document.getElementById('note-date').value;
+  const staffName = document.getElementById('note-staff').value.trim();
+  if (!noteDate || !staffName) { toast('Please fill in Date and Staff Name'); return; }
+  const editId = document.getElementById('note-edit-id').value;
+  const noteData = {
+    resident_id: currentResidentId,
+    note_date: noteDate,
+    created_by: staffName,
+    shift: document.getElementById('note-shift').value,
+    flag: document.getElementById('note-flag').value,
+    mood: document.getElementById('note-mood').value,
+    behavior: document.getElementById('note-behavior').value,
+    behavior_notes: document.getElementById('note-behavior-notes').value.trim(),
+    sleep: document.getElementById('note-sleep').value,
+    appetite: document.getElementById('note-appetite').value,
+    health_notes: document.getElementById('note-health-notes').value.trim(),
+    med_compliance: document.getElementById('note-med-compliance').value,
+    prn: document.getElementById('note-prn').value.trim(),
+    med_notes: document.getElementById('note-med-notes').value.trim(),
+    incident: document.getElementById('note-incident').value,
+    incident_reported: document.getElementById('note-incident-reported').value.trim(),
+    incident_desc: document.getElementById('note-incident-desc').value.trim(),
+    activities: document.getElementById('note-activities').value.trim(),
+    interventions: document.getElementById('note-interventions').value.trim(),
+    plan: document.getElementById('note-plan').value.trim(),
+  };
+  const notes = getNotes();
+  if (editId) {
+    const idx = notes.findIndex(n => n.id === editId);
+    if (idx > -1) { notes[idx] = { ...notes[idx], ...noteData, updated_at: new Date().toISOString() }; }
+  } else {
+    notes.push({ id: uid(), ...noteData, created_at: new Date().toISOString() });
+  }
+  saveNotes(notes);
+  closeModal('modal-note');
+  toast(editId ? 'Note updated' : 'Note saved');
+  renderProfileNotes();
+}
+
+function deleteNote(id) {
+  if (!confirm('Delete this progress note?')) return;
+  saveNotes(getNotes().filter(n => n.id !== id));
+  renderProfileNotes();
+  closeModal('modal-view-note');
+  toast('Note deleted');
+}
+
+// ══════════════════════════════════
+// VIEW NOTE
+// ══════════════════════════════════
+function viewNote(id) {
+  const note = getNotes().find(n => n.id === id);
+  if (!note) return;
+  viewingNoteId = id;
+  const res = getResidents().find(r => r.id === note.resident_id);
+  const flagColor = note.flag === 'critical' ? 'badge-red' : note.flag === 'concern' ? 'badge-warn' : 'badge-green';
+  const flagLabel = note.flag === 'critical' ? 'Critical' : note.flag === 'concern' ? 'Concern' : 'Routine';
+
+  const fv = (val) => val ? `<div class="field-value">${val}</div>` : `<div class="field-value empty">Not recorded</div>`;
+
+  document.getElementById('note-view-body').innerHTML = `
+    <div style="background:var(--accent-light);border-radius:var(--radius);padding:16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-weight:700;font-size:17px;">${res ? res.name : 'Unknown Resident'}</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:4px;">${fmtDate(note.note_date)} &middot; ${note.shift || 'Unspecified'} Shift &middot; By ${note.created_by}</div>
+      </div>
+      <span class="badge ${flagColor}" style="font-size:13px;padding:5px 12px;">${flagLabel}</span>
+    </div>
+
+    <div class="note-section">
+      <div class="note-section-title">Behavior & Mood</div>
+      <div class="note-grid">
+        <div class="note-field"><div class="field-label">Mood / Affect</div>${fv(note.mood)}</div>
+        <div class="note-field"><div class="field-label">Behavior</div>${fv(note.behavior)}</div>
+      </div>
+      <div class="note-field"><div class="field-label">Narrative</div>${fv(note.behavior_notes)}</div>
+    </div>
+
+    <div class="note-section">
+      <div class="note-section-title">Physical Health</div>
+      <div class="note-grid">
+        <div class="note-field"><div class="field-label">Sleep</div>${fv(note.sleep)}</div>
+        <div class="note-field"><div class="field-label">Appetite</div>${fv(note.appetite)}</div>
+      </div>
+      <div class="note-field"><div class="field-label">Health Notes</div>${fv(note.health_notes)}</div>
+    </div>
+
+    <div class="note-section">
+      <div class="note-section-title">Medications</div>
+      <div class="note-grid">
+        <div class="note-field"><div class="field-label">Compliance</div>${fv(note.med_compliance)}</div>
+        <div class="note-field"><div class="field-label">PRN Given</div>${fv(note.prn)}</div>
+      </div>
+      <div class="note-field"><div class="field-label">Medication Notes</div>${fv(note.med_notes)}</div>
+    </div>
+
+    ${note.incident && note.incident !== 'none' ? `
+    <div class="note-section" style="border-left:3px solid var(--danger);padding-left:14px;">
+      <div class="note-section-title" style="color:var(--danger);">Incident Reported</div>
+      <div class="note-grid">
+        <div class="note-field"><div class="field-label">Incident Type</div>${fv(note.incident)}</div>
+        <div class="note-field"><div class="field-label">Reported To</div>${fv(note.incident_reported)}</div>
+      </div>
+      <div class="note-field"><div class="field-label">Description</div>${fv(note.incident_desc)}</div>
+    </div>` : ''}
+
+    <div class="note-section">
+      <div class="note-section-title">Activities</div>
+      <div class="note-field">${fv(note.activities)}</div>
+    </div>
+
+    <div class="note-section">
+      <div class="note-section-title">Interventions & Plan</div>
+      <div class="note-field"><div class="field-label">Staff Interventions</div>${fv(note.interventions)}</div>
+      <div class="note-field"><div class="field-label">Follow-Up Plan</div>${fv(note.plan)}</div>
+    </div>
+  `;
+  document.getElementById('note-view-footer').innerHTML = `
+    <button class="btn btn-secondary" onclick="closeModal('modal-view-note')">Close</button>
+    <button class="btn btn-secondary" onclick="editNote('${id}')">Edit</button>
+    <button class="btn btn-danger" onclick="deleteNote('${id}')">Delete</button>
+  `;
+  openModal('modal-view-note');
+}
+
+// ══════════════════════════════════
+// PRINT / PDF
+// ══════════════════════════════════
+function printNote() { window.print(); }
+
+function exportPDF() {
+  const note = getNotes().find(n => n.id === viewingNoteId);
+  if (!note) return;
+  const res = getResidents().find(r => r.id === note.resident_id);
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  let y = 20;
+  const addLine = (text, bold, size) => {
+    doc.setFontSize(size || 11);
+    if (bold) doc.setFont(undefined, 'bold'); else doc.setFont(undefined, 'normal');
+    const lines = doc.splitTextToSize(text || '—', 170);
+    doc.text(lines, 20, y);
+    y += lines.length * (size ? size * 0.5 : 6) + 2;
+  };
+  const addSection = (title) => {
+    y += 4;
+    doc.setFillColor(232, 244, 243);
+    doc.rect(16, y - 5, 178, 8, 'F');
+    addLine(title, true, 10);
+    y += 2;
+  };
+  addLine('HARMONY LIVING HOUSE ADULT FAMILY LLC', true, 14);
+  addLine('Progress Note', false, 12);
+  y += 4;
+  doc.line(16, y, 194, y); y += 8;
+  addLine(`Resident: ${res ? res.name : 'Unknown'}`, true);
+  addLine(`Date: ${fmtDate(note.note_date)}   Shift: ${note.shift || '—'}   Staff: ${note.created_by}   Flag: ${note.flag || 'routine'}`, false);
+  y += 4;
+  addSection('BEHAVIOR & MOOD');
+  addLine(`Mood: ${note.mood || '—'}   Behavior: ${note.behavior || '—'}`, false);
+  addLine(note.behavior_notes || '—', false);
+  addSection('PHYSICAL HEALTH');
+  addLine(`Sleep: ${note.sleep || '—'}   Appetite: ${note.appetite || '—'}`, false);
+  addLine(note.health_notes || '—', false);
+  addSection('MEDICATIONS');
+  addLine(`Compliance: ${note.med_compliance || '—'}   PRN: ${note.prn || '—'}`, false);
+  addLine(note.med_notes || '—', false);
+  if (note.incident && note.incident !== 'none') {
+    addSection('INCIDENT');
+    addLine(`Type: ${note.incident}   Reported to: ${note.incident_reported || '—'}`, false);
+    addLine(note.incident_desc || '—', false);
+  }
+  addSection('ACTIVITIES');
+  addLine(note.activities || '—', false);
+  addSection('INTERVENTIONS');
+  addLine(note.interventions || '—', false);
+  addSection('PLAN / FOLLOW-UP');
+  addLine(note.plan || '—', false);
+  y += 16;
+  doc.line(16, y, 90, y);
+  y += 6;
+  addLine('Staff Signature', false, 10);
+  const fname = (res ? res.name : 'note').replace(/\s/g, '_');
+  doc.save(`ProgressNote_${fname}_${note.note_date}.pdf`);
+}
+
+// ══════════════════════════════════
+// ALL NOTES PAGE
+// ══════════════════════════════════
+function populateResidentFilter() {
+  const sel = document.getElementById('notes-resident-filter');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All Residents</option>';
+  getResidents().forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id; opt.textContent = r.name;
+    sel.appendChild(opt);
+  });
+  sel.value = cur;
+}
+
+function renderAllNotes() {
+  const q = (document.getElementById('notes-search')?.value || '').toLowerCase();
+  const dateF = document.getElementById('notes-date-filter')?.value;
+  const resF = document.getElementById('notes-resident-filter')?.value;
+  const residents = getResidents();
+  let notes = getNotes().sort((a,b) => new Date(b.note_date) - new Date(a.note_date));
+  if (q) notes = notes.filter(n => JSON.stringify(n).toLowerCase().includes(q));
+  if (dateF) notes = notes.filter(n => n.note_date === dateF);
+  if (resF) notes = notes.filter(n => n.resident_id === resF);
+  const container = document.getElementById('all-notes-list');
+  if (!notes.length) {
+    container.innerHTML = `<div class="empty-state"><h4>No notes found</h4><p>Try adjusting your search filters.</p></div>`;
+    return;
+  }
+  container.innerHTML = notes.map(n => {
+    const res = residents.find(r => r.id === n.resident_id);
+    const flagBadge = n.flag === 'critical' ? '<span class="badge badge-red">Critical</span>' : n.flag === 'concern' ? '<span class="badge badge-warn">Concern</span>' : '<span class="badge badge-green">Routine</span>';
+    const preview = (n.behavior_notes || n.incident_desc || n.plan || '—').slice(0, 120);
+    return `<div class="note-card" onclick="viewNote('${n.id}')">
+      <div class="note-card-header">
+        <div>
+          <div class="note-date">${res ? `<span style="cursor:pointer;color:var(--text);text-decoration:underline dotted;" onclick="event.stopPropagation();openProfile('${n.resident_id}')">${res.name}</span> &middot; ` : ''}${fmtDate(n.note_date)}</div>
+          <div class="note-staff">By ${n.created_by} &middot; ${n.shift || ''} shift &middot; ${flagBadge}</div>
+        </div>
+      </div>
+      <div class="note-preview">${preview}${preview.length >= 120 ? '…' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════
+// TIMELINE
+// ══════════════════════════════════
+function showTimeline() {
+  const notes = getNotes().filter(n => n.resident_id === currentResidentId)
+    .sort((a,b) => new Date(a.note_date) - new Date(b.note_date));
+  const icons = { routine: '📋', concern: '⚠️', critical: '🚨' };
+  document.getElementById('timeline-list').innerHTML = notes.map(n => `
+    <div class="timeline-item">
+      <div class="timeline-dot">${icons[n.flag] || '📋'}</div>
+      <div class="timeline-content" onclick="viewNote('${n.id}')" style="cursor:pointer;">
+        <div class="timeline-date">${fmtDate(n.note_date)}</div>
+        <div class="timeline-staff">By ${n.created_by} &middot; ${n.shift || ''} shift</div>
+        <div class="timeline-text">${(n.behavior_notes || n.incident_desc || n.plan || '—').slice(0,120)}</div>
+      </div>
+    </div>
+  `).join('') || '<p style="color:var(--text3);text-align:center;padding:32px;">No notes to display.</p>';
+  openModal('modal-timeline');
+}
+
+// ══════════════════════════════════
+// ANALYTICS
+// ══════════════════════════════════
+function renderAnalytics() {
+  const notes = getNotes();
+  const residents = getResidents();
+
+  // Weekly notes for last 8 weeks
+  const weeks = [];
+  const weekLabels = [];
+  for (let i = 7; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i * 7);
+    const start = new Date(d); start.setDate(d.getDate() - 6);
+    weekLabels.push(start.toLocaleDateString('en-US', { month:'short', day:'numeric' }));
+    weeks.push(notes.filter(n => {
+      const nd = new Date(n.note_date);
+      return nd >= start && nd <= d;
+    }).length);
+  }
+
+  if (weeklyChart) weeklyChart.destroy();
+  const ctx1 = document.getElementById('chart-weekly').getContext('2d');
+  weeklyChart = new Chart(ctx1, {
+    type: 'bar',
+    data: { labels: weekLabels, datasets: [{ label: 'Notes', data: weeks, backgroundColor: '#2c6e6a', borderRadius: 6 }] },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+  });
+
+  // Notes per resident
+  const resData = residents.map(r => ({ name: r.name.split(' ')[0], count: notes.filter(n => n.resident_id === r.id).length }));
+  if (residentChart) residentChart.destroy();
+  const ctx2 = document.getElementById('chart-resident').getContext('2d');
+  residentChart = new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+      labels: resData.map(r => r.name),
+      datasets: [{ data: resData.map(r => r.count), backgroundColor: ['#2c6e6a','#3d8c87','#5aada9','#7dc5c2','#a0d8d6','#c3eae9'] }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'right' } } }
+  });
+
+  // Staff table
+  const staffMap = {};
+  notes.forEach(n => {
+    if (!staffMap[n.created_by]) staffMap[n.created_by] = { count: 0, last: '' };
+    staffMap[n.created_by].count++;
+    if (!staffMap[n.created_by].last || n.note_date > staffMap[n.created_by].last)
+      staffMap[n.created_by].last = n.note_date;
+  });
+  const tbody = document.getElementById('staff-table');
+  const entries = Object.entries(staffMap);
+  if (!entries.length) {
+    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text3);padding:32px;">No data yet</td></tr>';
+    return;
+  }
+  tbody.innerHTML = entries.sort((a,b) => b[1].count - a[1].count).map(([name, d]) =>
+    `<tr><td style="font-weight:600;">${name}</td><td>${d.count}</td><td>${fmtDate(d.last)}</td></tr>`
+  ).join('');
+}
+
+// ══════════════════════════════════
+// MODAL HELPERS
+// ══════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+
+// ══════════════════════════════════
+// TOAST
+// ══════════════════════════════════
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.style.display = 'none', 2800);
+}
+
+// ══════════════════════════════════
+// INIT
+// ══════════════════════════════════
+checkSession();
+</script>
+</body>
+</html>
