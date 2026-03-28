@@ -659,7 +659,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-resident')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveResident()">Save Resident</button>
+      <button class="btn btn-primary" onclick="handleSaveResident()">Save Resident</button>
     </div>
   </div>
 </div>
@@ -931,7 +931,8 @@ function fmtDate(d) {
 
 async function renderResidentTable() {
   const q = (document.getElementById('resident-search')?.value || '').toLowerCase();
-  const residents = await getResidents().filter(r => r.name.toLowerCase().includes(q));
+  const allResidents = await getResidents();
+  const residents = allResidents.filter(r => r.name.toLowerCase().includes(q));
   const notes = await getNotes();
   const tbody = document.getElementById('residents-table');
   if (!residents.length) {
@@ -961,7 +962,7 @@ function openAddResident() {
   openModal('modal-resident');
 }
 
-async function saveResident() {
+async function handleSaveResident() {
   const name = document.getElementById('res-name').value.trim();
   const dob = document.getElementById('res-dob').value;
   if (!name || !dob) { toast('Please fill in Name and Date of Birth'); return; }
@@ -1003,8 +1004,9 @@ async function openProfile(id) {
   showPage('profile');
 }
 
-function renderProfileNotes() {
-  const notes = getNotes().filter(n => n.resident_id === currentResidentId)
+async function renderProfileNotes() {
+  const allNotes = await getNotes();
+  const notes = allNotes.filter(n => n.resident_id === currentResidentId)
     .sort((a,b) => new Date(b.note_date) - new Date(a.note_date));
   const container = document.getElementById('profile-notes-list');
   if (!notes.length) {
@@ -1049,8 +1051,9 @@ function openAddNote() {
   openModal('modal-note');
 }
 
-function editNote(id) {
-  const note = getNotes().find(n => n.id === id);
+async function editNote(id) {
+  const allNotes = await getNotes();
+  const note = allNotes.find(n => n.id === id);
   if (!note) return;
   document.getElementById('note-modal-title').textContent = 'Edit Progress Note';
   document.getElementById('note-edit-id').value = id;
@@ -1096,10 +1099,12 @@ async function deleteNote(id) {
 
 // ══════════════════════════════════
 async function viewNote(id) {
-  const note = await getNotes().find(n => n.id === id);
+  const allNotes = await getNotes();
+  const note = allNotes.find(n => n.id === id);
+  const allResidents = await getResidents();
+  const res = allResidents.find(r => r.id === note.resident_id);
   if (!note) return;
   viewingNoteId = id;
-  const res = await getResidents().find(r => r.id === note.resident_id);
   const flagColor = note.flag === 'critical' ? 'badge-red' : note.flag === 'concern' ? 'badge-warn' : 'badge-green';
   const flagLabel = note.flag === 'critical' ? 'Critical' : note.flag === 'concern' ? 'Concern' : 'Routine';
   const fv = (val) => val ? `<div class="field-value" style="white-space:pre-wrap;line-height:1.8;">${val}</div>` : `<div class="field-value empty">Not recorded</div>`;
@@ -1324,7 +1329,8 @@ async function populateResidentFilter() {
   const sel = document.getElementById('notes-resident-filter');
   const cur = sel.value;
   sel.innerHTML = '<option value="">All Residents</option>';
-  await getResidents().forEach(r => {
+  const residents = await getResidents();
+  residents.forEach(r => {
     const opt = document.createElement('option');
     opt.value = r.id; opt.textContent = r.name;
     sel.appendChild(opt);
@@ -1337,7 +1343,8 @@ async function renderAllNotes() {
   const dateF = document.getElementById('notes-date-filter')?.value;
   const resF = document.getElementById('notes-resident-filter')?.value;
   const residents = await getResidents();
-  let notes = getNotes().sort((a,b) => new Date(b.note_date) - new Date(a.note_date));
+  const allNotes = await getNotes();
+  let notes = allNotes.sort((a,b) => new Date(b.note_date) - new Date(a.note_date));
   if (q) notes = notes.filter(n => JSON.stringify(n).toLowerCase().includes(q));
   if (dateF) notes = notes.filter(n => n.note_date === dateF);
   if (resF) notes = notes.filter(n => n.resident_id === resF);
@@ -1365,8 +1372,9 @@ async function renderAllNotes() {
 // ══════════════════════════════════
 // TIMELINE
 // ══════════════════════════════════
-function showTimeline() {
-  const notes = getNotes().filter(n => n.resident_id === currentResidentId)
+async function showTimeline() {
+  const allNotes = await getNotes();
+  const notes = allNotes.filter(n => n.resident_id === currentResidentId)
     .sort((a,b) => new Date(a.note_date) - new Date(b.note_date));
   const icons = { routine: '📋', concern: '⚠️', critical: '🚨' };
   document.getElementById('timeline-list').innerHTML = notes.map(n => `
