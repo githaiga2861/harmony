@@ -321,6 +321,15 @@
   /* Page views */
   .page { display: none; }
   .page.active { display: block; }
+  @media (max-width: 768px) {
+  #auth-screen, #app {
+    display: none !important;
+  }
+
+  #mobile-block {
+    display: flex !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -349,6 +358,40 @@
       Capture every progress
     </p>
   </div>
+</div>
+
+  <div id="mobile-block" style="display:none; position:fixed; inset:0; z-index:9999;
+  background:#111111; flex-direction:column; align-items:center;
+  justify-content:center; padding:32px; text-align:center;">
+
+  <img src="harmony_living_house_logo.png"
+       style="width:110px; height:110px; object-fit:contain;
+              mix-blend-mode:normal; margin-bottom:32px;">
+
+  <div style="font-size:22px; font-weight:700; color:#b8860b;
+              font-family:'Georgia',serif; letter-spacing:0.02em;
+              margin-bottom:16px;">
+    Desktop Access Only
+  </div>
+
+  <div style="font-size:15px; color:#ffffff; line-height:1.8;
+              max-width:300px; margin-bottom:28px;">
+    This admin portal is designed for use on a
+    <strong style="color:#b8860b;">laptop or desktop computer</strong>
+    only.
+  </div>
+
+  <div style="background:#b8860b; color:#111111; font-weight:700;
+              font-size:13px; padding:14px 28px; border-radius:4px;
+              letter-spacing:0.06em; text-transform:uppercase;">
+    Please switch to a laptop or desktop PC to continue
+  </div>
+
+  <div style="margin-top:28px; font-size:12px; color:rgba(255,255,255,0.35);
+              font-family:'Georgia',serif;">
+    Harmony Living House Adult Family LLC
+  </div>
+
 </div>
 
 <!-- APP -->
