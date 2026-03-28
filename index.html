@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Harmony Living House — Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
@@ -763,6 +764,9 @@
 <div id="toast"></div>
 
 <script>
+ const SUPABASE_URL = 'https://gkmvglzjrsneqkrlvohp.supabase.co';
+ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrbXZnbHpqcnNuZXFrcmx2b2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2OTU0NTMsImV4cCI6MjA5MDI3MTQ1M30.bcGB06-v9xmJmgkY-4KbnHPgi13qP7_ng-BJHifd0UY';
+ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);  
 // ══════════════════════════════════
 // DATA LAYER — localStorage
 // ══════════════════════════════════
@@ -782,10 +786,27 @@ function getData(key) {
 }
 function setData(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
-function getResidents() { return getData('hlh_residents'); }
-function getNotes() { return getData('hlh_notes'); }
-function saveResidents(r) { setData('hlh_residents', r); }
-function saveNotes(n) { setData('hlh_notes', n); }
+async function getResidents() {
+  const { data } = await db.from('residents').select('*').order('created_at', { ascending: false });
+  return data || [];
+}
+async function getNotes() {
+  const { data } = await db.from('notes').select('*').order('note_date', { ascending: false });
+  return data || [];
+}
+async function saveResident(res) {
+  await db.from('residents').upsert(res);
+}
+async function saveNoteToDb(note) {
+  await db.from('notes').upsert(note);
+}
+async function deleteResidentFromDb(id) {
+  await db.from('residents').delete().eq('id', id);
+  await db.from('notes').delete().eq('resident_id', id);
+}
+async function deleteNoteFromDb(id) {
+  await db.from('notes').delete().eq('id', id);
+}
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
@@ -860,9 +881,9 @@ function showPage(name) {
 // ══════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════
-function refreshDashboard() {
-  const residents = getResidents();
-  const notes = getNotes();
+async function refreshDashboard() {
+  const residents = await getResidents();
+  const notes = await getNotes();
   const now = Date.now();
   const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
   const weekNotes = notes.filter(n => new Date(n.created_at).getTime() > weekAgo);
@@ -908,10 +929,10 @@ function fmtDate(d) {
   return dt.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
 }
 
-function renderResidentTable() {
+async function renderResidentTable() {
   const q = (document.getElementById('resident-search')?.value || '').toLowerCase();
-  const residents = getResidents().filter(r => r.name.toLowerCase().includes(q));
-  const notes = getNotes();
+  const residents = await getResidents().filter(r => r.name.toLowerCase().includes(q));
+  const notes = await getNotes();
   const tbody = document.getElementById('residents-table');
   if (!residents.length) {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:40px;">No residents found. Add your first resident!</td></tr>';
@@ -940,30 +961,27 @@ function openAddResident() {
   openModal('modal-resident');
 }
 
-function saveResident() {
+async function saveResident() {
   const name = document.getElementById('res-name').value.trim();
   const dob = document.getElementById('res-dob').value;
   if (!name || !dob) { toast('Please fill in Name and Date of Birth'); return; }
   const res = {
-    id: uid(), name, dob,
+    id: uid(), name: name, dob: dob,
     room: document.getElementById('res-room').value.trim(),
     diagnosis: document.getElementById('res-diagnosis').value.trim(),
     emergency_contact: document.getElementById('res-contact').value.trim(),
     created_at: new Date().toISOString(),
     created_by: currentUser.name
   };
-  const residents = getResidents();
-  residents.push(res);
-  saveResidents(residents);
+  await saveResident(res);
   closeModal('modal-resident');
   toast('Resident added successfully');
   openProfile(res.id);
 }
-
-function deleteResident(id) {
+  
+async function deleteResident(id) {
   if (!confirm('Delete this resident and all their notes? This cannot be undone.')) return;
-  saveResidents(getResidents().filter(r => r.id !== id));
-  saveNotes(getNotes().filter(n => n.resident_id !== id));
+  await deleteResidentFromDb(id);
   renderResidentTable();
   toast('Resident deleted');
 }
@@ -971,8 +989,8 @@ function deleteResident(id) {
 // ══════════════════════════════════
 // PROFILE
 // ══════════════════════════════════
-function openProfile(id) {
-  const residents = getResidents();
+async function openProfile(id) {
+  const residents = await getResidents();
   const res = residents.find(r => r.id === id);
   if (!res) return;
   currentResidentId = id;
@@ -1046,46 +1064,42 @@ function editNote(id) {
   openModal('modal-note');
 }
 
-function saveNote() {
+async function saveNote() {
   const noteDate = document.getElementById('note-date').value;
   const staffName = document.getElementById('note-staff').value.trim();
   if (!noteDate || !staffName) { toast('Please fill in Date and Staff Name'); return; }
   const editId = document.getElementById('note-edit-id').value;
   const noteData = {
+    id: editId || uid(),
     resident_id: currentResidentId,
     note_date: noteDate,
     note_time: document.getElementById('note-time').value,
     created_by: staffName,
     shift: document.getElementById('note-shift').value,
     flag: document.getElementById('note-flag').value,
+    behavior_notes: document.getElementById('note-behavior-notes').value.trim(),
+    created_at: new Date().toISOString()
   };
-  const notes = getNotes();
-  if (editId) {
-    const idx = notes.findIndex(n => n.id === editId);
-    if (idx > -1) { notes[idx] = { ...notes[idx], ...noteData, updated_at: new Date().toISOString() }; }
-  } else {
-    notes.push({ id: uid(), ...noteData, created_at: new Date().toISOString() });
-  }
-  saveNotes(notes);
+  await saveNoteToDb(noteData);
   closeModal('modal-note');
   toast(editId ? 'Note updated' : 'Note saved');
   renderProfileNotes();
 }
-
-function deleteNote(id) {
+  
+async function deleteNote(id) {
   if (!confirm('Delete this progress note?')) return;
-  saveNotes(getNotes().filter(n => n.id !== id));
+  await deleteNoteFromDb(id);
   renderProfileNotes();
   closeModal('modal-view-note');
   toast('Note deleted');
 }
 
 // ══════════════════════════════════
-function viewNote(id) {
-  const note = getNotes().find(n => n.id === id);
+async function viewNote(id) {
+  const note = await getNotes().find(n => n.id === id);
   if (!note) return;
   viewingNoteId = id;
-  const res = getResidents().find(r => r.id === note.resident_id);
+  const res = await getResidents().find(r => r.id === note.resident_id);
   const flagColor = note.flag === 'critical' ? 'badge-red' : note.flag === 'concern' ? 'badge-warn' : 'badge-green';
   const flagLabel = note.flag === 'critical' ? 'Critical' : note.flag === 'concern' ? 'Concern' : 'Routine';
   const fv = (val) => val ? `<div class="field-value" style="white-space:pre-wrap;line-height:1.8;">${val}</div>` : `<div class="field-value empty">Not recorded</div>`;
@@ -1123,10 +1137,10 @@ function viewNote(id) {
 // ══════════════════════════════════
 function printNote() { window.print(); }
 
-function exportPDF() {
-  const note = getNotes().find(n => n.id === viewingNoteId);
+async function exportPDF() {
+  const note = await getNotes().find(n => n.id === viewingNoteId);
   if (!note) return;
-  const res = getResidents().find(r => r.id === note.resident_id);
+  const res = await getResidents().find(r => r.id === note.resident_id);
   const residentName = res ? res.name : 'Unknown Resident';
   const noteDate = fmtDate(note.note_date);
   const noteTime = note.note_time || '';
@@ -1306,11 +1320,11 @@ function exportPDF() {
 // ══════════════════════════════════
 // ALL NOTES PAGE
 // ══════════════════════════════════
-function populateResidentFilter() {
+async function populateResidentFilter() {
   const sel = document.getElementById('notes-resident-filter');
   const cur = sel.value;
   sel.innerHTML = '<option value="">All Residents</option>';
-  getResidents().forEach(r => {
+  await getResidents().forEach(r => {
     const opt = document.createElement('option');
     opt.value = r.id; opt.textContent = r.name;
     sel.appendChild(opt);
@@ -1318,11 +1332,11 @@ function populateResidentFilter() {
   sel.value = cur;
 }
 
-function renderAllNotes() {
+async function renderAllNotes() {
   const q = (document.getElementById('notes-search')?.value || '').toLowerCase();
   const dateF = document.getElementById('notes-date-filter')?.value;
   const resF = document.getElementById('notes-resident-filter')?.value;
-  const residents = getResidents();
+  const residents = await getResidents();
   let notes = getNotes().sort((a,b) => new Date(b.note_date) - new Date(a.note_date));
   if (q) notes = notes.filter(n => JSON.stringify(n).toLowerCase().includes(q));
   if (dateF) notes = notes.filter(n => n.note_date === dateF);
@@ -1371,9 +1385,9 @@ function showTimeline() {
 // ══════════════════════════════════
 // ANALYTICS
 // ══════════════════════════════════
-function renderAnalytics() {
-  const notes = getNotes();
-  const residents = getResidents();
+async function renderAnalytics() {
+  const notes = await getNotes();
+  const residents = await getResidents();
 
   // Weekly notes for last 8 weeks
   const weeks = [];
