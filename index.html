@@ -1093,21 +1093,7 @@ function editNote(id) {
   document.getElementById('note-staff').value = note.created_by;
   document.getElementById('note-shift').value = note.shift || '';
   document.getElementById('note-flag').value = note.flag || 'routine';
-  document.getElementById('note-mood').value = note.mood || '';
-  document.getElementById('note-behavior').value = note.behavior || '';
   document.getElementById('note-behavior-notes').value = note.behavior_notes || '';
-  document.getElementById('note-sleep').value = note.sleep || '';
-  document.getElementById('note-appetite').value = note.appetite || '';
-  document.getElementById('note-health-notes').value = note.health_notes || '';
-  document.getElementById('note-med-compliance').value = note.med_compliance || '';
-  document.getElementById('note-prn').value = note.prn || '';
-  document.getElementById('note-med-notes').value = note.med_notes || '';
-  document.getElementById('note-incident').value = note.incident || 'none';
-  document.getElementById('note-incident-reported').value = note.incident_reported || '';
-  document.getElementById('note-incident-desc').value = note.incident_desc || '';
-  document.getElementById('note-activities').value = note.activities || '';
-  document.getElementById('note-interventions').value = note.interventions || '';
-  document.getElementById('note-plan').value = note.plan || '';
   closeModal('modal-view-note');
   openModal('modal-note');
 }
