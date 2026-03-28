@@ -1179,56 +1179,180 @@ function exportPDF() {
   const note = getNotes().find(n => n.id === viewingNoteId);
   if (!note) return;
   const res = getResidents().find(r => r.id === note.resident_id);
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  let y = 20;
-  const addLine = (text, bold, size) => {
-    doc.setFontSize(size || 11);
-    if (bold) doc.setFont(undefined, 'bold'); else doc.setFont(undefined, 'normal');
-    const lines = doc.splitTextToSize(text || '—', 170);
-    doc.text(lines, 20, y);
-    y += lines.length * (size ? size * 0.5 : 6) + 2;
-  };
-  const addSection = (title) => {
-    y += 4;
-    doc.setFillColor(232, 244, 243);
-    doc.rect(16, y - 5, 178, 8, 'F');
-    addLine(title, true, 10);
-    y += 2;
-  };
-  addLine('HARMONY LIVING HOUSE ADULT FAMILY LLC', true, 14);
-  addLine('Progress Note', false, 12);
-  y += 4;
-  doc.line(16, y, 194, y); y += 8;
-  addLine(`Resident: ${res ? res.name : 'Unknown'}`, true);
-  addLine(`Date: ${fmtDate(note.note_date)}   Shift: ${note.shift || '—'}   Staff: ${note.created_by}   Flag: ${note.flag || 'routine'}`, false);
-  y += 4;
-  addSection('BEHAVIOR & MOOD');
-  addLine(`Mood: ${note.mood || '—'}   Behavior: ${note.behavior || '—'}`, false);
-  addLine(note.behavior_notes || '—', false);
-  addSection('PHYSICAL HEALTH');
-  addLine(`Sleep: ${note.sleep || '—'}   Appetite: ${note.appetite || '—'}`, false);
-  addLine(note.health_notes || '—', false);
-  addSection('MEDICATIONS');
-  addLine(`Compliance: ${note.med_compliance || '—'}   PRN: ${note.prn || '—'}`, false);
-  addLine(note.med_notes || '—', false);
-  if (note.incident && note.incident !== 'none') {
-    addSection('INCIDENT');
-    addLine(`Type: ${note.incident}   Reported to: ${note.incident_reported || '—'}`, false);
-    addLine(note.incident_desc || '—', false);
+  const residentName = res ? res.name : 'Unknown Resident';
+  const noteDate = fmtDate(note.note_date);
+  const noteTime = note.note_time || '';
+  const dateTime = noteDate + (noteTime ? ' at ' + noteTime : '');
+  const noteText = note.behavior_notes || '';
+
+  // Split note text into lines for the table rows
+  const words = noteText.split(' ');
+  const lines = [];
+  let current = '';
+  for (const word of words) {
+    const test = current ? current + ' ' + word : word;
+    if (test.length > 90) { lines.push(current); current = word; }
+    else current = test;
   }
-  addSection('ACTIVITIES');
-  addLine(note.activities || '—', false);
-  addSection('INTERVENTIONS');
-  addLine(note.interventions || '—', false);
-  addSection('PLAN / FOLLOW-UP');
-  addLine(note.plan || '—', false);
-  y += 16;
-  doc.line(16, y, 90, y);
-  y += 6;
-  addLine('Staff Signature', false, 10);
-  const fname = (res ? res.name : 'note').replace(/\s/g, '_');
-  doc.save(`ProgressNote_${fname}_${note.note_date}.pdf`);
+  if (current) lines.push(current);
+  // Also preserve manual line breaks
+  const allLines = noteText.split('\n').flatMap(para => {
+    const w = para.split(' ');
+    const out = [];
+    let cur = '';
+    for (const word of w) {
+      const t = cur ? cur + ' ' + word : word;
+      if (t.length > 90) { out.push(cur); cur = word; }
+      else cur = t;
+    }
+    if (cur) out.push(cur);
+    out.push('');
+    return out;
+  });
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+
+  const pageW = 612;
+  const pageH = 792;
+  const marginL = 50;
+  const marginR = 50;
+  const contentW = pageW - marginL - marginR;
+  let y = 40;
+
+  // ── LOGO ──
+  // Attempt to draw logo using canvas
+  const drawDocument = (logoDataUrl) => {
+    doc.setFillColor(255, 255, 255);
+    doc.rect(0, 0, pageW, pageH, 'F');
+
+    if (logoDataUrl) {
+      const logoSize = 70;
+      doc.addImage(logoDataUrl, 'PNG', (pageW - logoSize) / 2, y, logoSize, logoSize);
+      y += logoSize + 8;
+    }
+
+    // ── ORG NAME ──
+    doc.setFont('times', 'bold');
+    doc.setFontSize(15);
+    doc.setTextColor(0, 0, 0);
+    const orgName = 'HARMONY LIVING HOUSE ADULT FAMILY LLC';
+    doc.text(orgName, pageW / 2, y, { align: 'center' });
+    y += 18;
+
+    // ── ADDRESS ──
+    doc.setFont('times', 'normal');
+    doc.setFontSize(10);
+    doc.text('120 Newaukum Village Dr Chehalis, WA 98532', pageW / 2, y, { align: 'center' });
+    y += 18;
+
+    // ── TITLE ──
+    doc.setFont('times', 'bold');
+    doc.setFontSize(12);
+    const titleText = 'PROGRESS NOTES';
+    const titleW = doc.getTextWidth(titleText);
+    doc.text(titleText, pageW / 2, y, { align: 'center' });
+    doc.line((pageW - titleW) / 2, y + 1.5, (pageW + titleW) / 2, y + 1.5);
+    y += 20;
+
+    // ── RESIDENT INFO LINE ──
+    doc.setFont('times', 'normal');
+    doc.setFontSize(11);
+    const infoLine = `Resident Name: ${residentName}          Date & Time: ${dateTime}`;
+    doc.text(infoLine, pageW / 2, y, { align: 'center' });
+    y += 6;
+
+    // ── DIVIDER ──
+    doc.setLineWidth(0.8);
+    doc.line(marginL, y, pageW - marginR, y);
+    y += 12;
+
+    // ── TABLE ──
+    const labelColW = 60;
+    const writeColW = contentW - labelColW;
+    const rowH = 24;
+    const tableTop = y;
+
+    // Header row — DATE label
+    doc.setLineWidth(0.5);
+    doc.rect(marginL, y, labelColW, rowH);
+    doc.rect(marginL + labelColW, y, writeColW, rowH);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(10);
+    doc.text('DATE', marginL + labelColW / 2, y + 15, { align: 'center' });
+    // Date value in write col
+    doc.setFont('times', 'normal');
+    doc.text(dateTime, marginL + labelColW + 8, y + 15);
+    y += rowH;
+
+    // Note rows
+    const minRows = 24;
+    const noteLines = allLines.length > 0 ? allLines : [];
+    const totalRows = Math.max(minRows, noteLines.length + 4);
+
+    doc.setFont('times', 'normal');
+    doc.setFontSize(10.5);
+
+    for (let i = 0; i < totalRows; i++) {
+      // Check if we need a new page
+      if (y + rowH > pageH - 40) {
+        doc.addPage();
+        y = 40;
+        // Repeat header on new page
+        doc.setFont('times', 'bold');
+        doc.setFontSize(10);
+        doc.rect(marginL, y, labelColW, rowH);
+        doc.rect(marginL + labelColW, y, writeColW, rowH);
+        doc.text('DATE', marginL + labelColW / 2, y + 15, { align: 'center' });
+        doc.setFont('times', 'normal');
+        doc.text(dateTime, marginL + labelColW + 8, y + 15);
+        y += rowH;
+      }
+
+      doc.setLineWidth(0.3);
+      doc.rect(marginL, y, labelColW, rowH);
+      doc.rect(marginL + labelColW, y, writeColW, rowH);
+
+      // Fill in note text line by line
+      if (noteLines[i] !== undefined && noteLines[i] !== '') {
+        doc.setFont('times', 'normal');
+        doc.setFontSize(10.5);
+        doc.text(noteLines[i], marginL + labelColW + 8, y + 15);
+      }
+
+      y += rowH;
+    }
+
+    // ── SIGNATURE LINE ──
+    y += 16;
+    if (y + 30 > pageH - 40) { doc.addPage(); y = 40; }
+    doc.setLineWidth(0.5);
+    doc.line(marginL, y, marginL + 180, y);
+    doc.setFont('times', 'normal');
+    doc.setFontSize(9);
+    doc.text('Staff Signature', marginL, y + 12);
+    doc.line(marginL + 280, y, marginL + 460, y);
+    doc.text('Date', marginL + 280, y + 12);
+
+    // ── SAVE ──
+    const safeName = residentName.replace(/\s/g, '_');
+    doc.save(`ProgressNotes_${safeName}_${note.note_date}.pdf`);
+  };
+
+  // Load logo as base64 via canvas
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const dataUrl = canvas.toDataURL('image/png');
+    drawDocument(dataUrl);
+  };
+  img.onerror = () => drawDocument(null);
+  img.src = 'harmony_living_house_logo.png';
 }
 
 // ══════════════════════════════════
