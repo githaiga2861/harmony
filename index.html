@@ -629,71 +629,43 @@
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="modal-body">
-      <input type="hidden" id="note-edit-id">
+<div class="modal-body">
+  <input type="hidden" id="note-edit-id">
 
-      <div class="form-section-title">Note Details</div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Date of Note *</label>
-          <input type="date" id="note-date">
-        </div>
-        <div class="field">
-          <label>Staff Name *</label>
-          <input type="text" id="note-staff" placeholder="Your name">
-        </div>
-        <div class="field">
-          <label>Shift</label>
-          <select id="note-shift">
-            <option value="">— Select —</option>
-            <option>Day</option>
-            <option>Evening</option>
-            <option>Night</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Priority Flag</label>
-          <select id="note-flag">
-            <option value="routine">Routine</option>
-            <option value="concern">Concern</option>
-            <option value="critical">Critical</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-section-title">Behavior & Mood</div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Mood/Affect</label>
-          <select id="note-mood">
-            <option value="">— Select —</option>
-            <option>Calm / Stable</option>
-            <option>Anxious</option>
-            <option>Irritable</option>
-            <option>Depressed</option>
-            <option>Elevated / Manic</option>
-            <option>Confused</option>
-            <option>Unresponsive</option>
-            <option>Intoxicated</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Behavior</label>
-          <select id="note-behavior">
-            <option value="">— Select —</option>
-            <option>Cooperative</option>
-            <option>Resistant</option>
-            <option>Agitated</option>
-            <option>Withdrawn</option>
-            <option>Elopement attempt</option>
-            <option>Self-isolating</option>
-          </select>
-        </div>
-        <div class="field span2">
-          <label>Behavior / Mood Narrative</label>
-          <textarea id="note-behavior-notes" rows="3" placeholder="Describe observed behavior and mood in detail..."></textarea>
-        </div>
-      </div>
+  <div class="form-grid">
+    <div class="field">
+      <label>Date of Note *</label>
+      <input type="date" id="note-date">
+    </div>
+    <div class="field">
+      <label>Staff Name *</label>
+      <input type="text" id="note-staff" placeholder="Your name">
+    </div>
+    <div class="field">
+      <label>Priority</label>
+      <select id="note-flag">
+        <option value="routine">Routine</option>
+        <option value="concern">Concern</option>
+        <option value="critical">Critical</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Shift</label>
+      <select id="note-shift">
+        <option value="">— Select —</option>
+        <option>Day</option>
+        <option>Evening</option>
+        <option>Night</option>
+      </select>
+    </div>
+    <div class="field span2">
+      <label>Progress Notes</label>
+      <textarea id="note-behavior-notes" rows="10" 
+        placeholder="Document resident's progress here — behaviour, incidents, medications, mood, activities, follow-up actions, and any other observations during this shift...">
+      </textarea>
+    </div>
+  </div>
+</div>
 
       <div class="form-section-title">Physical Health</div>
       <div class="form-grid">
@@ -1101,12 +1073,8 @@ function openAddNote() {
   document.getElementById('note-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('note-staff').value = currentUser.name;
   document.getElementById('note-flag').value = 'routine';
-  ['note-shift','note-mood','note-behavior','note-sleep','note-appetite','note-med-compliance','note-incident'].forEach(id => {
-    document.getElementById(id).value = id === 'note-incident' ? 'none' : '';
-  });
-  ['note-behavior-notes','note-health-notes','note-prn','note-med-notes','note-incident-desc','note-incident-reported','note-activities','note-interventions','note-plan'].forEach(id => {
-    document.getElementById(id).value = '';
-  });
+  document.getElementById('note-shift').value = '';
+  document.getElementById('note-behavior-notes').value = '';
   openModal('modal-note');
 }
 
@@ -1148,22 +1116,7 @@ function saveNote() {
     note_date: noteDate,
     created_by: staffName,
     shift: document.getElementById('note-shift').value,
-    flag: document.getElementById('note-flag').value,
-    mood: document.getElementById('note-mood').value,
-    behavior: document.getElementById('note-behavior').value,
-    behavior_notes: document.getElementById('note-behavior-notes').value.trim(),
-    sleep: document.getElementById('note-sleep').value,
-    appetite: document.getElementById('note-appetite').value,
-    health_notes: document.getElementById('note-health-notes').value.trim(),
-    med_compliance: document.getElementById('note-med-compliance').value,
-    prn: document.getElementById('note-prn').value.trim(),
-    med_notes: document.getElementById('note-med-notes').value.trim(),
-    incident: document.getElementById('note-incident').value,
-    incident_reported: document.getElementById('note-incident-reported').value.trim(),
-    incident_desc: document.getElementById('note-incident-desc').value.trim(),
-    activities: document.getElementById('note-activities').value.trim(),
-    interventions: document.getElementById('note-interventions').value.trim(),
-    plan: document.getElementById('note-plan').value.trim(),
+    flag: document.getElementById('note-flag').value;
   };
   const notes = getNotes();
   if (editId) {
