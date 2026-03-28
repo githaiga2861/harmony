@@ -634,9 +634,13 @@
 
   <div class="form-grid">
     <div class="field">
-      <label>Date of Note *</label>
-      <input type="date" id="note-date">
-    </div>
+  <label>Date of Note *</label>
+  <input type="date" id="note-date">
+</div>
+<div class="field">
+  <label>Time *</label>
+  <input type="time" id="note-time">
+</div>
     <div class="field">
       <label>Staff Name *</label>
       <input type="text" id="note-staff" placeholder="Your name">
@@ -1071,6 +1075,7 @@ function openAddNote() {
   document.getElementById('note-modal-title').textContent = 'Add Progress Note';
   document.getElementById('note-edit-id').value = '';
   document.getElementById('note-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('note-time').value = new Date().toTimeString().slice(0,5);
   document.getElementById('note-staff').value = currentUser.name;
   document.getElementById('note-flag').value = 'routine';
   document.getElementById('note-shift').value = '';
@@ -1084,6 +1089,7 @@ function editNote(id) {
   document.getElementById('note-modal-title').textContent = 'Edit Progress Note';
   document.getElementById('note-edit-id').value = id;
   document.getElementById('note-date').value = note.note_date;
+  document.getElementById('note-time').value = note.note_time || '';
   document.getElementById('note-staff').value = note.created_by;
   document.getElementById('note-shift').value = note.shift || '';
   document.getElementById('note-flag').value = note.flag || 'routine';
@@ -1114,6 +1120,7 @@ function saveNote() {
   const noteData = {
     resident_id: currentResidentId,
     note_date: noteDate,
+    note_time: document.getElementById('note-time').value,
     created_by: staffName,
     shift: document.getElementById('note-shift').value,
     flag: document.getElementById('note-flag').value;
@@ -1140,8 +1147,6 @@ function deleteNote(id) {
 }
 
 // ══════════════════════════════════
-// VIEW NOTE
-// ══════════════════════════════════
 function viewNote(id) {
   const note = getNotes().find(n => n.id === id);
   if (!note) return;
@@ -1149,66 +1154,28 @@ function viewNote(id) {
   const res = getResidents().find(r => r.id === note.resident_id);
   const flagColor = note.flag === 'critical' ? 'badge-red' : note.flag === 'concern' ? 'badge-warn' : 'badge-green';
   const flagLabel = note.flag === 'critical' ? 'Critical' : note.flag === 'concern' ? 'Concern' : 'Routine';
-
-  const fv = (val) => val ? `<div class="field-value">${val}</div>` : `<div class="field-value empty">Not recorded</div>`;
+  const fv = (val) => val ? `<div class="field-value" style="white-space:pre-wrap;line-height:1.8;">${val}</div>` : `<div class="field-value empty">Not recorded</div>`;
 
   document.getElementById('note-view-body').innerHTML = `
     <div style="background:var(--accent-light);border-radius:var(--radius);padding:16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;">
       <div>
         <div style="font-weight:700;font-size:17px;">${res ? res.name : 'Unknown Resident'}</div>
-        <div style="font-size:13px;color:var(--text2);margin-top:4px;">${fmtDate(note.note_date)} &middot; ${note.shift || 'Unspecified'} Shift &middot; By ${note.created_by}</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:4px;">
+          ${fmtDate(note.note_date)} 
+          ${note.note_time ? 'at ' + note.note_time : ''} &middot; 
+          ${note.shift || 'Unspecified'} Shift &middot; 
+          By ${note.created_by}
+        </div>
       </div>
       <span class="badge ${flagColor}" style="font-size:13px;padding:5px 12px;">${flagLabel}</span>
     </div>
 
     <div class="note-section">
-      <div class="note-section-title">Behavior & Mood</div>
-      <div class="note-grid">
-        <div class="note-field"><div class="field-label">Mood / Affect</div>${fv(note.mood)}</div>
-        <div class="note-field"><div class="field-label">Behavior</div>${fv(note.behavior)}</div>
-      </div>
-      <div class="note-field"><div class="field-label">Narrative</div>${fv(note.behavior_notes)}</div>
-    </div>
-
-    <div class="note-section">
-      <div class="note-section-title">Physical Health</div>
-      <div class="note-grid">
-        <div class="note-field"><div class="field-label">Sleep</div>${fv(note.sleep)}</div>
-        <div class="note-field"><div class="field-label">Appetite</div>${fv(note.appetite)}</div>
-      </div>
-      <div class="note-field"><div class="field-label">Health Notes</div>${fv(note.health_notes)}</div>
-    </div>
-
-    <div class="note-section">
-      <div class="note-section-title">Medications</div>
-      <div class="note-grid">
-        <div class="note-field"><div class="field-label">Compliance</div>${fv(note.med_compliance)}</div>
-        <div class="note-field"><div class="field-label">PRN Given</div>${fv(note.prn)}</div>
-      </div>
-      <div class="note-field"><div class="field-label">Medication Notes</div>${fv(note.med_notes)}</div>
-    </div>
-
-    ${note.incident && note.incident !== 'none' ? `
-    <div class="note-section" style="border-left:3px solid var(--danger);padding-left:14px;">
-      <div class="note-section-title" style="color:var(--danger);">Incident Reported</div>
-      <div class="note-grid">
-        <div class="note-field"><div class="field-label">Incident Type</div>${fv(note.incident)}</div>
-        <div class="note-field"><div class="field-label">Reported To</div>${fv(note.incident_reported)}</div>
-      </div>
-      <div class="note-field"><div class="field-label">Description</div>${fv(note.incident_desc)}</div>
-    </div>` : ''}
-
-    <div class="note-section">
-      <div class="note-section-title">Activities</div>
-      <div class="note-field">${fv(note.activities)}</div>
-    </div>
-
-    <div class="note-section">
-      <div class="note-section-title">Interventions & Plan</div>
-      <div class="note-field"><div class="field-label">Staff Interventions</div>${fv(note.interventions)}</div>
-      <div class="note-field"><div class="field-label">Follow-Up Plan</div>${fv(note.plan)}</div>
+      <div class="note-section-title">Progress Notes</div>
+      <div class="note-field">${fv(note.behavior_notes)}</div>
     </div>
   `;
+
   document.getElementById('note-view-footer').innerHTML = `
     <button class="btn btn-secondary" onclick="closeModal('modal-view-note')">Close</button>
     <button class="btn btn-secondary" onclick="editNote('${id}')">Edit</button>
