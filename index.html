@@ -1277,120 +1277,100 @@ async function exportPDF() {
     + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   const noteText = (note.behavior_notes || '').trim();
 
-  // Split note into wrapped lines at ~95 chars, preserving paragraph breaks
-  const noteLines = [];
-  noteText.split('\n').forEach(para => {
-    if (!para.trim()) return;
-    const words = para.split(' ');
-    let cur = '';
-    words.forEach(word => {
-      const test = cur ? cur + ' ' + word : word;
-      if (test.length > 95) { noteLines.push(cur); cur = word; }
-      else cur = test;
-    });
-    if (cur) noteLines.push(cur);
-  });
-
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'pt', format: 'letter' });
 
   const pageW = 612;
   const pageH = 792;
-  const marginL = 50;
-  const marginR = 50;
+  const marginL = 60;
+  const marginR = 60;
   const contentW = pageW - marginL - marginR;
-  const labelColW = 60;
-  const writeColW = contentW - labelColW;
-  const rowH = 22;
+  const lineH = 18;
+
+  // Wrap note text into lines at ~90 chars, preserving paragraph breaks
+  const noteLines = [];
+  noteText.split('\n').forEach(para => {
+    const trimmed = para.trim();
+    if (!trimmed) { noteLines.push(''); return; }
+    const words = trimmed.split(' ');
+    let cur = '';
+    words.forEach(word => {
+      const test = cur ? cur + ' ' + word : word;
+      if (test.length > 90) { noteLines.push(cur); cur = word; }
+      else cur = test;
+    });
+    if (cur) noteLines.push(cur);
+  });
 
   const drawDocument = (logoDataUrl) => {
-    let y = 36;
+    let y = 40;
 
     // ── LOGO ──
     if (logoDataUrl) {
-      const logoSize = 68;
+      const logoSize = 90;
       doc.addImage(logoDataUrl, 'PNG', (pageW - logoSize) / 2, y, logoSize, logoSize);
-      y += logoSize + 8;
+      y += logoSize + 12;
     }
 
     // ── ORG NAME ──
     doc.setFont('times', 'bold');
-    doc.setFontSize(14);
+    doc.setFontSize(18);
     doc.setTextColor(0, 0, 0);
     doc.text('HARMONY LIVING HOUSE ADULT FAMILY LLC', pageW / 2, y, { align: 'center' });
-    y += 16;
+    y += 22;
 
     // ── ADDRESS ──
     doc.setFont('times', 'normal');
-    doc.setFontSize(10);
+    doc.setFontSize(13);
     doc.text('120 Newaukum Village Dr Chehalis, WA 98532', pageW / 2, y, { align: 'center' });
-    y += 14;
+    y += 18;
 
     // ── TITLE ──
     doc.setFont('times', 'bold');
-    doc.setFontSize(12);
+    doc.setFontSize(14);
     const titleText = 'PROGRESS NOTES';
     const titleW = doc.getTextWidth(titleText);
     doc.text(titleText, pageW / 2, y, { align: 'center' });
     doc.setLineWidth(0.7);
     doc.line((pageW - titleW) / 2, y + 2, (pageW + titleW) / 2, y + 2);
-    y += 16;
+    y += 20;
 
     // ── RESIDENT INFO LINE ──
     doc.setFont('times', 'normal');
-    doc.setFontSize(10.5);
-    const leftInfo  = `Resident Name: ${residentName}`;
-    const rightInfo = `Date & Time: ${dateTime}`;
-    const totalInfo = leftInfo + '          ' + rightInfo;
-    doc.text(totalInfo, pageW / 2, y, { align: 'center' });
-    y += 12;
+    doc.setFontSize(11);
+    const infoLeft  = `Resident Name: ${residentName}`;
+    const infoRight = `Date & Time: ${dateTime}`;
+    doc.text(infoLeft,  marginL, y);
+    doc.text(infoRight, pageW - marginR, y, { align: 'right' });
+    y += 20;
 
-    // ── TABLE HEADER ROW ──
-    doc.setLineWidth(0.8);
-    doc.rect(marginL, y, labelColW, rowH);
-    doc.rect(marginL + labelColW, y, writeColW, rowH);
-    doc.setFont('times', 'bold');
-    doc.setFontSize(10);
-    doc.text('DATE', marginL + labelColW / 2, y + 14, { align: 'center' });
-    y += rowH;
+    // ── THIN DIVIDER ──
+    doc.setLineWidth(0.5);
+    doc.line(marginL, y, pageW - marginR, y);
+    y += 18;
 
-    // ── NOTE CONTENT ROWS — exactly as many as needed ──
+    // ── NOTE TEXT — plain, no borders, no columns ──
     doc.setFont('times', 'normal');
-    doc.setFontSize(10.5);
-    doc.setLineWidth(0.4);
+    doc.setFontSize(11.5);
 
-    noteLines.forEach((line, i) => {
-      if (y + rowH > pageH - 40) {
+    noteLines.forEach(line => {
+      if (y + lineH > pageH - 80) {
         doc.addPage();
         y = 40;
-        // Repeat header on continuation page
-        doc.setLineWidth(0.8);
-        doc.rect(marginL, y, labelColW, rowH);
-        doc.rect(marginL + labelColW, y, writeColW, rowH);
-        doc.setFont('times', 'bold');
-        doc.setFontSize(10);
-        doc.text('DATE', marginL + labelColW / 2, y + 14, { align: 'center' });
-        y += rowH;
-        doc.setFont('times', 'normal');
-        doc.setFontSize(10.5);
-        doc.setLineWidth(0.4);
       }
-      doc.rect(marginL, y, labelColW, rowH);
-      doc.rect(marginL + labelColW, y, writeColW, rowH);
-      if (line) doc.text(line, marginL + labelColW + 6, y + 14);
-      y += rowH;
+      if (line) doc.text(line, marginL, y);
+      y += lineH;
     });
 
-    // ── SIGNATURE LINE ──
-    y += 20;
-    if (y + 30 > pageH - 40) { doc.addPage(); y = 40; }
+    // ── SIGNATURE BLOCK ──
+    y += 32;
+    if (y + 50 > pageH - 20) { doc.addPage(); y = 40; }
     doc.setLineWidth(0.5);
-    doc.line(marginL, y, marginL + 180, y);
+    // Signature line
+    doc.line(marginL, y, marginL + 220, y);
     doc.setFont('times', 'normal');
-    doc.setFontSize(9);
-    doc.text('Staff Signature', marginL, y + 11);
-    doc.line(marginL + 280, y, marginL + 460, y);
-    doc.text('Date', marginL + 280, y + 11);
+    doc.setFontSize(9.5);
+    doc.text('Staff Signature / Stamp', marginL, y + 13);
 
     const safeName = residentName.replace(/\s+/g, '_');
     doc.save(`ProgressNotes_${safeName}_${note.note_date}.pdf`);
