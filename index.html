@@ -320,8 +320,23 @@
   }
 
   /* Page views */
+  /* Page views */
   .page { display: none; }
   .page.active { display: block; }
+
+  /* Incident Report Form */
+  .ir-section-title {
+    font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase;
+    letter-spacing: 0.06em; margin: 20px 0 12px; padding-bottom: 6px;
+    border-bottom: 2px solid var(--accent-light);
+  }
+  .checkbox-group { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 4px; }
+  .checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 13.5px; color: var(--text); cursor: pointer; }
+  .checkbox-item input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--accent); cursor: pointer; }
+  .ir-witness-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+  .ir-yn { display: flex; gap: 16px; align-items: center; margin-top: 4px; }
+  .ir-yn label { display: flex; align-items: center; gap: 5px; font-size: 13.5px; cursor: pointer; }
+  .ir-yn input[type="radio"] { accent-color: var(--accent); }
   @media (max-width: 768px) {
   #auth-screen, #app {
     display: none !important;
@@ -568,6 +583,10 @@
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                 Timeline
               </button>
+              <button class="btn btn-secondary btn-sm" onclick="openAddIncidentReport()" style="background:var(--danger-light);color:var(--danger);">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Incident Report
+              </button>
               <button class="btn btn-primary btn-sm" onclick="openAddNote()">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Add Note
@@ -575,6 +594,11 @@
             </div>
           </div>
           <div id="profile-notes-list" class="notes-list"></div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; margin: 24px 0 16px;">
+            <h3 style="font-size:15px; font-weight:600;">Incident Reports</h3>
+          </div>
+          <div id="profile-incidents-list" class="notes-list"></div>
         </div>
 
         <!-- ALL NOTES -->
@@ -761,6 +785,222 @@
   </div>
 </div>
 
+<!-- MODAL: Add/Edit Incident Report -->
+<div class="modal-overlay" id="modal-incident">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="incident-modal-title">Incident Report</h3>
+      <button class="btn-close" onclick="closeModal('modal-incident')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ir-edit-id">
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Name of Resident/Staff Involved *</label>
+          <input type="text" id="ir-name" placeholder="Full name">
+        </div>
+        <div class="field">
+          <label>Date of Birth</label>
+          <input type="date" id="ir-dob">
+        </div>
+        <div class="field">
+          <label>Sex</label>
+          <select id="ir-sex">
+            <option value="">— Select —</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="ir-section-title">Nature of Incident</div>
+      <div class="checkbox-group" style="margin-bottom:16px;">
+        <label class="checkbox-item"><input type="checkbox" id="ir-n-injury"> Resident/Staff Injury</label>
+        <label class="checkbox-item"><input type="checkbox" id="ir-n-missing"> Resident Missing</label>
+        <label class="checkbox-item"><input type="checkbox" id="ir-n-death"> Death of Resident</label>
+        <label class="checkbox-item"><input type="checkbox" id="ir-n-fire"> Fire/Natural Disaster</label>
+        <label class="checkbox-item"><input type="checkbox" id="ir-n-fall"> Fall</label>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Date Incident Occurred *</label>
+          <input type="date" id="ir-date">
+        </div>
+        <div class="field">
+          <label>Time</label>
+          <input type="time" id="ir-time">
+        </div>
+        <div class="field span2">
+          <label>Location</label>
+          <input type="text" id="ir-location" placeholder="e.g. Bedroom, Kitchen, Living Room">
+        </div>
+        <div class="field span2">
+          <label>Description of Incident (use specific behavioral terms and include actions taken by providers/staff)</label>
+          <textarea id="ir-description" rows="6" placeholder="Describe the incident in detail..."></textarea>
+        </div>
+      </div>
+
+      <div class="ir-section-title">Type of Injury</div>
+      <div class="checkbox-group" style="margin-bottom:8px;">
+        <label class="checkbox-item"><input type="checkbox" id="ir-i-laceration"> Laceration (cut)</label>
+        <label class="checkbox-item"><input type="checkbox" id="ir-i-hematoma"> Hematoma (bruise)</label>
+        <label class="checkbox-item"><input type="checkbox" id="ir-i-abrasion"> Abrasion (scrape)</label>
+        <label class="checkbox-item"><input type="checkbox" id="ir-i-burn"> Burn</label>
+        <label class="checkbox-item"><input type="checkbox" id="ir-i-non-apparent"> Non-Apparent</label>
+      </div>
+      <div class="field" style="max-width:300px; margin-bottom:16px;">
+        <label>Other (specify)</label>
+        <input type="text" id="ir-i-other" placeholder="Describe other injury type">
+      </div>
+
+      <div class="field">
+        <label>Emergency Treatment Given (if any)</label>
+        <input type="text" id="ir-emergency" placeholder="Describe treatment given">
+      </div>
+
+      <div class="ir-section-title">Witnesses &amp; Employees Involved</div>
+      <div class="ir-witness-grid">
+        <div class="field">
+          <label>Witness 1 Name</label>
+          <input type="text" id="ir-w1-name" placeholder="Name">
+        </div>
+        <div class="field">
+          <label>Witness 1 Phone</label>
+          <input type="text" id="ir-w1-phone" placeholder="Phone">
+        </div>
+        <div class="field">
+          <label>Employee 1 Name</label>
+          <input type="text" id="ir-e1-name" placeholder="Name">
+        </div>
+        <div class="field">
+          <label>Employee 1 Phone</label>
+          <input type="text" id="ir-e1-phone" placeholder="Phone">
+        </div>
+        <div class="field">
+          <label>Witness 2 Name</label>
+          <input type="text" id="ir-w2-name" placeholder="Name">
+        </div>
+        <div class="field">
+          <label>Witness 2 Phone</label>
+          <input type="text" id="ir-w2-phone" placeholder="Phone">
+        </div>
+        <div class="field">
+          <label>Employee 2 Name</label>
+          <input type="text" id="ir-e2-name" placeholder="Name">
+        </div>
+        <div class="field">
+          <label>Employee 2 Phone</label>
+          <input type="text" id="ir-e2-phone" placeholder="Phone">
+        </div>
+      </div>
+
+      <div class="ir-section-title">Medical Treatment</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Treated by Physician?</label>
+          <div class="ir-yn">
+            <label><input type="radio" name="ir-physician" value="yes" id="ir-physician-yes"> Yes</label>
+            <label><input type="radio" name="ir-physician" value="no" id="ir-physician-no"> No</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Physician Name</label>
+          <input type="text" id="ir-physician-name" placeholder="Name">
+        </div>
+        <div class="field">
+          <label>Physician Date</label>
+          <input type="date" id="ir-physician-date">
+        </div>
+        <div class="field">
+          <label>Physician Time</label>
+          <input type="time" id="ir-physician-time">
+        </div>
+        <div class="field">
+          <label>Hospital Admission?</label>
+          <div class="ir-yn">
+            <label><input type="radio" name="ir-hospital" value="yes" id="ir-hospital-yes"> Yes</label>
+            <label><input type="radio" name="ir-hospital" value="no" id="ir-hospital-no"> No</label>
+          </div>
+        </div>
+        <div class="field">
+          <label>Hospital Name</label>
+          <input type="text" id="ir-hospital-name" placeholder="Name">
+        </div>
+        <div class="field">
+          <label>Hospital Date</label>
+          <input type="date" id="ir-hospital-date">
+        </div>
+        <div class="field">
+          <label>Hospital Time</label>
+          <input type="time" id="ir-hospital-time">
+        </div>
+      </div>
+
+      <div class="ir-section-title">Individuals Notified</div>
+      <div class="checkbox-group" style="margin-bottom:8px;">
+        <label class="checkbox-item"><input type="checkbox" id="ir-notif-hcp"> Health Care Provider</label>
+        <label class="checkbox-item"><input type="checkbox" id="ir-notif-cm"> Case Manager</label>
+        <label class="checkbox-item"><input type="checkbox" id="ir-notif-rr"> Resident Representative</label>
+        <label class="checkbox-item"><input type="checkbox" id="ir-notif-nok"> Next-of-Kin</label>
+        <label class="checkbox-item"><input type="checkbox" id="ir-notif-le"> Law Enforcement</label>
+        <label class="checkbox-item"><input type="checkbox" id="ir-notif-dshs"> DSHS Hotline</label>
+      </div>
+      <div class="field" style="max-width:360px; margin-bottom:16px;">
+        <label>Other (specify)</label>
+        <input type="text" id="ir-notif-other" placeholder="Other individuals notified">
+      </div>
+
+      <div class="field">
+        <label>Action to Prevent Reoccurrence</label>
+        <textarea id="ir-prevention" rows="3" placeholder="Describe actions to prevent this incident from recurring..."></textarea>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Prepared By (Print Name/Title) *</label>
+          <input type="text" id="ir-prepared-by" placeholder="Name and title">
+        </div>
+        <div class="field">
+          <label>Date Prepared</label>
+          <input type="date" id="ir-prepared-date">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-incident')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveIncidentReportForm()">Save Incident Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: View Incident Report -->
+<div class="modal-overlay" id="modal-view-incident">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3>Incident Report</h3>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-secondary btn-sm" onclick="printIncidentReport()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="exportIncidentPDF()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          PDF
+        </button>
+        <button class="btn-close" onclick="closeModal('modal-view-incident')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body" id="incident-view-body"></div>
+    <div class="modal-footer" id="incident-view-footer"></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -806,6 +1046,18 @@ async function deleteResidentFromDb(id) {
 }
 async function deleteNoteFromDb(id) {
   await db.from('notes').delete().eq('id', id);
+}
+async function getIncidentReports(residentId) {
+  const q = db.from('incident_reports').select('*').order('incident_date', { ascending: false });
+  if (residentId) q.eq('resident_id', residentId);
+  const { data } = await q;
+  return data || [];
+}
+async function saveIncidentReport(report) {
+  await db.from('incident_reports').upsert(report);
+}
+async function deleteIncidentReportFromDb(id) {
+  await db.from('incident_reports').delete().eq('id', id);
 }
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
@@ -1001,6 +1253,7 @@ async function openProfile(id) {
   document.getElementById('profile-age').textContent = 'Age: ' + calcAge(res.dob);
   document.getElementById('profile-admitted').textContent = 'Added: ' + fmtDate(res.created_at?.split('T')[0]);
   renderProfileNotes();
+  renderProfileIncidents();
   showPage('profile');
 }
 
@@ -1514,6 +1767,465 @@ async function renderAnalytics() {
   tbody.innerHTML = entries.sort((a,b) => b[1].count - a[1].count).map(([name, d]) =>
     `<tr><td style="font-weight:600;">${name}</td><td>${d.count}</td><td>${fmtDate(d.last)}</td></tr>`
   ).join('');
+}
+
+// ══════════════════════════════════
+// INCIDENT REPORTS
+// ══════════════════════════════════
+let viewingIncidentId = null;
+
+function openAddIncidentReport() {
+  document.getElementById('incident-modal-title').textContent = 'Add Incident Report';
+  document.getElementById('ir-edit-id').value = '';
+  // Reset all fields
+  ['ir-name','ir-location','ir-description','ir-emergency',
+   'ir-w1-name','ir-w1-phone','ir-w2-name','ir-w2-phone',
+   'ir-e1-name','ir-e1-phone','ir-e2-name','ir-e2-phone',
+   'ir-physician-name','ir-hospital-name','ir-notif-other',
+   'ir-prevention','ir-prepared-by','ir-i-other'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['ir-dob','ir-physician-date','ir-physician-time','ir-hospital-date','ir-hospital-time'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('ir-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ir-time').value = new Date().toTimeString().slice(0,5);
+  document.getElementById('ir-prepared-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ir-prepared-by').value = currentUser.name;
+  document.getElementById('ir-sex').value = '';
+  ['ir-n-injury','ir-n-missing','ir-n-death','ir-n-fire','ir-n-fall',
+   'ir-i-laceration','ir-i-hematoma','ir-i-abrasion','ir-i-burn','ir-i-non-apparent',
+   'ir-notif-hcp','ir-notif-cm','ir-notif-rr','ir-notif-nok','ir-notif-le','ir-notif-dshs'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = false;
+  });
+  document.querySelectorAll('input[name="ir-physician"]').forEach(r => r.checked = false);
+  document.querySelectorAll('input[name="ir-hospital"]').forEach(r => r.checked = false);
+  openModal('modal-incident');
+}
+
+async function editIncidentReport(id) {
+  const reports = await getIncidentReports(currentResidentId);
+  const r = reports.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('incident-modal-title').textContent = 'Edit Incident Report';
+  document.getElementById('ir-edit-id').value = id;
+  document.getElementById('ir-name').value = r.resident_name || '';
+  document.getElementById('ir-dob').value = r.dob || '';
+  document.getElementById('ir-sex').value = r.sex || '';
+  document.getElementById('ir-n-injury').checked = !!r.nature_injury;
+  document.getElementById('ir-n-missing').checked = !!r.nature_missing;
+  document.getElementById('ir-n-death').checked = !!r.nature_death;
+  document.getElementById('ir-n-fire').checked = !!r.nature_fire;
+  document.getElementById('ir-n-fall').checked = !!r.nature_fall;
+  document.getElementById('ir-date').value = r.incident_date || '';
+  document.getElementById('ir-time').value = r.incident_time || '';
+  document.getElementById('ir-location').value = r.incident_location || '';
+  document.getElementById('ir-description').value = r.description || '';
+  document.getElementById('ir-i-laceration').checked = !!r.injury_laceration;
+  document.getElementById('ir-i-hematoma').checked = !!r.injury_hematoma;
+  document.getElementById('ir-i-abrasion').checked = !!r.injury_abrasion;
+  document.getElementById('ir-i-burn').checked = !!r.injury_burn;
+  document.getElementById('ir-i-non-apparent').checked = !!r.injury_non_apparent;
+  document.getElementById('ir-i-other').value = r.injury_other || '';
+  document.getElementById('ir-emergency').value = r.emergency_treatment || '';
+  document.getElementById('ir-w1-name').value = r.witness1_name || '';
+  document.getElementById('ir-w1-phone').value = r.witness1_phone || '';
+  document.getElementById('ir-w2-name').value = r.witness2_name || '';
+  document.getElementById('ir-w2-phone').value = r.witness2_phone || '';
+  document.getElementById('ir-e1-name').value = r.employee1_name || '';
+  document.getElementById('ir-e1-phone').value = r.employee1_phone || '';
+  document.getElementById('ir-e2-name').value = r.employee2_name || '';
+  document.getElementById('ir-e2-phone').value = r.employee2_phone || '';
+  if (r.treated_physician === true) document.getElementById('ir-physician-yes').checked = true;
+  else if (r.treated_physician === false) document.getElementById('ir-physician-no').checked = true;
+  document.getElementById('ir-physician-name').value = r.physician_name || '';
+  document.getElementById('ir-physician-date').value = r.physician_date || '';
+  document.getElementById('ir-physician-time').value = r.physician_time || '';
+  if (r.hospital_admission === true) document.getElementById('ir-hospital-yes').checked = true;
+  else if (r.hospital_admission === false) document.getElementById('ir-hospital-no').checked = true;
+  document.getElementById('ir-hospital-name').value = r.hospital_name || '';
+  document.getElementById('ir-hospital-date').value = r.hospital_date || '';
+  document.getElementById('ir-hospital-time').value = r.hospital_time || '';
+  document.getElementById('ir-notif-hcp').checked = !!r.notified_health_care;
+  document.getElementById('ir-notif-cm').checked = !!r.notified_case_manager;
+  document.getElementById('ir-notif-rr').checked = !!r.notified_resident_rep;
+  document.getElementById('ir-notif-nok').checked = !!r.notified_next_of_kin;
+  document.getElementById('ir-notif-le').checked = !!r.notified_law_enforcement;
+  document.getElementById('ir-notif-dshs').checked = !!r.notified_dshs;
+  document.getElementById('ir-notif-other').value = r.notified_other || '';
+  document.getElementById('ir-prevention').value = r.prevention_action || '';
+  document.getElementById('ir-prepared-by').value = r.prepared_by || '';
+  document.getElementById('ir-prepared-date').value = r.prepared_date || '';
+  closeModal('modal-view-incident');
+  openModal('modal-incident');
+}
+
+async function saveIncidentReportForm() {
+  const name = document.getElementById('ir-name').value.trim();
+  const date = document.getElementById('ir-date').value;
+  if (!name || !date) { toast('Please fill in Resident Name and Incident Date'); return; }
+  const editId = document.getElementById('ir-edit-id').value;
+  const physicianYes = document.getElementById('ir-physician-yes').checked;
+  const physicianNo = document.getElementById('ir-physician-no').checked;
+  const hospitalYes = document.getElementById('ir-hospital-yes').checked;
+  const hospitalNo = document.getElementById('ir-hospital-no').checked;
+  const report = {
+    id: editId || uid(),
+    resident_id: currentResidentId,
+    resident_name: name,
+    dob: document.getElementById('ir-dob').value,
+    sex: document.getElementById('ir-sex').value,
+    nature_injury: document.getElementById('ir-n-injury').checked,
+    nature_missing: document.getElementById('ir-n-missing').checked,
+    nature_death: document.getElementById('ir-n-death').checked,
+    nature_fire: document.getElementById('ir-n-fire').checked,
+    nature_fall: document.getElementById('ir-n-fall').checked,
+    incident_date: date,
+    incident_time: document.getElementById('ir-time').value,
+    incident_location: document.getElementById('ir-location').value.trim(),
+    description: document.getElementById('ir-description').value.trim(),
+    injury_laceration: document.getElementById('ir-i-laceration').checked,
+    injury_hematoma: document.getElementById('ir-i-hematoma').checked,
+    injury_abrasion: document.getElementById('ir-i-abrasion').checked,
+    injury_burn: document.getElementById('ir-i-burn').checked,
+    injury_non_apparent: document.getElementById('ir-i-non-apparent').checked,
+    injury_other: document.getElementById('ir-i-other').value.trim(),
+    emergency_treatment: document.getElementById('ir-emergency').value.trim(),
+    witness1_name: document.getElementById('ir-w1-name').value.trim(),
+    witness1_phone: document.getElementById('ir-w1-phone').value.trim(),
+    witness2_name: document.getElementById('ir-w2-name').value.trim(),
+    witness2_phone: document.getElementById('ir-w2-phone').value.trim(),
+    employee1_name: document.getElementById('ir-e1-name').value.trim(),
+    employee1_phone: document.getElementById('ir-e1-phone').value.trim(),
+    employee2_name: document.getElementById('ir-e2-name').value.trim(),
+    employee2_phone: document.getElementById('ir-e2-phone').value.trim(),
+    treated_physician: physicianYes ? true : physicianNo ? false : null,
+    physician_name: document.getElementById('ir-physician-name').value.trim(),
+    physician_date: document.getElementById('ir-physician-date').value,
+    physician_time: document.getElementById('ir-physician-time').value,
+    hospital_admission: hospitalYes ? true : hospitalNo ? false : null,
+    hospital_name: document.getElementById('ir-hospital-name').value.trim(),
+    hospital_date: document.getElementById('ir-hospital-date').value,
+    hospital_time: document.getElementById('ir-hospital-time').value,
+    notified_health_care: document.getElementById('ir-notif-hcp').checked,
+    notified_case_manager: document.getElementById('ir-notif-cm').checked,
+    notified_resident_rep: document.getElementById('ir-notif-rr').checked,
+    notified_next_of_kin: document.getElementById('ir-notif-nok').checked,
+    notified_law_enforcement: document.getElementById('ir-notif-le').checked,
+    notified_dshs: document.getElementById('ir-notif-dshs').checked,
+    notified_other: document.getElementById('ir-notif-other').value.trim(),
+    prevention_action: document.getElementById('ir-prevention').value.trim(),
+    prepared_by: document.getElementById('ir-prepared-by').value.trim(),
+    prepared_date: document.getElementById('ir-prepared-date').value,
+    created_at: new Date().toISOString()
+  };
+  await saveIncidentReport(report);
+  closeModal('modal-incident');
+  toast(editId ? 'Incident report updated' : 'Incident report saved');
+  renderProfileIncidents();
+}
+
+async function renderProfileIncidents() {
+  const reports = await getIncidentReports(currentResidentId);
+  const container = document.getElementById('profile-incidents-list');
+  if (!reports.length) {
+    container.innerHTML = `<div class="empty-state">
+      <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <h4>No Incident Reports Yet</h4>
+      <p>Use the Incident Report button above to file a report.</p>
+    </div>`;
+    return;
+  }
+  container.innerHTML = reports.map(r => {
+    const natures = [r.nature_injury&&'Injury', r.nature_missing&&'Missing', r.nature_death&&'Death', r.nature_fire&&'Fire/Disaster', r.nature_fall&&'Fall'].filter(Boolean).join(', ') || 'Unspecified';
+    const preview = (r.description || '—').slice(0, 100);
+    return `<div class="note-card" onclick="viewIncidentReport('${r.id}')">
+      <div class="note-card-header">
+        <div>
+          <div class="note-date">${fmtDate(r.incident_date)} ${r.incident_time ? '· ' + r.incident_time : ''}</div>
+          <div class="note-staff">Nature: ${natures} · Prepared by ${r.prepared_by}</div>
+        </div>
+        <div class="note-actions" onclick="event.stopPropagation()">
+          <button class="btn btn-secondary btn-sm" onclick="editIncidentReport('${r.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteIncidentReport('${r.id}')">Delete</button>
+        </div>
+      </div>
+      <div class="note-preview">${preview}${preview.length >= 100 ? '…' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteIncidentReport(id) {
+  if (!confirm('Delete this incident report? This cannot be undone.')) return;
+  await deleteIncidentReportFromDb(id);
+  renderProfileIncidents();
+  closeModal('modal-view-incident');
+  toast('Incident report deleted');
+}
+
+function cb(val) { return val ? '☑' : '☐'; }
+function yn(val) { if (val === true) return 'Yes'; if (val === false) return 'No'; return '—'; }
+
+async function viewIncidentReport(id) {
+  const reports = await getIncidentReports(currentResidentId);
+  const r = reports.find(x => x.id === id);
+  if (!r) return;
+  viewingIncidentId = id;
+  const fv = (val) => val ? `<span style="color:var(--text)">${val}</span>` : `<span style="color:var(--text3);font-style:italic;">Not recorded</span>`;
+
+  document.getElementById('incident-view-body').innerHTML = `
+    <div style="background:var(--danger-light);border-radius:var(--radius);padding:16px;margin-bottom:20px;">
+      <div style="font-weight:700;font-size:17px;">${r.resident_name}</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:4px;">
+        ${fmtDate(r.incident_date)} ${r.incident_time ? 'at ' + r.incident_time : ''} · ${r.incident_location || 'Location not recorded'}
+      </div>
+    </div>
+
+    <div class="note-section">
+      <div class="note-section-title">Basic Information</div>
+      <div class="note-grid">
+        <div class="note-field"><div class="field-label">DOB</div>${fv(fmtDate(r.dob))}</div>
+        <div class="note-field"><div class="field-label">Sex</div>${fv(r.sex)}</div>
+      </div>
+    </div>
+
+    <div class="note-section">
+      <div class="note-section-title">Nature of Incident</div>
+      <div style="font-size:13.5px;display:flex;flex-wrap:wrap;gap:12px;">
+        <span>${cb(r.nature_injury)} Resident/Staff Injury</span>
+        <span>${cb(r.nature_missing)} Resident Missing</span>
+        <span>${cb(r.nature_death)} Death of Resident</span>
+        <span>${cb(r.nature_fire)} Fire/Natural Disaster</span>
+        <span>${cb(r.nature_fall)} Fall</span>
+      </div>
+    </div>
+
+    <div class="note-section">
+      <div class="note-section-title">Description of Incident</div>
+      <div class="note-field"><div class="field-value" style="white-space:pre-wrap;line-height:1.8;">${r.description || '<span style="color:var(--text3);font-style:italic;">Not recorded</span>'}</div></div>
+    </div>
+
+    <div class="note-section">
+      <div class="note-section-title">Type of Injury</div>
+      <div style="font-size:13.5px;display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
+        <span>${cb(r.injury_laceration)} Laceration (cut)</span>
+        <span>${cb(r.injury_hematoma)} Hematoma (bruise)</span>
+        <span>${cb(r.injury_abrasion)} Abrasion (scrape)</span>
+        <span>${cb(r.injury_burn)} Burn</span>
+        <span>${cb(r.injury_non_apparent)} Non-Apparent</span>
+      </div>
+      ${r.injury_other ? `<div class="note-field"><div class="field-label">Other</div>${fv(r.injury_other)}</div>` : ''}
+      <div class="note-field"><div class="field-label">Emergency Treatment Given</div>${fv(r.emergency_treatment)}</div>
+    </div>
+
+    <div class="note-section">
+      <div class="note-section-title">Witnesses &amp; Employees</div>
+      <div class="note-grid">
+        <div class="note-field"><div class="field-label">Witness 1</div>${fv(r.witness1_name)} ${r.witness1_phone ? '· ' + r.witness1_phone : ''}</div>
+        <div class="note-field"><div class="field-label">Witness 2</div>${fv(r.witness2_name)} ${r.witness2_phone ? '· ' + r.witness2_phone : ''}</div>
+        <div class="note-field"><div class="field-label">Employee 1</div>${fv(r.employee1_name)} ${r.employee1_phone ? '· ' + r.employee1_phone : ''}</div>
+        <div class="note-field"><div class="field-label">Employee 2</div>${fv(r.employee2_name)} ${r.employee2_phone ? '· ' + r.employee2_phone : ''}</div>
+      </div>
+    </div>
+
+    <div class="note-section">
+      <div class="note-section-title">Medical Treatment</div>
+      <div class="note-grid">
+        <div class="note-field"><div class="field-label">Treated by Physician</div>${fv(yn(r.treated_physician))} ${r.physician_name ? '· ' + r.physician_name : ''} ${r.physician_date ? '· ' + fmtDate(r.physician_date) : ''} ${r.physician_time ? r.physician_time : ''}</div>
+        <div class="note-field"><div class="field-label">Hospital Admission</div>${fv(yn(r.hospital_admission))} ${r.hospital_name ? '· ' + r.hospital_name : ''} ${r.hospital_date ? '· ' + fmtDate(r.hospital_date) : ''} ${r.hospital_time ? r.hospital_time : ''}</div>
+      </div>
+    </div>
+
+    <div class="note-section">
+      <div class="note-section-title">Individuals Notified</div>
+      <div style="font-size:13.5px;display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
+        <span>${cb(r.notified_health_care)} Health Care Provider</span>
+        <span>${cb(r.notified_case_manager)} Case Manager</span>
+        <span>${cb(r.notified_resident_rep)} Resident Representative</span>
+        <span>${cb(r.notified_next_of_kin)} Next-of-Kin</span>
+        <span>${cb(r.notified_law_enforcement)} Law Enforcement</span>
+        <span>${cb(r.notified_dshs)} DSHS Hotline</span>
+      </div>
+      ${r.notified_other ? `<div class="note-field"><div class="field-label">Other</div>${fv(r.notified_other)}</div>` : ''}
+    </div>
+
+    <div class="note-section">
+      <div class="note-section-title">Prevention &amp; Preparation</div>
+      <div class="note-field"><div class="field-label">Action to Prevent Reoccurrence</div><div class="field-value" style="white-space:pre-wrap;line-height:1.8;">${r.prevention_action || '<span style="color:var(--text3);font-style:italic;">Not recorded</span>'}</div></div>
+      <div class="note-grid" style="margin-top:10px;">
+        <div class="note-field"><div class="field-label">Prepared By</div>${fv(r.prepared_by)}</div>
+        <div class="note-field"><div class="field-label">Date Prepared</div>${fv(fmtDate(r.prepared_date))}</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('incident-view-footer').innerHTML = `
+    <button class="btn btn-secondary" onclick="closeModal('modal-view-incident')">Close</button>
+    <button class="btn btn-secondary" onclick="editIncidentReport('${id}')">Edit</button>
+    <button class="btn btn-danger" onclick="deleteIncidentReport('${id}')">Delete</button>
+  `;
+  openModal('modal-view-incident');
+}
+
+function buildIncidentHTML(r) {
+  const chk = (val) => val ? '&#9745;' : '&#9744;';
+  const yesNo = (val) => val === true ? 'Yes' : val === false ? 'No' : '';
+  const blank = (label, val, width) => `<span style="display:inline-block;min-width:${width||120}px;border-bottom:1px solid #000;margin:0 4px;font-size:11px;">${val||''}</span>`;
+  const descLines = (r.description || '').split('\n').map(l => `<div style="border-bottom:1px solid #000;min-height:22px;font-size:11px;padding:2px 0;">${l}</div>`).join('');
+  const preventLines = (r.prevention_action || '').split('\n').map(l => `<div style="border-bottom:1px solid #000;min-height:20px;font-size:11px;padding:2px 0;">${l}</div>`).join('');
+
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Incident Report — ${r.resident_name}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Times New Roman', Times, serif; background: #fff; color: #000; padding: 36px 48px; width: 816px; margin: 0 auto; font-size: 11.5px; }
+  .header { text-align: center; margin-bottom: 14px; }
+  .header img { width: 70px; height: 70px; object-fit: contain; display: block; margin: 0 auto 6px; }
+  .org-name { font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
+  .doc-title { font-size: 14px; font-weight: bold; text-decoration: underline; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+  .field-row { margin-bottom: 10px; font-size: 11.5px; }
+  .underline { display: inline-block; border-bottom: 1px solid #000; min-width: 140px; margin: 0 3px; font-size: 11px; padding: 0 2px; }
+  .check-row { display: flex; flex-wrap: wrap; gap: 18px 32px; margin: 6px 0; font-size: 11.5px; }
+  .check-item { display: inline-flex; align-items: center; gap: 4px; }
+  .section { margin: 12px 0 6px; font-weight: bold; font-size: 11.5px; }
+  .desc-area { border: 1px solid #000; min-height: 180px; padding: 6px; font-size: 11px; line-height: 1.8; }
+  .desc-line { border-bottom: 1px solid #000; min-height: 22px; padding: 1px 2px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .body-img { display: flex; justify-content: center; gap: 32px; margin: 8px 0; }
+  .sig-line { border-bottom: 1px solid #000; display: inline-block; min-width: 180px; margin: 0 4px; }
+  @media print { body { padding: 24px 36px; } @page { size: letter; margin: 0.5in; } }
+</style></head><body>
+<div class="header">
+  <img src="harmony_living_house_logo.png" alt="Logo">
+  <div class="org-name">Harmony Living House Adult Family LLC</div>
+  <div class="doc-title">Incident Report</div>
+</div>
+
+<div class="field-row">
+  <strong>Name of Resident/Staff involved in Incidents:</strong>
+  <span class="underline">${r.resident_name||''}</span>
+  <strong>DOB:</strong><span class="underline" style="min-width:90px;">${r.dob ? new Date(r.dob+'T00:00:00').toLocaleDateString('en-US') : ''}</span>
+  <strong>Sex:</strong><span class="underline" style="min-width:80px;">${r.sex||''}</span>
+</div>
+
+<div class="section">Nature of Incident:</div>
+<div class="check-row">
+  <span class="check-item">${chk(r.nature_injury)} Resident/Staff Injury</span>
+  <span class="check-item">${chk(r.nature_missing)} Resident Missing</span>
+  <span class="check-item">${chk(r.nature_death)} Death of Resident</span>
+  <span class="check-item">${chk(r.nature_fire)} Fire/Natural Disaster</span>
+  <span class="check-item">${chk(r.nature_fall)} Fall</span>
+</div>
+
+<div class="field-row" style="margin-top:10px;">
+  <strong>Date Incident Occurred:</strong><span class="underline">${r.incident_date ? new Date(r.incident_date+'T00:00:00').toLocaleDateString('en-US') : ''}</span>
+  <strong>Time:</strong><span class="underline" style="min-width:90px;">${r.incident_time||''}</span>
+  <strong>Location:</strong><span class="underline" style="min-width:160px;">${r.incident_location||''}</span>
+</div>
+
+<div class="section" style="margin-top:10px;">Description of Incident <span style="font-weight:normal;font-size:10.5px;">(use specific behavioral terms and include actions taken by providers/staff):</span></div>
+<div class="desc-area">${(r.description||'').split('\n').map(l=>`<div class="desc-line">${l}</div>`).join('')}</div>
+
+<div style="page-break-before: always;"></div>
+
+<div class="header" style="margin-top:16px;">
+  <img src="harmony_living_house_logo.png" alt="Logo">
+</div>
+
+<div class="section">TYPE OF INJURY:</div>
+<div class="check-row">
+  <span class="check-item">${chk(r.injury_laceration)} Laceration(cut)</span>
+  <span class="check-item">${chk(r.injury_hematoma)} Hematoma(bruise)</span>
+  <span class="check-item">${chk(r.injury_abrasion)} Abrasion (scrape)</span>
+  <span class="check-item">${chk(r.injury_burn)} Burn</span>
+  <span class="check-item">${chk(r.injury_non_apparent)} Non-Apparent</span>
+  <span class="check-item">Other (specify): <span class="underline" style="min-width:120px;">${r.injury_other||''}</span></span>
+</div>
+
+<div class="field-row" style="margin-top:10px;">
+  <strong>Emergency Treatment Given (if any):</strong><span class="underline" style="min-width:300px;">${r.emergency_treatment||''}</span>
+</div>
+
+<div style="margin:10px 0 4px;"><strong>Witness(es)</strong> &nbsp;&nbsp;&nbsp; <strong>Phone</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Employee(s) Involved</strong> &nbsp;&nbsp;&nbsp; <strong>Phone</strong></div>
+<div style="border:1px solid #000;padding:4px 6px;min-height:22px;font-size:11px;margin-bottom:2px;">${r.witness1_name||''} &nbsp;&nbsp; ${r.witness1_phone||''} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${r.employee1_name||''} &nbsp;&nbsp; ${r.employee1_phone||''}</div>
+<div style="border:1px solid #000;border-top:none;padding:4px 6px;min-height:22px;font-size:11px;margin-bottom:8px;">${r.witness2_name||''} &nbsp;&nbsp; ${r.witness2_phone||''} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${r.employee2_name||''} &nbsp;&nbsp; ${r.employee2_phone||''}</div>
+
+<div class="field-row">
+  <strong>Treated by Physician:</strong>
+  <span class="check-item">${chk(r.treated_physician===true)} Yes</span> &nbsp;
+  <span class="check-item">${chk(r.treated_physician===false)} No</span> &nbsp;
+  <strong>Name</strong><span class="underline" style="min-width:140px;">${r.physician_name||''}</span>
+  <strong>Date</strong><span class="underline" style="min-width:80px;">${r.physician_date ? new Date(r.physician_date+'T00:00:00').toLocaleDateString('en-US') : ''}</span>
+  <strong>Time</strong><span class="underline" style="min-width:70px;">${r.physician_time||''}</span>
+</div>
+
+<div class="field-row">
+  <strong>Hospital Admission:</strong>
+  <span class="check-item">${chk(r.hospital_admission===true)} Yes</span> &nbsp;
+  <span class="check-item">${chk(r.hospital_admission===false)} No</span> &nbsp;
+  <strong>Name</strong><span class="underline" style="min-width:140px;">${r.hospital_name||''}</span>
+  <strong>Date</strong><span class="underline" style="min-width:80px;">${r.hospital_date ? new Date(r.hospital_date+'T00:00:00').toLocaleDateString('en-US') : ''}</span>
+  <strong>Time</strong><span class="underline" style="min-width:70px;">${r.hospital_time||''}</span>
+</div>
+
+<div class="section">Individual Notified <span style="font-weight:normal;font-size:10.5px;">(Indicate date and time notified):</span></div>
+<div class="check-row">
+  <span class="check-item">${chk(r.notified_health_care)} Health Care Provider</span>
+  <span class="check-item">${chk(r.notified_case_manager)} Case Manager</span>
+  <span class="check-item">${chk(r.notified_resident_rep)} Resident Representative</span>
+  <span class="check-item">${chk(r.notified_next_of_kin)} Next-of-Kin</span>
+  <span class="check-item">${chk(r.notified_law_enforcement)} Law Enforcement</span>
+  <span class="check-item">${chk(r.notified_dshs)} DSHS Hotline</span>
+  ${r.notified_other ? `<span class="check-item">Other: <span class="underline">${r.notified_other}</span></span>` : ''}
+</div>
+
+<div class="section" style="margin-top:12px;">Action to be taken to prevent the reoccurrence of the incident:</div>
+<div style="border-bottom:1px solid #000;min-height:20px;font-size:11px;padding:2px 0;">${r.prevention_action||''}</div>
+<div style="border-bottom:1px solid #000;min-height:20px;font-size:11px;"></div>
+
+<div class="field-row" style="margin-top:14px;">
+  <strong>Prepared By: Print Name/Title:</strong><span class="underline" style="min-width:160px;">${r.prepared_by||''}</span>
+  <strong>Signature:</strong><span class="underline" style="min-width:140px;"></span>
+  <strong>Date:</strong><span class="underline" style="min-width:90px;">${r.prepared_date ? new Date(r.prepared_date+'T00:00:00').toLocaleDateString('en-US') : ''}</span>
+</div>
+
+<div style="margin-top:32px;font-size:10px;"><strong>INCIDENT REPORT</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2</div>
+</body></html>`;
+}
+
+async function printIncidentReport() {
+  const reports = await getIncidentReports(currentResidentId);
+  const r = reports.find(x => x.id === viewingIncidentId);
+  if (!r) return;
+  const win = window.open('', '_blank', 'width=900,height=1100');
+  win.document.write(buildIncidentHTML(r));
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 700);
+}
+
+async function exportIncidentPDF() {
+  const reports = await getIncidentReports(currentResidentId);
+  const r = reports.find(x => x.id === viewingIncidentId);
+  if (!r) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'letter' });
+  const html = buildIncidentHTML(r);
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:816px;background:#fff;';
+  container.innerHTML = html.replace(/<html>[\s\S]*?<body[^>]*>/i,'').replace(/<\/body>[\s\S]*?<\/html>/i,'');
+  document.body.appendChild(container);
+  doc.html(container, {
+    callback: (d) => {
+      document.body.removeChild(container);
+      const safeName = r.resident_name.replace(/\s+/g,'_');
+      d.save(`IncidentReport_${safeName}_${r.incident_date}.pdf`);
+    },
+    x: 36, y: 20, width: 540, windowWidth: 816
+  });
 }
 
 // ══════════════════════════════════
