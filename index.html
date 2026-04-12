@@ -491,6 +491,17 @@
   .profile-tab:hover { color:var(--text); }
   .profile-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
 
+  /* Body Map */
+  .bregion {
+    cursor: pointer;
+    fill: rgba(0,0,0,0);
+    stroke: transparent;
+    stroke-width: 2;
+    transition: fill .12s, stroke .12s;
+  }
+  .bregion:hover { fill: rgba(184,134,11,.3); stroke: #b8860b; stroke-width: 2; }
+  .bregion.sel { fill: rgba(192,57,43,.38); stroke: #c0392b; stroke-width: 2.5; }
+
   /* Incident Report Form */
   .ir-section-title {
     font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase;
@@ -1363,8 +1374,185 @@
       </div>
 
       <div class="ir-section-title">Body Location of Injury</div>
-      <p style="font-size:12px;color:var(--text3);margin-bottom:12px;">Click on the numbered body regions to mark injured areas. Click again to deselect.</p>
-      <div class="body-map-container" id="ir-body-map">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:10px;">Click on any numbered region to mark it as injured. Click again to deselect. Selected regions print on the report.</p>
+
+      <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;">
+
+        <!-- FRONT VIEW -->
+        <div style="text-align:center;">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Front</div>
+          <div style="position:relative;display:inline-block;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fafafa;">
+            <img src="front.jpeg" alt="Body front" style="display:block;width:200px;height:auto;opacity:0.85;">
+            <svg style="position:absolute;top:0;left:0;width:100%;height:100%;" viewBox="0 0 720 838" xmlns="http://www.w3.org/2000/svg">
+
+              <!-- HEAD -->
+              <ellipse class="bregion" data-n="1" data-l="Head Left" cx="330" cy="72" rx="70" ry="72" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="2" data-l="Head Right" cx="400" cy="72" rx="70" ry="72" onclick="tbr(this)"/>
+
+              <!-- NECK -->
+              <rect class="bregion" data-n="3" data-l="Neck" x="316" y="143" width="88" height="55" rx="6" onclick="tbr(this)"/>
+
+              <!-- CHEST & SHOULDERS -->
+              <path class="bregion" data-n="4" data-l="Left Chest & Shoulder" d="M180 198 Q240 185 320 190 L320 310 Q260 325 195 305 Q155 285 148 248 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="5" data-l="Right Chest & Shoulder" d="M540 198 Q480 185 400 190 L400 310 Q460 325 525 305 Q565 285 572 248 Z" onclick="tbr(this)"/>
+
+              <!-- LEFT ARM -->
+              <path class="bregion" data-n="6" data-l="Left Upper Arm" d="M80 248 Q120 215 165 228 Q145 285 135 330 Q125 365 122 390 Q100 378 82 355 Q68 325 78 280 Z" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="8" data-l="Left Elbow" cx="115" cy="400" rx="36" ry="28" onclick="tbr(this)"/>
+              <path class="bregion" data-n="10" data-l="Left Forearm" d="M72 420 Q90 415 138 425 Q148 470 152 510 Q152 525 148 538 L100 540 Q84 527 78 510 Q68 468 72 420 Z" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="51" data-l="Left Wrist" cx="120" cy="556" rx="34" ry="20" onclick="tbr(this)"/>
+              <path class="bregion" data-n="53" data-l="Left Hand" d="M78 572 Q82 610 88 638 Q108 655 138 652 Q158 636 160 610 L158 572 Z" onclick="tbr(this)"/>
+              <!-- Left fingers -->
+              <path class="bregion" data-n="55" data-l="Left Fingers" d="M58 568 Q50 548 46 525 Q44 508 52 500 Q62 496 70 504 Q76 518 76 540 L76 568 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="56" data-l="Left Fingers" d="M76 568 Q72 545 72 518 Q73 500 82 495 Q93 492 99 502 Q104 516 102 542 L100 568 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="57" data-l="Left Fingers" d="M100 568 Q98 542 99 515 Q101 498 111 494 Q122 492 127 502 Q130 517 128 542 L126 568 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="58" data-l="Left Fingers" d="M126 568 Q128 542 128 518 Q129 504 138 500 Q148 498 152 510 Q154 524 152 548 L148 568 Z" onclick="tbr(this)"/>
+
+              <!-- RIGHT ARM -->
+              <path class="bregion" data-n="7" data-l="Right Upper Arm" d="M640 248 Q600 215 555 228 Q575 285 585 330 Q595 365 598 390 Q620 378 638 355 Q652 325 642 280 Z" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="9" data-l="Right Elbow" cx="605" cy="400" rx="36" ry="28" onclick="tbr(this)"/>
+              <path class="bregion" data-n="11" data-l="Right Forearm" d="M648 420 Q630 415 582 425 Q572 470 568 510 Q568 525 572 538 L620 540 Q636 527 642 510 Q652 468 648 420 Z" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="52" data-l="Right Wrist" cx="600" cy="556" rx="34" ry="20" onclick="tbr(this)"/>
+              <path class="bregion" data-n="54" data-l="Right Hand" d="M642 572 Q638 610 632 638 Q612 655 582 652 Q562 636 560 610 L562 572 Z" onclick="tbr(this)"/>
+              <!-- Right fingers -->
+              <path class="bregion" data-n="59" data-l="Right Fingers" d="M662 568 Q670 548 674 525 Q676 508 668 500 Q658 496 650 504 Q644 518 644 540 L644 568 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="60" data-l="Right Fingers" d="M644 568 Q648 545 648 518 Q647 500 638 495 Q627 492 621 502 Q616 516 618 542 L620 568 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="61" data-l="Right Fingers" d="M620 568 Q622 542 621 515 Q619 498 609 494 Q598 492 593 502 Q590 517 592 542 L594 568 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="62" data-l="Right Fingers" d="M594 568 Q592 542 592 518 Q591 504 582 500 Q572 498 568 510 Q566 524 568 548 L572 568 Z" onclick="tbr(this)"/>
+
+              <!-- TORSO / ABDOMEN -->
+              <path class="bregion" data-n="12" data-l="Left Abdomen" d="M195 310 Q260 325 320 328 L320 445 Q265 455 202 440 Q175 426 168 400 Q162 374 165 348 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="13" data-l="Right Abdomen" d="M525 310 Q460 325 400 328 L400 445 Q455 455 518 440 Q545 426 552 400 Q558 374 555 348 Z" onclick="tbr(this)"/>
+
+              <!-- HIP & GROIN -->
+              <path class="bregion" data-n="14" data-l="Left Hip & Pelvis" d="M175 445 Q260 455 320 458 L316 530 Q284 548 248 542 Q210 534 190 516 Q170 498 168 472 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="15" data-l="Right Hip & Pelvis" d="M545 445 Q460 455 400 458 L404 530 Q436 548 472 542 Q510 534 530 516 Q550 498 552 472 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="16" data-l="Groin" d="M298 528 Q320 548 360 552 Q400 548 422 528 Q404 510 360 508 Q316 510 298 528 Z" onclick="tbr(this)"/>
+
+              <!-- THIGHS -->
+              <path class="bregion" data-n="17" data-l="Left Thigh" d="M185 548 Q252 545 318 552 Q322 610 320 658 Q318 700 315 730 Q276 742 248 736 Q218 728 204 710 Q190 690 185 660 Q178 622 182 578 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="18" data-l="Right Thigh" d="M535 548 Q468 545 402 552 Q398 610 400 658 Q402 700 405 730 Q444 742 472 736 Q502 728 516 710 Q530 690 535 660 Q542 622 538 578 Z" onclick="tbr(this)"/>
+
+              <!-- KNEES -->
+              <ellipse class="bregion" data-n="49" data-l="Left Knee" cx="258" cy="752" rx="64" ry="36" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="50" data-l="Right Knee" cx="462" cy="752" rx="64" ry="36" onclick="tbr(this)"/>
+
+              <!-- LOWER LEGS -->
+              <path class="bregion" data-n="19" data-l="Left Lower Leg" d="M198 788 Q230 780 316 790 Q318 830 316 868 Q308 900 296 918 Q270 932 242 928 Q216 922 204 904 Q194 882 192 852 Q192 820 198 788 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="20" data-l="Right Lower Leg" d="M522 788 Q490 780 404 790 Q402 830 404 868 Q412 900 424 918 Q450 932 478 928 Q504 922 516 904 Q526 882 528 852 Q528 820 522 788 Z" onclick="tbr(this)"/>
+
+              <!-- ANKLES -->
+              <ellipse class="bregion" data-n="73" data-l="Left Ankle" cx="258" cy="932" rx="60" ry="24" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="74" data-l="Right Ankle" cx="462" cy="932" rx="60" ry="24" onclick="tbr(this)"/>
+
+              <!-- FEET -->
+              <path class="bregion" data-n="21" data-l="Left Foot" d="M178 955 Q200 948 318 960 Q320 990 310 1008 Q282 1022 252 1020 Q220 1014 196 998 Q175 980 178 955 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="22" data-l="Right Foot" d="M542 955 Q520 948 402 960 Q400 990 410 1008 Q438 1022 468 1020 Q500 1014 524 998 Q545 980 542 955 Z" onclick="tbr(this)"/>
+
+              <!-- Left toes -->
+              <path class="bregion" data-n="63" data-l="Left Toes (1st)" d="M168 1002 Q158 988 156 968 Q160 955 172 956 Q182 960 184 978 Q184 996 178 1006 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="64" data-l="Left Toes (2nd)" d="M182 1008 Q178 994 178 974 Q180 960 192 960 Q204 962 204 978 Q204 996 198 1010 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="65" data-l="Left Toes (3rd)" d="M198 1012 Q196 996 197 976 Q200 963 212 964 Q224 966 223 982 Q221 1000 216 1014 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="66" data-l="Left Toes (4th)" d="M215 1014 Q215 998 216 980 Q219 968 230 969 Q242 971 240 986 Q237 1004 232 1016 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="67" data-l="Left Toes (5th)" d="M231 1016 Q232 1002 234 988 Q236 978 245 979 Q254 981 252 994 Q249 1010 244 1018 Z" onclick="tbr(this)"/>
+
+              <!-- Right toes -->
+              <path class="bregion" data-n="68" data-l="Right Toes (1st)" d="M552 1002 Q562 988 564 968 Q560 955 548 956 Q538 960 536 978 Q536 996 542 1006 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="69" data-l="Right Toes (2nd)" d="M538 1008 Q542 994 542 974 Q540 960 528 960 Q516 962 516 978 Q516 996 522 1010 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="70" data-l="Right Toes (3rd)" d="M522 1012 Q524 996 523 976 Q520 963 508 964 Q496 966 497 982 Q499 1000 504 1014 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="71" data-l="Right Toes (4th)" d="M505 1014 Q505 998 504 980 Q501 968 490 969 Q478 971 480 986 Q483 1004 488 1016 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="72" data-l="Right Toes (5th)" d="M489 1016 Q488 1002 486 988 Q484 978 475 979 Q466 981 468 994 Q471 1010 476 1018 Z" onclick="tbr(this)"/>
+
+            </svg>
+          </div>
+        </div>
+
+        <!-- BACK VIEW -->
+        <div style="text-align:center;">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Back</div>
+          <div style="position:relative;display:inline-block;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#fafafa;">
+            <img src="back.jpeg" alt="Body back" style="display:block;width:200px;height:auto;opacity:0.85;">
+            <svg style="position:absolute;top:0;left:0;width:100%;height:100%;" viewBox="0 0 720 759" xmlns="http://www.w3.org/2000/svg">
+
+              <!-- HEAD BACK -->
+              <ellipse class="bregion" data-n="23" data-l="Head Left (Back)" cx="328" cy="68" rx="68" ry="66" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="24" data-l="Head Right (Back)" cx="400" cy="68" rx="68" ry="66" onclick="tbr(this)"/>
+
+              <!-- NECK BACK -->
+              <rect class="bregion" data-n="25" data-l="Neck (Back)" x="318" y="134" width="84" height="52" rx="6" onclick="tbr(this)"/>
+
+              <!-- UPPER BACK & SHOULDERS -->
+              <path class="bregion" data-n="26" data-l="Left Upper Back & Shoulder" d="M152 192 Q225 178 318 186 L318 290 Q255 305 185 290 Q148 272 140 240 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="27" data-l="Right Upper Back & Shoulder" d="M568 192 Q495 178 402 186 L402 290 Q465 305 535 290 Q572 272 580 240 Z" onclick="tbr(this)"/>
+
+              <!-- LEFT ARM BACK -->
+              <path class="bregion" data-n="28" data-l="Left Upper Arm (Back)" d="M68 240 Q108 210 158 224 Q138 280 128 325 Q118 360 114 385 Q92 372 74 348 Q60 318 70 272 Z" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="30" data-l="Left Elbow (Back)" cx="108" cy="396" rx="34" ry="26" onclick="tbr(this)"/>
+              <path class="bregion" data-n="31" data-l="Left Forearm (Back)" d="M68 414 Q86 408 132 418 Q142 462 146 502 Q146 518 142 530 L96 532 Q80 519 74 502 Q64 461 68 414 Z" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="75" data-l="Left Wrist (Back)" cx="110" cy="546" rx="32" ry="18" onclick="tbr(this)"/>
+              <path class="bregion" data-n="32" data-l="Left Hand (Back)" d="M70 562 Q74 598 80 624 Q100 640 128 637 Q148 622 150 596 L148 562 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="76" data-l="Left Fingers (Back)" d="M50 558 Q42 538 38 515 Q36 499 44 491 Q54 487 62 495 Q68 509 68 532 L68 558 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="77" data-l="Left Fingers (Back)" d="M68 558 Q64 536 64 510 Q65 492 74 487 Q85 484 91 494 Q96 507 94 532 L92 558 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="78" data-l="Left Fingers (Back)" d="M92 558 Q90 532 91 506 Q93 489 103 485 Q114 483 119 493 Q122 507 120 532 L118 558 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="79" data-l="Left Fingers (Back)" d="M118 558 Q120 532 120 508 Q121 495 130 491 Q140 489 144 501 Q146 515 144 538 L140 558 Z" onclick="tbr(this)"/>
+
+              <!-- RIGHT ARM BACK -->
+              <path class="bregion" data-n="29" data-l="Right Upper Arm (Back)" d="M652 240 Q612 210 562 224 Q582 280 592 325 Q602 360 606 385 Q628 372 646 348 Q660 318 650 272 Z" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="33" data-l="Right Elbow (Back)" cx="612" cy="396" rx="34" ry="26" onclick="tbr(this)"/>
+              <path class="bregion" data-n="34" data-l="Right Forearm (Back)" d="M652 414 Q634 408 588 418 Q578 462 574 502 Q574 518 578 530 L624 532 Q640 519 646 502 Q656 461 652 414 Z" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="80" data-l="Right Wrist (Back)" cx="610" cy="546" rx="32" ry="18" onclick="tbr(this)"/>
+              <path class="bregion" data-n="35" data-l="Right Hand (Back)" d="M650 562 Q646 598 640 624 Q620 640 592 637 Q572 622 570 596 L572 562 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="81" data-l="Right Fingers (Back)" d="M670 558 Q678 538 682 515 Q684 499 676 491 Q666 487 658 495 Q652 509 652 532 L652 558 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="82" data-l="Right Fingers (Back)" d="M652 558 Q656 536 656 510 Q655 492 646 487 Q635 484 629 494 Q624 507 626 532 L628 558 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="83" data-l="Right Fingers (Back)" d="M628 558 Q630 532 629 506 Q627 489 617 485 Q606 483 601 493 Q598 507 600 532 L602 558 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="84" data-l="Right Fingers (Back)" d="M602 558 Q600 532 600 508 Q599 495 590 491 Q580 489 576 501 Q574 515 576 538 L580 558 Z" onclick="tbr(this)"/>
+
+              <!-- MID BACK -->
+              <path class="bregion" data-n="36" data-l="Left Mid Back" d="M148 292 Q238 306 318 310 L318 400 Q248 412 182 398 Q152 386 144 366 Q138 344 140 316 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="37" data-l="Right Mid Back" d="M572 292 Q482 306 402 310 L402 400 Q472 412 538 398 Q568 386 576 366 Q582 344 580 316 Z" onclick="tbr(this)"/>
+
+              <!-- LOWER BACK -->
+              <path class="bregion" data-n="38" data-l="Left Lower Back" d="M148 402 Q238 413 318 416 L316 488 Q270 500 218 494 Q178 484 158 464 Q140 444 142 422 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="39" data-l="Right Lower Back" d="M572 402 Q482 413 402 416 L404 488 Q450 500 502 494 Q542 484 562 464 Q580 444 578 422 Z" onclick="tbr(this)"/>
+
+              <!-- SACRUM -->
+              <ellipse class="bregion" data-n="46" data-l="Sacrum / Coccyx" cx="360" cy="498" rx="50" ry="30" onclick="tbr(this)"/>
+
+              <!-- BUTTOCKS -->
+              <path class="bregion" data-n="40" data-l="Left Buttock" d="M158 512 Q240 502 318 508 L314 578 Q284 596 248 590 Q212 582 188 562 Q162 542 158 512 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="41" data-l="Right Buttock" d="M562 512 Q480 502 402 508 L406 578 Q436 596 472 590 Q508 582 532 562 Q558 542 562 512 Z" onclick="tbr(this)"/>
+
+              <!-- LEFT LEG BACK -->
+              <path class="bregion" data-n="42" data-l="Left Thigh (Back)" d="M162 598 Q242 590 318 598 Q318 650 314 696 Q308 730 302 756 Q270 768 240 762 Q208 754 192 736 Q174 715 166 680 Q158 645 162 608 Z" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="47" data-l="Left Knee (Back)" cx="244" cy="776" rx="68" ry="34" onclick="tbr(this)"/>
+              <path class="bregion" data-n="43" data-l="Left Lower Leg (Back)" d="M178 810 Q218 802 310 812 Q312 848 310 882 Q302 910 290 926 Q264 938 238 934 Q214 928 202 912 Q186 892 182 862 Q178 836 178 810 Z" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="85" data-l="Left Heel" cx="246" cy="944" rx="58" ry="26" onclick="tbr(this)"/>
+
+              <!-- RIGHT LEG BACK -->
+              <path class="bregion" data-n="43b" data-l="Right Thigh (Back)" d="M558 598 Q478 590 402 598 Q402 650 406 696 Q412 730 418 756 Q450 768 480 762 Q512 754 528 736 Q546 715 554 680 Q562 645 558 608 Z" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="48" data-l="Right Knee (Back)" cx="476" cy="776" rx="68" ry="34" onclick="tbr(this)"/>
+              <path class="bregion" data-n="44" data-l="Right Lower Leg (Back)" d="M542 810 Q502 802 410 812 Q408 848 410 882 Q418 910 430 926 Q456 938 482 934 Q506 928 518 912 Q534 892 538 862 Q542 836 542 810 Z" onclick="tbr(this)"/>
+              <ellipse class="bregion" data-n="86" data-l="Right Heel" cx="474" cy="944" rx="58" ry="26" onclick="tbr(this)"/>
+
+              <!-- FEET BACK -->
+              <path class="bregion" data-n="45" data-l="Left Foot (Back)" d="M166 968 Q186 960 314 972 Q316 1000 304 1016 Q278 1028 248 1026 Q216 1020 192 1004 Q168 988 166 968 Z" onclick="tbr(this)"/>
+              <path class="bregion" data-n="87" data-l="Right Foot (Back)" d="M554 968 Q534 960 406 972 Q404 1000 416 1016 Q442 1028 472 1026 Q504 1020 528 1004 Q552 988 554 968 Z" onclick="tbr(this)"/>
+
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selected regions legend -->
+      <div style="margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Selected regions:</div>
+        <div id="ir-body-legend" style="display:flex;flex-wrap:wrap;gap:6px;min-height:22px;">
+          <span style="font-size:12px;color:var(--text3);font-style:italic;">None selected</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Emergency Treatment Given (if any)</label>
 
         <!-- FRONT VIEW -->
         <div class="body-map-side">
@@ -2633,6 +2821,18 @@ async function editIncidentReport(id) {
   document.getElementById('ir-prevention').value = r.prevention_action || '';
   document.getElementById('ir-prepared-by').value = r.prepared_by || '';
   document.getElementById('ir-prepared-date').value = r.prepared_date || '';
+  resetBodyMap();
+  if (r.body_regions) {
+    r.body_regions.split(', ').forEach(part => {
+      const m = part.match(/^#(\d+[a-z]*) /);
+      if (m) {
+        const n = m[1];
+        const el = document.querySelector(`.bregion[data-n="${n}"]`);
+        if (el) { el.classList.add('sel'); selectedBodyRegions[n] = el.getAttribute('data-l'); }
+      }
+    });
+    updateBodyMapLegend();
+  }
   closeModal('modal-view-incident');
   openModal('modal-incident');
 }
@@ -3375,40 +3575,42 @@ async function deleteMedication(id) {
 // ══════════════════════════════════
 let selectedBodyRegions = {};
 
-function toggleBodyRegion(el) {
-  const region = el.getAttribute('data-region');
-  const label = el.getAttribute('data-label');
-  if (selectedBodyRegions[region]) {
-    delete selectedBodyRegions[region];
-    el.classList.remove('selected');
+function tbr(el) {
+  const n = el.getAttribute('data-n');
+  const l = el.getAttribute('data-l');
+  if (selectedBodyRegions[n]) {
+    delete selectedBodyRegions[n];
+    el.classList.remove('sel');
   } else {
-    selectedBodyRegions[region] = label;
-    el.classList.add('selected');
+    selectedBodyRegions[n] = l;
+    el.classList.add('sel');
   }
   updateBodyMapLegend();
 }
+
+function toggleBodyRegion(el) { tbr(el); }
 
 function updateBodyMapLegend() {
   const legend = document.getElementById('ir-body-legend');
   const entries = Object.entries(selectedBodyRegions);
   if (!entries.length) {
-    legend.innerHTML = '<span style="color:var(--text3);font-style:italic;background:none;border:none;">None selected</span>';
+    legend.innerHTML = '<span style="font-size:12px;color:var(--text3);font-style:italic;">None selected</span>';
     return;
   }
   legend.innerHTML = entries.map(([num, label]) =>
-    `<span onclick="deselectRegion('${num}')" title="Click to deselect">#${num} ${label}</span>`
+    `<span onclick="deselectRegion('${num}')" title="Click to deselect" style="font-size:11px;padding:3px 9px;border-radius:20px;background:var(--danger-light);color:var(--danger);border:1px solid rgba(192,57,43,.2);cursor:pointer;">#${num} ${label}</span>`
   ).join('');
 }
 
 function deselectRegion(num) {
   delete selectedBodyRegions[num];
-  document.querySelectorAll(`.body-region[data-region="${num}"]`).forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll(`.bregion[data-n="${num}"]`).forEach(el => el.classList.remove('sel'));
   updateBodyMapLegend();
 }
 
 function resetBodyMap() {
   selectedBodyRegions = {};
-  document.querySelectorAll('.body-region.selected').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('.bregion.sel').forEach(el => el.classList.remove('sel'));
   updateBodyMapLegend();
 }
 
