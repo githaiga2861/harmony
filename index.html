@@ -1603,7 +1603,10 @@ function printNote() {
 </body></html>`);
   win.document.close();
   win.focus();
-  setTimeout(() => { win.print(); win.close(); }, 700);
+  setTimeout(() => {
+    win.print();
+    win.addEventListener('afterprint', () => { win.close(); window.focus(); });
+  }, 700);
 }
 
 async function exportPDF() {
@@ -1706,6 +1709,7 @@ async function exportPDF() {
 
     const safeName = residentName.replace(/\s+/g, '_');
     doc.save(`ProgressNotes_${safeName}_${note.note_date}.pdf`);
+    setTimeout(() => window.focus(), 300);
   };
 
   const img = new Image();
@@ -2423,7 +2427,7 @@ async function printIncidentReport() {
   win.focus();
   setTimeout(() => {
     win.print();
-    setTimeout(() => { try { win.close(); } catch(e){} window.focus(); }, 500);
+    win.addEventListener('afterprint', () => { win.close(); window.focus(); });
   }, 700);
 }
 
@@ -2443,6 +2447,7 @@ async function exportIncidentPDF() {
       document.body.removeChild(container);
       const safeName = r.resident_name.replace(/\s+/g,'_');
       d.save(`IncidentReport_${safeName}_${r.incident_date}.pdf`);
+      setTimeout(() => window.focus(), 300);
     },
     x: 36, y: 20, width: 540, windowWidth: 816
   });
