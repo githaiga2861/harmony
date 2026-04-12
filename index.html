@@ -430,7 +430,11 @@
         </button>
         <button class="nav-item" onclick="showPage('notes')" id="nav-notes">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          All Notes
+          All Progress Notes
+        </button>
+        <button class="nav-item" onclick="showPage('incidents')" id="nav-incidents">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          All Incidents Reports
         </button>
         <button class="nav-item" onclick="showPage('analytics')" id="nav-analytics">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -552,7 +556,7 @@
               </div>
               <table>
                 <thead><tr>
-                  <th>Name</th><th>Date of Birth</th><th>Age</th><th>Date Added</th><th>Notes</th><th>Actions</th>
+                  <th>Name</th><th>Date of Birth</th><th>Age</th><th>Date Added</th><th>Progress Notes</th><th>Incident Reports</th><th>Actions</th>
                 </tr></thead>
                 <tbody id="residents-table"></tbody>
               </table>
@@ -585,11 +589,11 @@
               </button>
               <button class="btn btn-secondary btn-sm" onclick="openAddIncidentReport()" style="background:var(--danger-light);color:var(--danger);">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                Incident Report
+                Add Incident Report
               </button>
               <button class="btn btn-primary btn-sm" onclick="openAddNote()">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Add Note
+                Add Progress Note
               </button>
             </div>
           </div>
@@ -639,6 +643,25 @@
                 <thead><tr><th>Staff</th><th>Notes Created</th><th>Last Activity</th></tr></thead>
                 <tbody id="staff-table"></tbody>
               </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ALL INCIDENTS -->
+        <div class="page" id="page-incidents">
+          <div class="card">
+            <div class="card-header">
+              <h3>All Incident Reports</h3>
+            </div>
+            <div class="card-body">
+              <div class="search-bar">
+                <input class="search-input" id="incidents-search" placeholder="Search incident reports..." oninput="renderAllIncidents()">
+                <input type="date" id="incidents-date-filter" class="search-input" style="max-width:180px;" oninput="renderAllIncidents()">
+                <select id="incidents-resident-filter" class="search-input" style="max-width:200px;" onchange="renderAllIncidents()">
+                  <option value="">All Residents</option>
+                </select>
+              </div>
+              <div id="all-incidents-list" class="notes-list"></div>
             </div>
           </div>
         </div>
@@ -1114,7 +1137,7 @@ document.getElementById('login-password').addEventListener('keydown', e => { if 
 // ══════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════
-const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics' };
+const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports' };
 
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1128,6 +1151,7 @@ function showPage(name) {
   if (name === 'notes') { renderAllNotes(); populateResidentFilter(); }
   if (name === 'analytics') renderAnalytics();
   if (name === 'residents') renderResidentTable();
+  if (name === 'incidents') renderAllIncidents();
 }
 
 // ══════════════════════════════════
@@ -1186,19 +1210,23 @@ async function renderResidentTable() {
   const allResidents = await getResidents();
   const residents = allResidents.filter(r => r.name.toLowerCase().includes(q));
   const notes = await getNotes();
+  const { data: allIncidents } = await db.from('incident_reports').select('resident_id');
+  const incidents = allIncidents || [];
   const tbody = document.getElementById('residents-table');
   if (!residents.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text3);padding:40px;">No residents found. Add your first resident!</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:40px;">No residents found. Add your first resident!</td></tr>';
     return;
   }
   tbody.innerHTML = residents.map(r => {
     const noteCount = notes.filter(n => n.resident_id === r.id).length;
+    const incidentCount = incidents.filter(i => i.resident_id === r.id).length;
     return `<tr>
       <td><span class="resident-name" onclick="openProfile('${r.id}')">${r.name}</span></td>
       <td>${fmtDate(r.dob)}</td>
       <td>${calcAge(r.dob)}</td>
       <td>${fmtDate(r.created_at?.split('T')[0])}</td>
       <td><span class="badge badge-green">${noteCount} note${noteCount !== 1 ? 's' : ''}</span></td>
+      <td><span class="badge badge-red">${incidentCount} report${incidentCount !== 1 ? 's' : ''}</span></td>
       <td style="display:flex;gap:6px;">
         <button class="btn btn-secondary btn-sm" onclick="openProfile('${r.id}')">View</button>
         <button class="btn btn-danger btn-sm" onclick="deleteResident('${r.id}')">Delete</button>
@@ -1397,7 +1425,6 @@ function printNote() {
   const noteBodyEl = document.getElementById('note-view-body');
   if (!noteBodyEl) return;
 
-  // Extract resident name, date/time, and note text from the rendered view
   const nameEl = noteBodyEl.querySelector('[style*="font-weight:700"]');
   const residentName = nameEl ? nameEl.textContent.trim() : 'Unknown Resident';
   const metaEl = noteBodyEl.querySelector('[style*="font-size:13px"]');
@@ -1406,26 +1433,8 @@ function printNote() {
   const noteText = noteTextEl ? noteTextEl.textContent.trim() : '';
 
   const now = new Date();
-  const dateTime = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-    + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-
-  // Split note text into rows — wrap at ~100 chars per row
-  const noteLines = [];
-  noteText.split('\n').forEach(para => {
-    if (!para.trim()) { noteLines.push(''); return; }
-    const words = para.split(' ');
-    let cur = '';
-    words.forEach(word => {
-      const test = cur ? cur + ' ' + word : word;
-      if (test.length > 100) { noteLines.push(cur); cur = word; }
-      else cur = test;
-    });
-    if (cur) noteLines.push(cur);
-  });
-
-  const rowsHtml = noteLines.map(line =>
-    `<tr><td class="date-col"></td><td class="note-col">${line}</td></tr>`
-  ).join('');
+  const dateTime = now.toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles', month: 'long', day: 'numeric', year: 'numeric' })
+    + ' ' + now.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit' });
 
   const win = window.open('', '_blank', 'width=850,height=1000');
   win.document.write(`<!DOCTYPE html>
@@ -1438,84 +1447,49 @@ function printNote() {
     font-family: 'Times New Roman', Times, serif;
     background: #fff;
     color: #000;
-    padding: 36px 48px;
+    padding: 48px 60px;
     width: 816px;
     margin: 0 auto;
   }
-  .header { text-align: center; margin-bottom: 10px; }
-  .header img { width: 80px; height: 80px; object-fit: contain; display: block; margin: 0 auto 8px; }
-  .org-name {
-    font-size: 15px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin-bottom: 4px;
-  }
-  .org-address { font-size: 11px; margin-bottom: 8px; }
-  .doc-title {
-    font-size: 13px;
-    font-weight: bold;
-    text-decoration: underline;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 10px;
-  }
-  .resident-line {
-    font-size: 11.5px;
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: center;
-    gap: 48px;
-  }
-  .resident-line span { display: inline-block; }
-  .resident-line strong { font-weight: bold; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 4px;
-  }
-  td {
-    border: 1px solid #000;
-    font-size: 11px;
-    vertical-align: top;
-    padding: 3px 5px;
-    height: 22px;
-    font-family: 'Times New Roman', Times, serif;
-  }
-  .date-col { width: 72px; font-weight: bold; text-align: center; }
-  .note-col { width: auto; }
-  thead td { font-weight: bold; text-align: center; background: #fff; }
+  .header { text-align: center; margin-bottom: 20px; }
+  .header img { width: 80px; height: 80px; object-fit: contain; display: block; margin: 0 auto 10px; }
+  .org-name { font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .org-address { font-size: 11.5px; color: #444; margin-bottom: 10px; }
+  .doc-title { font-size: 14px; font-weight: bold; text-decoration: underline; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 16px; }
+  .meta-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; padding-bottom: 10px; border-bottom: 1.5px solid #000; }
+  .meta-row span strong { font-weight: bold; }
+  .note-body { font-size: 12.5px; line-height: 1.9; margin-top: 20px; white-space: pre-wrap; color: #111; }
+  .sig-block { margin-top: 48px; }
+  .sig-line { display: inline-block; border-bottom: 1px solid #000; width: 220px; margin-right: 8px; }
+  .sig-label { font-size: 10.5px; color: #555; margin-top: 4px; }
   @media print {
-    body { padding: 24px 36px; }
-    @page { size: letter; margin: 0.5in; }
+    body { padding: 36px 48px; }
+    @page { size: letter; margin: 0.6in; }
   }
 </style>
 </head><body>
 <div class="header">
   <img src="harmony_living_house_logo.png" alt="Logo">
   <div class="org-name">Harmony Living House Adult Family LLC</div>
-  <div class="org-address">120 Newaukum Village Dr Chehalis, WA 98532</div>
+  <div class="org-address">120 Newaukum Village Dr &nbsp;|&nbsp; Chehalis, WA 98532</div>
   <div class="doc-title">Progress Notes</div>
-  <div class="resident-line">
-    <span><strong>Resident Name:</strong> ${residentName}</span>
-    <span><strong>Date &amp; Time:</strong> ${dateTime}</span>
-  </div>
 </div>
-<table>
-  <thead>
-    <tr>
-      <td class="date-col">DATE</td>
-      <td class="note-col"></td>
-    </tr>
-  </thead>
-  <tbody>
-    ${rowsHtml}
-  </tbody>
-</table>
+<div class="meta-row">
+  <span><strong>Resident Name:</strong> ${residentName}</span>
+  <span><strong>Printed:</strong> ${dateTime} (PT)</span>
+</div>
+<div class="meta-row" style="border-bottom:none;padding-bottom:0;margin-bottom:0;">
+  <span><strong>Note Details:</strong> ${metaText}</span>
+</div>
+<div class="note-body">${noteText}</div>
+<div class="sig-block">
+  <div class="sig-line"></div>
+  <div class="sig-label">Staff Signature</div>
+</div>
 </body></html>`);
   win.document.close();
   win.focus();
-  setTimeout(() => win.print(), 700);
+  setTimeout(() => { win.print(); win.close(); }, 700);
 }
 
 async function exportPDF() {
@@ -1526,9 +1500,10 @@ async function exportPDF() {
   const res = allResidents.find(r => r.id === note.resident_id);
   const residentName = res ? res.name : 'Unknown Resident';
   const now = new Date();
-  const dateTime = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-    + ' ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  const dateTime = now.toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles', month: 'long', day: 'numeric', year: 'numeric' })
+    + ' ' + now.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit' });
   const noteText = (note.behavior_notes || '').trim();
+  const noteDetails = `${note.note_date ? fmtDate(note.note_date) : ''}${note.note_time ? ' at ' + note.note_time : ''}${note.shift ? ' · ' + note.shift + ' Shift' : ''} · By ${note.created_by || ''}`;
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'pt', format: 'letter' });
@@ -1537,93 +1512,83 @@ async function exportPDF() {
   const pageH = 792;
   const marginL = 60;
   const marginR = 60;
-  const contentW = pageW - marginL - marginR;
-  const lineH = 18;
+  const usableW = pageW - marginL - marginR;
+  const lineH = 19;
 
-  // Wrap note text into lines at ~90 chars, preserving paragraph breaks
-  const noteLines = [];
-  noteText.split('\n').forEach(para => {
-    const trimmed = para.trim();
-    if (!trimmed) { noteLines.push(''); return; }
-    const words = trimmed.split(' ');
-    let cur = '';
-    words.forEach(word => {
-      const test = cur ? cur + ' ' + word : word;
-      if (test.length > 90) { noteLines.push(cur); cur = word; }
-      else cur = test;
+  const wrapText = (text, maxChars) => {
+    const result = [];
+    text.split('\n').forEach(para => {
+      const trimmed = para.trim();
+      if (!trimmed) { result.push(''); return; }
+      const words = trimmed.split(' ');
+      let cur = '';
+      words.forEach(word => {
+        const test = cur ? cur + ' ' + word : word;
+        if (test.length > maxChars) { result.push(cur); cur = word; }
+        else cur = test;
+      });
+      if (cur) result.push(cur);
     });
-    if (cur) noteLines.push(cur);
-  });
+    return result;
+  };
 
   const drawDocument = (logoDataUrl) => {
     let y = 40;
 
-    // ── LOGO ──
     if (logoDataUrl) {
-      const logoSize = 90;
+      const logoSize = 80;
       doc.addImage(logoDataUrl, 'PNG', (pageW - logoSize) / 2, y, logoSize, logoSize);
-      y += logoSize + 12;
+      y += logoSize + 10;
     }
 
-    // ── ORG NAME ──
     doc.setFont('times', 'bold');
-    doc.setFontSize(18);
-    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(16);
     doc.text('HARMONY LIVING HOUSE ADULT FAMILY LLC', pageW / 2, y, { align: 'center' });
-    y += 22;
+    y += 20;
 
-    // ── ADDRESS ──
     doc.setFont('times', 'normal');
-    doc.setFontSize(13);
-    doc.text('120 Newaukum Village Dr Chehalis, WA 98532', pageW / 2, y, { align: 'center' });
+    doc.setFontSize(11);
+    doc.text('120 Newaukum Village Dr  |  Chehalis, WA 98532', pageW / 2, y, { align: 'center' });
     y += 18;
 
-    // ── TITLE ──
     doc.setFont('times', 'bold');
-    doc.setFontSize(14);
+    doc.setFontSize(13);
     const titleText = 'PROGRESS NOTES';
     const titleW = doc.getTextWidth(titleText);
     doc.text(titleText, pageW / 2, y, { align: 'center' });
-    doc.setLineWidth(0.7);
+    doc.setLineWidth(0.8);
     doc.line((pageW - titleW) / 2, y + 2, (pageW + titleW) / 2, y + 2);
-    y += 20;
+    y += 22;
 
-    // ── RESIDENT INFO LINE ──
     doc.setFont('times', 'normal');
     doc.setFontSize(11);
-    const infoLeft  = `Resident Name: ${residentName}`;
-    const infoRight = `Date & Time: ${dateTime}`;
-    doc.text(infoLeft,  marginL, y);
-    doc.text(infoRight, pageW - marginR, y, { align: 'right' });
+    doc.text(`Resident Name: ${residentName}`, marginL, y);
+    doc.text(`Printed: ${dateTime} (PT)`, pageW - marginR, y, { align: 'right' });
+    y += 16;
+
+    doc.setFontSize(10.5);
+    doc.text(`Note Details: ${noteDetails}`, marginL, y);
+    y += 14;
+
+    doc.setLineWidth(1);
+    doc.line(marginL, y, pageW - marginR, y);
     y += 20;
 
-    // ── THIN DIVIDER ──
-    doc.setLineWidth(0.5);
-    doc.line(marginL, y, pageW - marginR, y);
-    y += 18;
-
-    // ── NOTE TEXT — plain, no borders, no columns ──
     doc.setFont('times', 'normal');
     doc.setFontSize(11.5);
-
+    const noteLines = wrapText(noteText, 88);
     noteLines.forEach(line => {
-      if (y + lineH > pageH - 80) {
-        doc.addPage();
-        y = 40;
-      }
+      if (y + lineH > pageH - 80) { doc.addPage(); y = 40; }
       if (line) doc.text(line, marginL, y);
       y += lineH;
     });
 
-    // ── SIGNATURE BLOCK ──
-    y += 32;
-    if (y + 50 > pageH - 20) { doc.addPage(); y = 40; }
+    y += 36;
+    if (y + 40 > pageH - 20) { doc.addPage(); y = 40; }
     doc.setLineWidth(0.5);
-    // Signature line
     doc.line(marginL, y, marginL + 220, y);
-    doc.setFont('times', 'normal');
     doc.setFontSize(9.5);
-    doc.text('Staff Signature / Stamp', marginL, y + 13);
+    doc.text('Staff Signature', marginL, y + 13);
 
     const safeName = residentName.replace(/\s+/g, '_');
     doc.save(`ProgressNotes_${safeName}_${note.note_date}.pdf`);
@@ -1633,8 +1598,7 @@ async function exportPDF() {
   img.crossOrigin = 'anonymous';
   img.onload = () => {
     const canvas = document.createElement('canvas');
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
+    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
     canvas.getContext('2d').drawImage(img, 0, 0);
     drawDocument(canvas.toDataURL('image/png'));
   };
@@ -1689,8 +1653,55 @@ async function renderAllNotes() {
 }
 
 // ══════════════════════════════════
-// TIMELINE
+// ALL INCIDENTS PAGE
 // ══════════════════════════════════
+async function renderAllIncidents() {
+  const q = (document.getElementById('incidents-search')?.value || '').toLowerCase();
+  const dateF = document.getElementById('incidents-date-filter')?.value;
+  const resF = document.getElementById('incidents-resident-filter')?.value;
+  const residents = await getResidents();
+  const sel = document.getElementById('incidents-resident-filter');
+  if (sel && sel.options.length <= 1) {
+    residents.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.id; opt.textContent = r.name;
+      sel.appendChild(opt);
+    });
+  }
+  const { data: allReports } = await db.from('incident_reports').select('*').order('incident_date', { ascending: false });
+  let reports = allReports || [];
+  if (q) reports = reports.filter(r => JSON.stringify(r).toLowerCase().includes(q));
+  if (dateF) reports = reports.filter(r => r.incident_date === dateF);
+  if (resF) reports = reports.filter(r => r.resident_id === resF);
+  const container = document.getElementById('all-incidents-list');
+  if (!reports.length) {
+    container.innerHTML = `<div class="empty-state"><h4>No incident reports found</h4><p>Try adjusting your search filters.</p></div>`;
+    return;
+  }
+  container.innerHTML = reports.map(r => {
+    const res = residents.find(x => x.id === r.resident_id);
+    const natures = [r.nature_injury&&'Injury', r.nature_missing&&'Missing', r.nature_death&&'Death', r.nature_fire&&'Fire/Disaster', r.nature_fall&&'Fall'].filter(Boolean).join(', ') || 'Unspecified';
+    const preview = (r.description || '—').slice(0, 120);
+    return `<div class="note-card" onclick="openProfileAndViewIncident('${r.resident_id}','${r.id}')">
+      <div class="note-card-header">
+        <div>
+          <div class="note-date">${res ? `<span style="cursor:pointer;color:var(--text);text-decoration:underline dotted;">${res.name}</span> &middot; ` : ''}${fmtDate(r.incident_date)}</div>
+          <div class="note-staff">Nature: ${natures} · Prepared by ${r.prepared_by}</div>
+        </div>
+      </div>
+      <div class="note-preview">${preview}${preview.length >= 120 ? '…' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+async function openProfileAndViewIncident(residentId, incidentId) {
+  await openProfile(residentId);
+  viewingIncidentId = incidentId;
+  viewIncidentReport(incidentId);
+}
+
+// ══════════════════════════════════
+// TIMELINE
 async function showTimeline() {
   const allNotes = await getNotes();
   const notes = allNotes.filter(n => n.resident_id === currentResidentId)
@@ -1734,7 +1745,7 @@ async function renderAnalytics() {
   weeklyChart = new Chart(ctx1, {
     type: 'bar',
     data: { labels: weekLabels, datasets: [{ label: 'Notes', data: weeks, backgroundColor: '#b8860b', borderRadius: 6 }] },
-    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+    options: { responsive: true, animation: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
   });
 
   // Notes per resident
@@ -1747,7 +1758,7 @@ async function renderAnalytics() {
       labels: resData.map(r => r.name),
       datasets: [{ data: resData.map(r => r.count), backgroundColor: ['#2c6e6a','#3d8c87','#5aada9','#7dc5c2','#a0d8d6','#c3eae9'] }]
     },
-    options: { responsive: true, plugins: { legend: { position: 'right' } } }
+    options: { responsive: true, animation: false, plugins: { legend: { position: 'right' } } }
   });
 
   // Staff table
@@ -2071,11 +2082,16 @@ async function viewIncidentReport(id) {
 }
 
 function buildIncidentHTML(r) {
+  // Washington State timezone for printed date
+  const now = new Date();
+  const printedAt = now.toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles', month: 'long', day: 'numeric', year: 'numeric' })
+    + ' ' + now.toLocaleTimeString('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit' });
+  void printedAt; // used in template below
   const chk = (val) => val ? '&#9745;' : '&#9744;';
   const yesNo = (val) => val === true ? 'Yes' : val === false ? 'No' : '';
   const blank = (label, val, width) => `<span style="display:inline-block;min-width:${width||120}px;border-bottom:1px solid #000;margin:0 4px;font-size:11px;">${val||''}</span>`;
-  const descLines = (r.description || '').split('\n').map(l => `<div style="border-bottom:1px solid #000;min-height:22px;font-size:11px;padding:2px 0;">${l}</div>`).join('');
-  const preventLines = (r.prevention_action || '').split('\n').map(l => `<div style="border-bottom:1px solid #000;min-height:20px;font-size:11px;padding:2px 0;">${l}</div>`).join('');
+  const descText = (r.description || '').trim();
+  const preventText = (r.prevention_action || '').trim();
 
   return `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>Incident Report — ${r.resident_name}</title>
@@ -2091,10 +2107,7 @@ function buildIncidentHTML(r) {
   .check-row { display: flex; flex-wrap: wrap; gap: 18px 32px; margin: 6px 0; font-size: 11.5px; }
   .check-item { display: inline-flex; align-items: center; gap: 4px; }
   .section { margin: 12px 0 6px; font-weight: bold; font-size: 11.5px; }
-  .desc-area { border: 1px solid #000; min-height: 180px; padding: 6px; font-size: 11px; line-height: 1.8; }
-  .desc-line { border-bottom: 1px solid #000; min-height: 22px; padding: 1px 2px; }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
-  .body-img { display: flex; justify-content: center; gap: 32px; margin: 8px 0; }
+  .desc-box { border: 1px solid #000; padding: 6px 8px; font-size: 11px; line-height: 1.8; white-space: pre-wrap; word-wrap: break-word; }
   .sig-line { border-bottom: 1px solid #000; display: inline-block; min-width: 180px; margin: 0 4px; }
   @media print { body { padding: 24px 36px; } @page { size: letter; margin: 0.5in; } }
 </style></head><body>
@@ -2107,7 +2120,7 @@ function buildIncidentHTML(r) {
 <div class="field-row">
   <strong>Name of Resident/Staff involved in Incidents:</strong>
   <span class="underline">${r.resident_name||''}</span>
-  <strong>DOB:</strong><span class="underline" style="min-width:90px;">${r.dob ? new Date(r.dob+'T00:00:00').toLocaleDateString('en-US') : ''}</span>
+  <strong>DOB:</strong><span class="underline" style="min-width:90px;">${r.dob ? new Date(r.dob+'T00:00:00').toLocaleDateString('en-US',{timeZone:'America/Los_Angeles'}) : ''}</span>
   <strong>Sex:</strong><span class="underline" style="min-width:80px;">${r.sex||''}</span>
 </div>
 
@@ -2121,21 +2134,15 @@ function buildIncidentHTML(r) {
 </div>
 
 <div class="field-row" style="margin-top:10px;">
-  <strong>Date Incident Occurred:</strong><span class="underline">${r.incident_date ? new Date(r.incident_date+'T00:00:00').toLocaleDateString('en-US') : ''}</span>
+  <strong>Date Incident Occurred:</strong><span class="underline">${r.incident_date ? new Date(r.incident_date+'T00:00:00').toLocaleDateString('en-US',{timeZone:'America/Los_Angeles'}) : ''}</span>
   <strong>Time:</strong><span class="underline" style="min-width:90px;">${r.incident_time||''}</span>
   <strong>Location:</strong><span class="underline" style="min-width:160px;">${r.incident_location||''}</span>
 </div>
 
 <div class="section" style="margin-top:10px;">Description of Incident <span style="font-weight:normal;font-size:10.5px;">(use specific behavioral terms and include actions taken by providers/staff):</span></div>
-<div class="desc-area">${(r.description||'').split('\n').map(l=>`<div class="desc-line">${l}</div>`).join('')}</div>
+<div class="desc-box">${descText || '&nbsp;'}</div>
 
-<div style="page-break-before: always;"></div>
-
-<div class="header" style="margin-top:16px;">
-  <img src="harmony_living_house_logo.png" alt="Logo">
-</div>
-
-<div class="section">TYPE OF INJURY:</div>
+<div class="section" style="margin-top:14px;">TYPE OF INJURY:</div>
 <div class="check-row">
   <span class="check-item">${chk(r.injury_laceration)} Laceration(cut)</span>
   <span class="check-item">${chk(r.injury_hematoma)} Hematoma(bruise)</span>
@@ -2158,7 +2165,7 @@ function buildIncidentHTML(r) {
   <span class="check-item">${chk(r.treated_physician===true)} Yes</span> &nbsp;
   <span class="check-item">${chk(r.treated_physician===false)} No</span> &nbsp;
   <strong>Name</strong><span class="underline" style="min-width:140px;">${r.physician_name||''}</span>
-  <strong>Date</strong><span class="underline" style="min-width:80px;">${r.physician_date ? new Date(r.physician_date+'T00:00:00').toLocaleDateString('en-US') : ''}</span>
+  <strong>Date</strong><span class="underline" style="min-width:80px;">${r.physician_date ? new Date(r.physician_date+'T00:00:00').toLocaleDateString('en-US',{timeZone:'America/Los_Angeles'}) : ''}</span>
   <strong>Time</strong><span class="underline" style="min-width:70px;">${r.physician_time||''}</span>
 </div>
 
@@ -2167,7 +2174,7 @@ function buildIncidentHTML(r) {
   <span class="check-item">${chk(r.hospital_admission===true)} Yes</span> &nbsp;
   <span class="check-item">${chk(r.hospital_admission===false)} No</span> &nbsp;
   <strong>Name</strong><span class="underline" style="min-width:140px;">${r.hospital_name||''}</span>
-  <strong>Date</strong><span class="underline" style="min-width:80px;">${r.hospital_date ? new Date(r.hospital_date+'T00:00:00').toLocaleDateString('en-US') : ''}</span>
+  <strong>Date</strong><span class="underline" style="min-width:80px;">${r.hospital_date ? new Date(r.hospital_date+'T00:00:00').toLocaleDateString('en-US',{timeZone:'America/Los_Angeles'}) : ''}</span>
   <strong>Time</strong><span class="underline" style="min-width:70px;">${r.hospital_time||''}</span>
 </div>
 
@@ -2183,16 +2190,13 @@ function buildIncidentHTML(r) {
 </div>
 
 <div class="section" style="margin-top:12px;">Action to be taken to prevent the reoccurrence of the incident:</div>
-<div style="border-bottom:1px solid #000;min-height:20px;font-size:11px;padding:2px 0;">${r.prevention_action||''}</div>
-<div style="border-bottom:1px solid #000;min-height:20px;font-size:11px;"></div>
+<div class="desc-box" style="margin-bottom:8px;">${preventText || '&nbsp;'}</div>
 
 <div class="field-row" style="margin-top:14px;">
   <strong>Prepared By: Print Name/Title:</strong><span class="underline" style="min-width:160px;">${r.prepared_by||''}</span>
   <strong>Signature:</strong><span class="underline" style="min-width:140px;"></span>
-  <strong>Date:</strong><span class="underline" style="min-width:90px;">${r.prepared_date ? new Date(r.prepared_date+'T00:00:00').toLocaleDateString('en-US') : ''}</span>
+  <strong>Date:</strong><span class="underline" style="min-width:90px;">${r.prepared_date ? new Date(r.prepared_date+'T00:00:00').toLocaleDateString('en-US',{timeZone:'America/Los_Angeles'}) : ''}</span>
 </div>
-
-<div style="margin-top:32px;font-size:10px;"><strong>INCIDENT REPORT</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2</div>
 </body></html>`;
 }
 
@@ -2204,7 +2208,10 @@ async function printIncidentReport() {
   win.document.write(buildIncidentHTML(r));
   win.document.close();
   win.focus();
-  setTimeout(() => win.print(), 700);
+  setTimeout(() => {
+    win.print();
+    setTimeout(() => { try { win.close(); } catch(e){} window.focus(); }, 500);
+  }, 700);
 }
 
 async function exportIncidentPDF() {
