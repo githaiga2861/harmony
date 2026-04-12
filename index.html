@@ -1243,6 +1243,7 @@ function initApp() {
   document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
   refreshDashboard();
   renderResidentTable();
+  startNotifScheduler();
 }
 
 // Login on Enter key
@@ -2471,6 +2472,211 @@ function toast(msg) {
   el.textContent = msg; el.style.display = 'block';
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.style.display = 'none', 2800);
+}
+
+// ══════════════════════════════════
+// DAILY NOTIFICATIONS
+// ══════════════════════════════════
+
+const NOTIF_KEY = 'hlh_notif_permission';
+const NOTIF_LAST_KEY = 'hlh_notif_last';
+
+const notifQuotes = [
+  { quote: "Small moments, big impact.", sub: "Every note you write protects someone who cannot speak for themselves." },
+  { quote: "You are someone's safety net.", sub: "Your documentation today is their voice tomorrow." },
+  { quote: "Consistency is an act of love.", sub: "A few minutes of updates can change everything for your residents." },
+  { quote: "Details matter. You matter.", sub: "Your notes are more powerful than you know." },
+  { quote: "Great care lives in the records.", sub: "Keep the story going — your residents deserve it." },
+  { quote: "You showed up. Now let the notes show it.", sub: "Documenting your care is part of giving it." },
+  { quote: "Behind every great resident outcome is a diligent caregiver.", sub: "That's you. Let's get those notes in." },
+  { quote: "Your presence is a gift. Your notes are its proof.", sub: "Time to update — it only takes a moment." },
+  { quote: "Every entry is a step toward better care.", sub: "You're doing something meaningful. Keep going." },
+  { quote: "Compassion documented is compassion multiplied.", sub: "Let's make sure today's care is on the record." },
+  { quote: "Your work doesn't go unnoticed.", sub: "Let the records reflect the heart you pour into this work." },
+  { quote: "A moment to document. A lifetime of impact.", sub: "Your residents are lucky to have someone so dedicated." },
+  { quote: "Care without a record is a story half told.", sub: "Let's complete the chapter — time to update." },
+  { quote: "You make a difference every single day.", sub: "Now let's make sure the notes say so too." },
+  { quote: "The best caregivers never skip the details.", sub: "And you never do either. Time to log in." },
+];
+
+function getDailyQuote() {
+  const idx = Math.floor(Date.now() / (1000 * 60 * 60 * 12)) % notifQuotes.length;
+  return notifQuotes[idx];
+}
+
+function getShiftLabel() {
+  const hr = new Date().getHours();
+  return hr < 12 ? 'Good Morning' : hr < 17 ? 'Good Afternoon' : 'Good Evening';
+}
+
+function shouldFireNotif() {
+  const last = localStorage.getItem(NOTIF_LAST_KEY);
+  if (!last) return true;
+  const now = new Date();
+  const lastDate = new Date(parseInt(last));
+  const sameDay = now.toDateString() === lastDate.toDateString();
+  if (!sameDay) return true;
+  // Fire once in AM (before noon) and once in PM (after noon)
+  const nowAM = now.getHours() < 12;
+  const lastAM = lastDate.getHours() < 12;
+  return nowAM !== lastAM;
+}
+
+function markNotifFired() {
+  localStorage.setItem(NOTIF_LAST_KEY, Date.now().toString());
+}
+
+function fireSystemNotif() {
+  if (Notification.permission !== 'granted') return;
+  if (!shouldFireNotif()) return;
+  const { quote, sub } = getDailyQuote();
+  const greeting = getShiftLabel();
+  const n = new Notification(`${greeting}, ${currentUser ? currentUser.name.split(' ')[0] : 'there'} 🌿`, {
+    body: `"${quote}"\n\n${sub}\n\n— Time to update Harmony Living House records`,
+    icon: 'harmony_living_house_logo.png',
+    badge: 'harmony_living_house_logo.png',
+    tag: 'hlh-daily',
+    requireInteraction: false,
+  });
+  n.onclick = () => { window.focus(); n.close(); };
+  markNotifFired();
+}
+
+async function requestNotifPermission() {
+  if (!('Notification' in window)) return;
+  const stored = localStorage.getItem(NOTIF_KEY);
+  if (stored === 'granted') { fireSystemNotif(); return; }
+  if (stored === 'denied') return;
+  if (Notification.permission === 'granted') {
+    localStorage.setItem(NOTIF_KEY, 'granted');
+    fireSystemNotif();
+    return;
+  }
+  // Show our beautiful in-app prompt first
+  showNotifPrompt();
+}
+
+function showNotifPrompt() {
+  const { quote } = getDailyQuote();
+  const greeting = getShiftLabel();
+  const name = currentUser ? currentUser.name.split(' ')[0] : 'there';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'notif-prompt-overlay';
+  overlay.style.cssText = `
+    position:fixed;inset:0;z-index:9999;
+    background:rgba(10,10,10,0.55);
+    display:flex;align-items:center;justify-content:center;
+    backdrop-filter:blur(4px);
+    animation:fadeIn 0.3s ease;
+  `;
+
+  overlay.innerHTML = `
+    <div style="
+      background:#fff;border-radius:20px;
+      width:420px;max-width:90vw;
+      box-shadow:0 24px 64px rgba(0,0,0,0.25);
+      overflow:hidden;
+      animation:slideUp 0.3s ease;
+    ">
+      <!-- Gold header bar -->
+      <div style="
+        background:linear-gradient(135deg,#1a1a1a 0%,#b8860b 100%);
+        padding:28px 28px 20px;
+        text-align:center;
+      ">
+        <img src="harmony_living_house_logo.png"
+          style="width:72px;height:72px;object-fit:contain;
+                 background:#fff;border-radius:50%;
+                 padding:6px;box-shadow:0 4px 16px rgba(0,0,0,0.3);
+                 margin-bottom:14px;display:block;margin-left:auto;margin-right:auto;">
+        <div style="font-size:13px;font-weight:700;letter-spacing:0.12em;
+                    text-transform:uppercase;color:rgba(255,255,255,0.6);
+                    margin-bottom:4px;">Harmony Living House</div>
+        <div style="font-family:'Georgia',serif;font-size:20px;
+                    font-weight:700;color:#fff;line-height:1.3;">
+          ${greeting}, ${name} 👋
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div style="padding:28px;">
+        <div style="
+          background:#fdf6e3;border-left:3px solid #b8860b;
+          border-radius:0 8px 8px 0;padding:14px 16px;margin-bottom:20px;
+        ">
+          <div style="font-size:13px;font-weight:700;color:#b8860b;
+                      margin-bottom:4px;font-family:'Georgia',serif;">
+            ❝ ${quote} ❞
+          </div>
+          <div style="font-size:12px;color:#4a5568;line-height:1.6;">
+            Stay on top of your residents' care — enable daily reminders so you never miss an update.
+          </div>
+        </div>
+
+        <div style="font-size:13.5px;color:#1a2332;line-height:1.7;margin-bottom:22px;">
+          Allow <strong>Harmony Living House</strong> to send you gentle morning &amp; evening reminders to keep your records current. You'll only be asked once.
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button id="notif-allow" style="
+            background:linear-gradient(135deg,#b8860b,#d4a017);
+            color:#fff;border:none;border-radius:10px;
+            padding:13px;font-size:14px;font-weight:700;
+            cursor:pointer;font-family:inherit;
+            letter-spacing:0.02em;
+            box-shadow:0 4px 14px rgba(184,134,11,0.35);
+            transition:opacity 0.15s;
+          ">
+            🔔 &nbsp; Yes, remind me daily
+          </button>
+          <button id="notif-deny" style="
+            background:#f0f2f5;color:#8a9ab0;border:none;
+            border-radius:10px;padding:11px;font-size:13px;
+            cursor:pointer;font-family:inherit;
+          ">
+            No thanks
+          </button>
+        </div>
+
+        <div style="text-align:center;margin-top:14px;
+                    font-size:11px;color:#aab0bb;line-height:1.5;">
+          Reminders fire at your morning &amp; evening shift times.<br>
+          You can turn them off in your browser settings anytime.
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  document.getElementById('notif-allow').onclick = async () => {
+    document.body.removeChild(overlay);
+    const result = await Notification.requestPermission();
+    localStorage.setItem(NOTIF_KEY, result);
+    if (result === 'granted') {
+      fireSystemNotif();
+      toast('🔔 Daily reminders enabled! We\'ll nudge you every morning & evening.');
+    }
+  };
+
+  document.getElementById('notif-deny').onclick = () => {
+    localStorage.setItem(NOTIF_KEY, 'denied');
+    document.body.removeChild(overlay);
+  };
+}
+
+// Schedule checks every 30 minutes for AM/PM boundary crossing
+function startNotifScheduler() {
+  if (!('Notification' in window)) return;
+  // Initial fire
+  setTimeout(() => requestNotifPermission(), 2500);
+  // Re-check every 30 mins
+  setInterval(() => {
+    if (currentUser && Notification.permission === 'granted' && shouldFireNotif()) {
+      fireSystemNotif();
+    }
+  }, 30 * 60 * 1000);
 }
 
 // ══════════════════════════════════
