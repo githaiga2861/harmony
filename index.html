@@ -350,9 +350,146 @@
   }
 
   /* Page views */
-  /* Page views */
   .page { display: none; }
   .page.active { display: block; }
+
+  /* ── RESIDENT STATUS BADGES ── */
+  .status-active { background:#e6f4ea; color:#1e7e34; }
+  .status-hospitalized { background:#fff3cd; color:#856404; }
+  .status-onleave { background:#e8f0fe; color:#1a73e8; }
+  .status-discharged { background:#f8d7da; color:#721c24; }
+
+  /* ── PHOTO UPLOAD ── */
+  .resident-photo-wrap {
+    position:relative; width:64px; height:64px; flex-shrink:0;
+  }
+  .resident-photo {
+    width:64px; height:64px; border-radius:50%; object-fit:cover;
+    border:3px solid rgba(255,255,255,0.3);
+  }
+  .photo-upload-btn {
+    position:absolute; bottom:0; right:0;
+    width:22px; height:22px; border-radius:50%;
+    background:var(--accent); border:2px solid #fff;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:11px; color:#fff;
+  }
+  #photo-upload-input { display:none; }
+
+  /* ── VITALS ── */
+  .vitals-table { width:100%; border-collapse:collapse; font-size:13px; }
+  .vitals-table th {
+    background:var(--accent); color:#fff; padding:8px 10px;
+    font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.05em; border:1px solid #c9a227;
+  }
+  .vitals-table td {
+    padding:8px 10px; border:1px solid var(--border);
+    font-size:13px; vertical-align:middle;
+  }
+  .vitals-table tr:nth-child(even) td { background:#fdfaf3; }
+  .vitals-table tr:hover td { background:var(--accent-light); }
+
+  /* ── MEDICATION ── */
+  .med-card {
+    border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 16px; display:flex; align-items:flex-start;
+    gap:14px; transition:border-color 0.15s;
+  }
+  .med-card:hover { border-color:var(--accent); }
+  .med-icon {
+    width:38px; height:38px; border-radius:10px;
+    background:var(--accent-light); color:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; font-size:18px;
+  }
+  .med-name { font-weight:700; font-size:14px; color:var(--text); }
+  .med-detail { font-size:12px; color:var(--text2); margin-top:2px; line-height:1.6; }
+  .med-flag { font-size:11px; font-weight:700; color:var(--danger); margin-top:4px; }
+
+  /* ── BODY MAP ── */
+  .body-map-container {
+    display:flex; gap:24px; justify-content:center;
+    flex-wrap:wrap; margin:12px 0;
+  }
+  .body-map-side { text-align:center; }
+  .body-map-side h4 {
+    font-size:11px; font-weight:700; color:var(--text3);
+    text-transform:uppercase; letter-spacing:0.07em; margin-bottom:8px;
+  }
+  .body-map-svg { position:relative; display:inline-block; }
+  .body-region {
+    cursor:pointer; fill:transparent; stroke:transparent;
+    transition:fill 0.15s;
+  }
+  .body-region:hover { fill:rgba(184,134,11,0.25); stroke:#b8860b; stroke-width:1; }
+  .body-region.selected { fill:rgba(192,57,43,0.3); stroke:#c0392b; stroke-width:1.5; }
+  .body-map-legend {
+    margin-top:12px; font-size:12px; color:var(--text2);
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+  }
+  .body-map-legend span {
+    background:rgba(192,57,43,0.15); color:var(--danger);
+    border:1px solid rgba(192,57,43,0.3);
+    padding:3px 8px; border-radius:20px; font-size:11px; font-weight:600;
+  }
+
+  /* ── CALENDAR ── */
+  .cal-grid {
+    display:grid; grid-template-columns:repeat(7,1fr); gap:4px;
+  }
+  .cal-header-cell {
+    text-align:center; font-size:11px; font-weight:700;
+    color:var(--text3); text-transform:uppercase;
+    padding:6px 0; letter-spacing:0.05em;
+  }
+  .cal-day {
+    min-height:72px; border:1px solid var(--border);
+    border-radius:8px; padding:6px; cursor:pointer;
+    transition:border-color 0.15s, background 0.15s;
+    position:relative;
+  }
+  .cal-day:hover { border-color:var(--accent); background:var(--accent-light); }
+  .cal-day.today { border-color:var(--accent); border-width:2px; }
+  .cal-day.other-month { opacity:0.35; }
+  .cal-day-num {
+    font-size:12px; font-weight:700; color:var(--text);
+    margin-bottom:4px;
+  }
+  .cal-day.today .cal-day-num { color:var(--accent); }
+  .cal-dot {
+    display:inline-block; width:7px; height:7px;
+    border-radius:50%; margin:1px;
+  }
+  .cal-dot-note { background:#b8860b; }
+  .cal-dot-incident { background:#c0392b; }
+  .cal-day-popup {
+    position:fixed; z-index:500; background:#fff;
+    border:1px solid var(--border); border-radius:12px;
+    box-shadow:var(--shadow-lg); padding:16px; width:280px;
+    font-size:13px;
+  }
+  .cal-popup-title {
+    font-weight:700; font-size:14px; color:var(--accent);
+    margin-bottom:10px; padding-bottom:8px;
+    border-bottom:1px solid var(--border);
+  }
+  .cal-popup-item {
+    padding:6px 0; border-bottom:1px solid var(--border);
+    font-size:12px; color:var(--text2); line-height:1.5;
+  }
+  .cal-popup-item:last-child { border-bottom:none; }
+  .cal-popup-item strong { color:var(--text); }
+
+  /* ── PROFILE TABS ── */
+  .profile-tab {
+    padding:10px 18px; border:none; background:none;
+    font-family:inherit; font-size:13.5px; font-weight:600;
+    color:var(--text3); cursor:pointer; border-bottom:3px solid transparent;
+    transition:all 0.15s; margin-bottom:-2px;
+  }
+  .profile-tab:hover { color:var(--text); }
+  .profile-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
 
   /* Incident Report Form */
   .ir-section-title {
@@ -596,43 +733,120 @@
 
         <!-- RESIDENT PROFILE -->
         <div class="page" id="page-profile">
+          <input type="file" id="photo-upload-input" accept="image/*" onchange="handlePhotoUpload(event)">
+
           <button class="back-btn" onclick="showPage('residents')">
             ← Back to Residents
           </button>
+
+          <!-- Birthday alert banner -->
+          <div id="birthday-banner" style="display:none;background:linear-gradient(90deg,#fff8e1,#fdf3c0);border:1px solid #f0c040;border-radius:10px;padding:12px 18px;margin-bottom:14px;display:none;align-items:center;gap:10px;font-size:13px;font-weight:600;color:#7a5c00;">
+            🎂 <span id="birthday-banner-text"></span>
+          </div>
+
           <div class="profile-header" id="profile-header">
-            <div class="profile-avatar" id="profile-avatar">T</div>
-            <div>
-              <div class="profile-name" id="profile-name">Resident Name</div>
+            <div class="resident-photo-wrap">
+              <div class="profile-avatar" id="profile-avatar" style="display:flex;width:64px;height:64px;">T</div>
+              <img id="profile-photo-img" src="" alt="" class="resident-photo" style="display:none;">
+              <div class="photo-upload-btn" onclick="document.getElementById('photo-upload-input').click()" title="Change photo">✏️</div>
+            </div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <div class="profile-name" id="profile-name">Resident Name</div>
+                <select id="profile-status-select" onchange="saveResidentStatus()" style="padding:4px 10px;border-radius:20px;border:1px solid var(--border);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;background:#fff;">
+                  <option value="active">🟢 Active</option>
+                  <option value="hospitalized">🟡 Hospitalized</option>
+                  <option value="onleave">🔵 On Leave</option>
+                  <option value="discharged">🔴 Discharged</option>
+                </select>
+              </div>
               <div class="profile-meta">
                 <span id="profile-dob">DOB: —</span>
                 <span id="profile-age">Age: —</span>
                 <span id="profile-admitted">Added: —</span>
+                <span id="profile-diagnosis" style="color:rgba(255,255,255,0.7);"></span>
               </div>
             </div>
           </div>
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
-            <h3 style="font-size:15px; font-weight:600;">Progress Notes</h3>
-            <div style="display:flex;gap:8px;">
-              <button class="btn btn-secondary btn-sm" onclick="showTimeline()">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                Timeline
+
+          <!-- Profile Tab Nav -->
+          <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:0;">
+            <button class="profile-tab active" id="ptab-notes" onclick="switchProfileTab('notes')">📋 Progress Notes</button>
+            <button class="profile-tab" id="ptab-vitals" onclick="switchProfileTab('vitals')">❤️ Vitals</button>
+            <button class="profile-tab" id="ptab-medications" onclick="switchProfileTab('medications')">💊 Medications</button>
+            <button class="profile-tab" id="ptab-incidents" onclick="switchProfileTab('incidents')">⚠️ Incidents</button>
+          </div>
+
+          <!-- TAB: NOTES -->
+          <div id="profile-tab-notes">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <h3 style="font-size:15px;font-weight:600;">Progress Notes</h3>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-secondary btn-sm" onclick="showTimeline()">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                  Timeline
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="openAddNote()">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add Progress Note
+                </button>
+              </div>
+            </div>
+            <div id="profile-notes-list" class="notes-list"></div>
+          </div>
+
+          <!-- TAB: VITALS -->
+          <div id="profile-tab-vitals" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <h3 style="font-size:15px;font-weight:600;">Vitals Log</h3>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-secondary btn-sm" onclick="printVitalsSheet()">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                  Print Vitals Sheet
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="openAddVitals()">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add Vitals Entry
+                </button>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-body" style="padding:0;overflow-x:auto;">
+                <table class="vitals-table" id="vitals-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th><th>BP</th><th>Temp</th><th>Pulse</th><th>RR</th><th>O2 Sat</th><th>Weight</th><th>Recorded By</th><th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="vitals-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: MEDICATIONS -->
+          <div id="profile-tab-medications" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <h3 style="font-size:15px;font-weight:600;">Medication Tracker</h3>
+              <button class="btn btn-primary btn-sm" onclick="openAddMedication()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Medication
               </button>
+            </div>
+            <div id="medications-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+          </div>
+
+          <!-- TAB: INCIDENTS -->
+          <div id="profile-tab-incidents" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <h3 style="font-size:15px;font-weight:600;">Incident Reports</h3>
               <button class="btn btn-secondary btn-sm" onclick="openAddIncidentReport()" style="background:var(--danger-light);color:var(--danger);">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                 Add Incident Report
               </button>
-              <button class="btn btn-primary btn-sm" onclick="openAddNote()">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Add Progress Note
-              </button>
             </div>
+            <div id="profile-incidents-list" class="notes-list"></div>
           </div>
-          <div id="profile-notes-list" class="notes-list"></div>
-
-          <div style="display:flex; align-items:center; justify-content:space-between; margin: 24px 0 16px;">
-            <h3 style="font-size:15px; font-weight:600;">Incident Reports</h3>
-          </div>
-          <div id="profile-incidents-list" class="notes-list"></div>
         </div>
 
         <!-- ALL NOTES -->
@@ -746,9 +960,31 @@
               <div class="card-header"><h3>Incident Types Breakdown</h3></div>
               <div class="card-body"><canvas id="chart-incidents" height="200"></canvas></div>
             </div>
-            <div class="card">
-              <div class="card-header"><h3>Shift Distribution</h3></div>
-              <div class="card-body"><canvas id="chart-shifts" height="200"></canvas></div>
+            <div class="card" style="grid-column:span 2;">
+              <div class="card-header">
+                <h3>📅 Monthly Activity Calendar</h3>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <button class="btn btn-secondary btn-sm" onclick="calPrevMonth()">‹ Prev</button>
+                  <span id="cal-month-label" style="font-weight:700;font-size:14px;min-width:160px;text-align:center;"></span>
+                  <button class="btn btn-secondary btn-sm" onclick="calNextMonth()">Next ›</button>
+                </div>
+                <div style="display:flex;gap:12px;align-items:center;font-size:12px;">
+                  <span><span class="cal-dot cal-dot-note" style="display:inline-block;margin-right:4px;"></span>Notes</span>
+                  <span><span class="cal-dot cal-dot-incident" style="display:inline-block;margin-right:4px;"></span>Incidents</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="cal-grid" style="margin-bottom:8px;">
+                  <div class="cal-header-cell">Sun</div>
+                  <div class="cal-header-cell">Mon</div>
+                  <div class="cal-header-cell">Tue</div>
+                  <div class="cal-header-cell">Wed</div>
+                  <div class="cal-header-cell">Thu</div>
+                  <div class="cal-header-cell">Fri</div>
+                  <div class="cal-header-cell">Sat</div>
+                </div>
+                <div class="cal-grid" id="cal-days-grid"></div>
+              </div>
             </div>
           </div>
 
@@ -926,6 +1162,138 @@
   </div>
 </div>
 
+<!-- MODAL: Add Vitals -->
+<div class="modal-overlay" id="modal-vitals">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="vitals-modal-title">Add Vitals Entry</h3>
+      <button class="btn-close" onclick="closeModal('modal-vitals')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="vitals-edit-id">
+      <div class="form-grid">
+        <div class="field">
+          <label>Date *</label>
+          <input type="date" id="vitals-date">
+        </div>
+        <div class="field">
+          <label>Recorded By *</label>
+          <input type="text" id="vitals-by" placeholder="Staff name">
+        </div>
+        <div class="field">
+          <label>Blood Pressure (BP)</label>
+          <input type="text" id="vitals-bp" placeholder="e.g. 120/80">
+        </div>
+        <div class="field">
+          <label>Temperature (°F)</label>
+          <input type="text" id="vitals-temp" placeholder="e.g. 98.6">
+        </div>
+        <div class="field">
+          <label>Pulse (BPM)</label>
+          <input type="text" id="vitals-pulse" placeholder="e.g. 72">
+        </div>
+        <div class="field">
+          <label>Respiratory Rate (RR)</label>
+          <input type="text" id="vitals-rr" placeholder="e.g. 16">
+        </div>
+        <div class="field">
+          <label>O2 Saturation (%)</label>
+          <input type="text" id="vitals-o2" placeholder="e.g. 98">
+        </div>
+        <div class="field">
+          <label>Weight (lbs)</label>
+          <input type="text" id="vitals-weight" placeholder="e.g. 145">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-vitals')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveVitals()">Save Vitals</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Medication -->
+<div class="modal-overlay" id="modal-medication">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="med-modal-title">Add Medication</h3>
+      <button class="btn-close" onclick="closeModal('modal-medication')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="med-edit-id">
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Medication Name *</label>
+          <input type="text" id="med-name" placeholder="e.g. Lisinopril">
+        </div>
+        <div class="field">
+          <label>Dosage *</label>
+          <input type="text" id="med-dosage" placeholder="e.g. 10mg">
+        </div>
+        <div class="field">
+          <label>Frequency *</label>
+          <select id="med-frequency">
+            <option value="">— Select —</option>
+            <option>Once daily</option>
+            <option>Twice daily</option>
+            <option>Three times daily</option>
+            <option>Four times daily</option>
+            <option>Every morning</option>
+            <option>Every evening</option>
+            <option>As needed (PRN)</option>
+            <option>Weekly</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Route</label>
+          <select id="med-route">
+            <option value="">— Select —</option>
+            <option>Oral</option>
+            <option>Topical</option>
+            <option>Injection</option>
+            <option>Inhaled</option>
+            <option>Sublingual</option>
+            <option>Transdermal</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Prescribing Physician</label>
+          <input type="text" id="med-physician" placeholder="Dr. Name">
+        </div>
+        <div class="field">
+          <label>Start Date</label>
+          <input type="date" id="med-start">
+        </div>
+        <div class="field">
+          <label>End Date (if applicable)</label>
+          <input type="date" id="med-end">
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="med-status">
+            <option value="active">Active</option>
+            <option value="discontinued">Discontinued</option>
+            <option value="onhold">On Hold</option>
+          </select>
+        </div>
+        <div class="field span2">
+          <label>Special Instructions / Notes</label>
+          <textarea id="med-notes" rows="3" placeholder="e.g. Take with food, Monitor blood pressure..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-medication')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMedication()">Save Medication</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Add/Edit Incident Report -->
 <div class="modal-overlay" id="modal-incident">
   <div class="modal modal-lg">
@@ -996,6 +1364,202 @@
       <div class="field" style="max-width:300px; margin-bottom:16px;">
         <label>Other (specify)</label>
         <input type="text" id="ir-i-other" placeholder="Describe other injury type">
+      </div>
+
+      <div class="ir-section-title">Body Location of Injury</div>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:12px;">Click on the numbered body regions to mark injured areas. Click again to deselect.</p>
+      <div class="body-map-container" id="ir-body-map">
+
+        <!-- FRONT VIEW -->
+        <div class="body-map-side">
+          <h4>Front View</h4>
+          <svg width="220" height="420" viewBox="0 0 220 420" xmlns="http://www.w3.org/2000/svg" style="border:1px solid var(--border);border-radius:8px;background:#fafafa;">
+            <!-- Head -->
+            <ellipse cx="110" cy="32" rx="28" ry="30" fill="none" stroke="#333" stroke-width="1.5"/>
+            <!-- Neck -->
+            <rect x="100" y="60" width="20" height="18" rx="3" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Torso -->
+            <rect x="70" y="78" width="80" height="90" rx="4" fill="none" stroke="#333" stroke-width="1.5"/>
+            <!-- Left shoulder -->
+            <ellipse cx="60" cy="88" rx="16" ry="14" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Right shoulder -->
+            <ellipse cx="160" cy="88" rx="16" ry="14" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Left upper arm -->
+            <rect x="36" y="96" width="28" height="50" rx="10" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Right upper arm -->
+            <rect x="156" y="96" width="28" height="50" rx="10" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Left lower arm -->
+            <rect x="28" y="150" width="24" height="48" rx="8" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Right lower arm -->
+            <rect x="168" y="150" width="24" height="48" rx="8" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Left hand -->
+            <ellipse cx="40" cy="210" rx="16" ry="14" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Right hand -->
+            <ellipse cx="180" cy="210" rx="16" ry="14" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Pelvis -->
+            <rect x="72" y="168" width="76" height="38" rx="4" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Left thigh -->
+            <rect x="72" y="206" width="34" height="72" rx="10" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Right thigh -->
+            <rect x="114" y="206" width="34" height="72" rx="10" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Left knee -->
+            <ellipse cx="89" cy="288" rx="16" ry="12" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Right knee -->
+            <ellipse cx="131" cy="288" rx="16" ry="12" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Left lower leg -->
+            <rect x="76" y="300" width="26" height="68" rx="8" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Right lower leg -->
+            <rect x="118" y="300" width="26" height="68" rx="8" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Left foot -->
+            <ellipse cx="89" cy="378" rx="22" ry="12" fill="none" stroke="#333" stroke-width="1.2"/>
+            <!-- Right foot -->
+            <ellipse cx="131" cy="378" rx="22" ry="12" fill="none" stroke="#333" stroke-width="1.2"/>
+
+            <!-- Clickable Regions FRONT -->
+            <ellipse class="body-region" data-region="1" data-label="Head Left (Front)" cx="103" cy="28" rx="18" ry="22" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="2" data-label="Head Right (Front)" cx="117" cy="28" rx="18" ry="22" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="3" data-label="Neck (Front)" x="98" y="59" width="24" height="20" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="4" data-label="Left Chest" x="70" y="78" width="40" height="45" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="5" data-label="Right Chest" x="110" y="78" width="40" height="45" rx="3" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="6" data-label="Left Upper Arm (Front)" cx="50" cy="120" rx="18" ry="26" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="7" data-label="Right Upper Arm (Front)" cx="170" cy="120" rx="18" ry="26" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="12" data-label="Left Abdomen" x="70" y="122" width="40" height="46" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="13" data-label="Right Abdomen" x="110" y="122" width="40" height="46" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="8" data-label="Left Forearm (Front)" x="27" y="148" width="26" height="50" rx="8" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="9" data-label="Right Forearm (Front)" x="167" y="148" width="26" height="50" rx="8" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="10" data-label="Left Hand" cx="40" cy="210" rx="17" ry="15" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="11" data-label="Right Hand" cx="180" cy="210" rx="17" ry="15" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="14" data-label="Left Pelvis / Hip" x="72" y="166" width="38" height="40" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="15" data-label="Right Pelvis / Hip" x="110" y="166" width="38" height="40" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="16" data-label="Groin" x="90" y="200" width="40" height="20" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="17" data-label="Left Thigh (Front)" x="72" y="204" width="34" height="74" rx="8" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="18" data-label="Right Thigh (Front)" x="114" y="204" width="34" height="74" rx="8" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="49" data-label="Left Knee (Front)" cx="89" cy="288" rx="17" ry="13" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="50" data-label="Right Knee (Front)" cx="131" cy="288" rx="17" ry="13" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="19" data-label="Left Lower Leg (Front)" x="75" y="300" width="28" height="68" rx="8" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="20" data-label="Right Lower Leg (Front)" x="117" y="300" width="28" height="68" rx="8" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="21" data-label="Left Foot" cx="89" cy="378" rx="23" ry="13" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="22" data-label="Right Foot" cx="131" cy="378" rx="23" ry="13" onclick="toggleBodyRegion(this)"/>
+
+            <!-- Number Labels FRONT -->
+            <text x="97" y="25" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">1</text>
+            <text x="119" y="25" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">2</text>
+            <text x="110" y="72" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">3</text>
+            <text x="88" y="98" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">4</text>
+            <text x="132" y="98" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">5</text>
+            <text x="44" y="114" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">6</text>
+            <text x="176" y="114" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">7</text>
+            <text x="36" y="170" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">8</text>
+            <text x="184" y="170" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">9</text>
+            <text x="40" y="213" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">10</text>
+            <text x="180" y="213" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">11</text>
+            <text x="88" y="142" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">12</text>
+            <text x="132" y="142" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">13</text>
+            <text x="88" y="185" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">14</text>
+            <text x="132" y="185" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">15</text>
+            <text x="110" y="213" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">16</text>
+            <text x="88" y="245" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">17</text>
+            <text x="132" y="245" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">18</text>
+            <text x="89" y="292" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">49</text>
+            <text x="131" y="292" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">50</text>
+            <text x="89" y="336" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">19</text>
+            <text x="131" y="336" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">20</text>
+            <text x="89" y="380" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">21</text>
+            <text x="131" y="380" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">22</text>
+          </svg>
+        </div>
+
+        <!-- BACK VIEW -->
+        <div class="body-map-side">
+          <h4>Back View</h4>
+          <svg width="220" height="420" viewBox="0 0 220 420" xmlns="http://www.w3.org/2000/svg" style="border:1px solid var(--border);border-radius:8px;background:#fafafa;">
+            <!-- Same body outline shapes -->
+            <ellipse cx="110" cy="32" rx="28" ry="30" fill="none" stroke="#333" stroke-width="1.5"/>
+            <rect x="100" y="60" width="20" height="18" rx="3" fill="none" stroke="#333" stroke-width="1.2"/>
+            <rect x="70" y="78" width="80" height="90" rx="4" fill="none" stroke="#333" stroke-width="1.5"/>
+            <ellipse cx="60" cy="88" rx="16" ry="14" fill="none" stroke="#333" stroke-width="1.2"/>
+            <ellipse cx="160" cy="88" rx="16" ry="14" fill="none" stroke="#333" stroke-width="1.2"/>
+            <rect x="36" y="96" width="28" height="50" rx="10" fill="none" stroke="#333" stroke-width="1.2"/>
+            <rect x="156" y="96" width="28" height="50" rx="10" fill="none" stroke="#333" stroke-width="1.2"/>
+            <rect x="28" y="150" width="24" height="48" rx="8" fill="none" stroke="#333" stroke-width="1.2"/>
+            <rect x="168" y="150" width="24" height="48" rx="8" fill="none" stroke="#333" stroke-width="1.2"/>
+            <ellipse cx="40" cy="210" rx="16" ry="14" fill="none" stroke="#333" stroke-width="1.2"/>
+            <ellipse cx="180" cy="210" rx="16" ry="14" fill="none" stroke="#333" stroke-width="1.2"/>
+            <rect x="72" y="168" width="76" height="38" rx="4" fill="none" stroke="#333" stroke-width="1.2"/>
+            <rect x="72" y="206" width="34" height="72" rx="10" fill="none" stroke="#333" stroke-width="1.2"/>
+            <rect x="114" y="206" width="34" height="72" rx="10" fill="none" stroke="#333" stroke-width="1.2"/>
+            <ellipse cx="89" cy="288" rx="16" ry="12" fill="none" stroke="#333" stroke-width="1.2"/>
+            <ellipse cx="131" cy="288" rx="16" ry="12" fill="none" stroke="#333" stroke-width="1.2"/>
+            <rect x="76" y="300" width="26" height="68" rx="8" fill="none" stroke="#333" stroke-width="1.2"/>
+            <rect x="118" y="300" width="26" height="68" rx="8" fill="none" stroke="#333" stroke-width="1.2"/>
+            <ellipse cx="89" cy="378" rx="22" ry="12" fill="none" stroke="#333" stroke-width="1.2"/>
+            <ellipse cx="131" cy="378" rx="22" ry="12" fill="none" stroke="#333" stroke-width="1.2"/>
+
+            <!-- Clickable Regions BACK -->
+            <ellipse class="body-region" data-region="23" data-label="Head Left (Back)" cx="103" cy="28" rx="18" ry="22" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="24" data-label="Head Right (Back)" cx="117" cy="28" rx="18" ry="22" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="25" data-label="Neck (Back)" x="98" y="59" width="24" height="20" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="26" data-label="Left Upper Back / Shoulder" x="70" y="78" width="40" height="30" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="27" data-label="Right Upper Back / Shoulder" x="110" y="78" width="40" height="30" rx="3" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="28" data-label="Left Upper Arm (Back)" cx="50" cy="120" rx="18" ry="26" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="29" data-label="Right Upper Arm (Back)" cx="170" cy="120" rx="18" ry="26" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="34" data-label="Left Mid Back" x="70" y="108" width="40" height="32" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="35" data-label="Right Mid Back" x="110" y="108" width="40" height="32" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="30" data-label="Left Forearm (Back)" x="27" y="148" width="26" height="50" rx="8" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="31" data-label="Right Forearm (Back)" x="167" y="148" width="26" height="50" rx="8" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="32" data-label="Left Hand (Back)" cx="40" cy="210" rx="17" ry="15" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="33" data-label="Right Hand (Back)" cx="180" cy="210" rx="17" ry="15" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="36" data-label="Left Lower Back" x="70" y="140" width="40" height="30" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="37" data-label="Right Lower Back" x="110" y="140" width="40" height="30" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="38" data-label="Left Buttock" x="72" y="168" width="38" height="40" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="39" data-label="Right Buttock" x="110" y="168" width="38" height="40" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="46" data-label="Sacrum / Coccyx" x="95" y="196" width="30" height="18" rx="3" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="40" data-label="Left Thigh (Back)" x="72" y="204" width="34" height="74" rx="8" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="41" data-label="Right Thigh (Back)" x="114" y="204" width="34" height="74" rx="8" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="42" data-label="Left Knee (Back)" cx="89" cy="288" rx="17" ry="13" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="43" data-label="Right Knee (Back)" cx="131" cy="288" rx="17" ry="13" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="44" data-label="Left Lower Leg (Back)" x="75" y="300" width="28" height="68" rx="8" onclick="toggleBodyRegion(this)"/>
+            <rect class="body-region" data-region="45" data-label="Right Lower Leg (Back)" x="117" y="300" width="28" height="68" rx="8" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="47" data-label="Left Heel / Foot (Back)" cx="89" cy="378" rx="23" ry="13" onclick="toggleBodyRegion(this)"/>
+            <ellipse class="body-region" data-region="48" data-label="Right Heel / Foot (Back)" cx="131" cy="378" rx="23" ry="13" onclick="toggleBodyRegion(this)"/>
+
+            <!-- Number Labels BACK -->
+            <text x="97" y="25" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">23</text>
+            <text x="119" y="25" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">24</text>
+            <text x="110" y="72" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">25</text>
+            <text x="88" y="92" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">26</text>
+            <text x="132" y="92" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">27</text>
+            <text x="44" y="114" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">28</text>
+            <text x="176" y="114" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">29</text>
+            <text x="36" y="170" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">30</text>
+            <text x="184" y="170" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">31</text>
+            <text x="40" y="213" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">32</text>
+            <text x="180" y="213" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">33</text>
+            <text x="88" y="122" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">34</text>
+            <text x="132" y="122" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">35</text>
+            <text x="88" y="154" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">36</text>
+            <text x="132" y="154" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">37</text>
+            <text x="88" y="188" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">38</text>
+            <text x="132" y="188" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">39</text>
+            <text x="110" y="208" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">46</text>
+            <text x="88" y="245" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">40</text>
+            <text x="132" y="245" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">41</text>
+            <text x="89" y="292" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">42</text>
+            <text x="131" y="292" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">43</text>
+            <text x="89" y="336" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">44</text>
+            <text x="131" y="336" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">45</text>
+            <text x="89" y="380" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">47</text>
+            <text x="131" y="380" font-size="9" fill="#333" font-weight="bold" text-anchor="middle">48</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Selected regions legend -->
+      <div style="margin-top:10px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Selected Body Regions:</div>
+        <div class="body-map-legend" id="ir-body-legend">
+          <span style="color:var(--text3);font-style:italic;background:none;border:none;">None selected</span>
+        </div>
       </div>
 
       <div class="field">
@@ -1403,8 +1967,12 @@ async function openProfile(id) {
   document.getElementById('profile-dob').textContent = 'DOB: ' + fmtDate(res.dob);
   document.getElementById('profile-age').textContent = 'Age: ' + calcAge(res.dob);
   document.getElementById('profile-admitted').textContent = 'Added: ' + fmtDate(res.created_at?.split('T')[0]);
+  document.getElementById('profile-diagnosis').textContent = res.diagnosis ? '· ' + res.diagnosis : '';
+  document.getElementById('profile-status-select').value = res.status || 'active';
+  showResidentPhoto(res.photo || null);
+  checkBirthday(res);
+  switchProfileTab('notes');
   renderProfileNotes();
-  renderProfileIncidents();
   showPage('profile');
 }
 
@@ -1851,7 +2419,20 @@ async function showTimeline() {
 // ANALYTICS
 // ══════════════════════════════════
 let incidentChart = null;
-let shiftChart = null;
+
+async function calPrevMonth() {
+  calCurrentDate.setMonth(calCurrentDate.getMonth() - 1);
+  const notes = await getNotes();
+  const { data: incidents } = await db.from('incident_reports').select('*');
+  renderCalendar(notes, incidents || []);
+}
+
+async function calNextMonth() {
+  calCurrentDate.setMonth(calCurrentDate.getMonth() + 1);
+  const notes = await getNotes();
+  const { data: incidents } = await db.from('incident_reports').select('*');
+  renderCalendar(notes, incidents || []);
+}
 
 async function renderAnalytics() {
   const notes = await getNotes();
@@ -1969,25 +2550,8 @@ async function renderAnalytics() {
     }
   });
 
-  // ── SHIFT DISTRIBUTION ──
-  const shiftCounts = { Day: 0, Evening: 0, Night: 0, Unspecified: 0 };
-  notes.forEach(n => {
-    const s = n.shift || '';
-    if (s === 'Day') shiftCounts.Day++;
-    else if (s === 'Evening') shiftCounts.Evening++;
-    else if (s === 'Night') shiftCounts.Night++;
-    else shiftCounts.Unspecified++;
-  });
-  if (shiftChart) { shiftChart.destroy(); shiftChart = null; }
-  const ctx4 = document.getElementById('chart-shifts').getContext('2d');
-  shiftChart = new Chart(ctx4, {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(shiftCounts),
-      datasets: [{ data: Object.values(shiftCounts), backgroundColor: ['#b8860b','#2c6e6a','#1a2332','#aab0bb'], borderWidth: 2 }]
-    },
-    options: { responsive: true, animation: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 12 } } } } }
-  });
+ // ── CALENDAR ──
+  await renderCalendar(notes, incidents);
 
   // ── STAFF TABLE ──
   const tbody = document.getElementById('staff-table');
@@ -2014,6 +2578,7 @@ let viewingIncidentId = null;
 function openAddIncidentReport() {
   document.getElementById('incident-modal-title').textContent = 'Add Incident Report';
   document.getElementById('ir-edit-id').value = '';
+  resetBodyMap();
   // Reset all fields
   ['ir-name','ir-location','ir-description','ir-emergency',
    'ir-w1-name','ir-w1-phone','ir-w2-name','ir-w2-phone',
@@ -2157,6 +2722,7 @@ async function saveIncidentReportForm() {
     prevention_action: document.getElementById('ir-prevention').value.trim(),
     prepared_by: document.getElementById('ir-prepared-by').value.trim(),
     prepared_date: document.getElementById('ir-prepared-date').value,
+    body_regions: getBodyRegionsText(),
     created_at: new Date().toISOString()
   };
   await saveIncidentReport(report);
@@ -2256,6 +2822,7 @@ async function viewIncidentReport(id) {
       </div>
       ${r.injury_other ? `<div class="note-field"><div class="field-label">Other</div>${fv(r.injury_other)}</div>` : ''}
       <div class="note-field"><div class="field-label">Emergency Treatment Given</div>${fv(r.emergency_treatment)}</div>
+      ${r.body_regions ? `<div class="note-field"><div class="field-label">Body Regions Affected</div><div class="field-value">${r.body_regions}</div></div>` : ''}
     </div>
 
     <div class="note-section">
@@ -2381,6 +2948,7 @@ function buildIncidentHTML(r) {
 <div class="field-row" style="margin-top:10px;">
   <strong>Emergency Treatment Given (if any):</strong><span class="underline" style="min-width:300px;">${r.emergency_treatment||''}</span>
 </div>
+${r.body_regions ? `<div class="field-row"><strong>Body Regions Affected:</strong> ${r.body_regions}</div>` : ''}
 
 <div style="margin:10px 0 4px;"><strong>Witness(es)</strong> &nbsp;&nbsp;&nbsp; <strong>Phone</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Employee(s) Involved</strong> &nbsp;&nbsp;&nbsp; <strong>Phone</strong></div>
 <div style="border:1px solid #000;padding:4px 6px;min-height:22px;font-size:11px;margin-bottom:2px;">${r.witness1_name||''} &nbsp;&nbsp; ${r.witness1_phone||''} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${r.employee1_name||''} &nbsp;&nbsp; ${r.employee1_phone||''}</div>
@@ -2480,6 +3048,498 @@ function toast(msg) {
   el.textContent = msg; el.style.display = 'block';
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.style.display = 'none', 2800);
+}
+
+// ══════════════════════════════════
+// PROFILE TABS
+// ══════════════════════════════════
+function switchProfileTab(tab) {
+  ['notes','vitals','medications','incidents'].forEach(t => {
+    document.getElementById('profile-tab-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('ptab-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'vitals') renderVitals();
+  if (tab === 'medications') renderMedications();
+  if (tab === 'incidents') renderProfileIncidents();
+}
+
+// ══════════════════════════════════
+// RESIDENT PHOTO
+// ══════════════════════════════════
+function handlePhotoUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const dataUrl = e.target.result;
+    // Save to supabase residents table
+    await db.from('residents').update({ photo: dataUrl }).eq('id', currentResidentId);
+    showResidentPhoto(dataUrl);
+    toast('Photo updated');
+  };
+  reader.readAsDataURL(file);
+}
+
+function showResidentPhoto(dataUrl) {
+  const img = document.getElementById('profile-photo-img');
+  const avatar = document.getElementById('profile-avatar');
+  if (dataUrl) {
+    img.src = dataUrl;
+    img.style.display = 'block';
+    avatar.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    avatar.style.display = 'flex';
+  }
+}
+
+// ══════════════════════════════════
+// RESIDENT STATUS
+// ══════════════════════════════════
+async function saveResidentStatus() {
+  const status = document.getElementById('profile-status-select').value;
+  await db.from('residents').update({ status }).eq('id', currentResidentId);
+  toast('Status updated');
+}
+
+// ══════════════════════════════════
+// BIRTHDAY ALERTS
+// ══════════════════════════════════
+function checkBirthday(res) {
+  if (!res.dob) return;
+  const today = new Date();
+  const dob = new Date(res.dob + 'T00:00:00');
+  const thisYearBday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
+  const diff = Math.round((thisYearBday - today) / (1000 * 60 * 60 * 24));
+  const banner = document.getElementById('birthday-banner');
+  const bannerText = document.getElementById('birthday-banner-text');
+  if (diff === 0) {
+    banner.style.display = 'flex';
+    bannerText.textContent = `Today is ${res.name.split(' ')[0]}'s birthday! 🎉 Wishing them a wonderful day.`;
+  } else if (diff > 0 && diff <= 7) {
+    banner.style.display = 'flex';
+    bannerText.textContent = `${res.name.split(' ')[0]}'s birthday is in ${diff} day${diff > 1 ? 's' : ''}!`;
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+// ══════════════════════════════════
+// VITALS
+// ══════════════════════════════════
+async function getVitals(residentId) {
+  const { data } = await db.from('vitals').select('*').eq('resident_id', residentId).order('vitals_date', { ascending: false });
+  return data || [];
+}
+
+async function renderVitals() {
+  const vitals = await getVitals(currentResidentId);
+  const tbody = document.getElementById('vitals-tbody');
+  if (!vitals.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text3);padding:32px;">No vitals recorded yet. Add the first entry above.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = vitals.map(v => `
+    <tr>
+      <td style="font-weight:600;">${fmtDate(v.vitals_date)}</td>
+      <td>${v.bp || '—'}</td>
+      <td>${v.temp || '—'}</td>
+      <td>${v.pulse || '—'}</td>
+      <td>${v.rr || '—'}</td>
+      <td>${v.o2_sat || '—'}</td>
+      <td>${v.weight || '—'}</td>
+      <td>${v.recorded_by || '—'}</td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn btn-danger btn-sm" onclick="deleteVitals('${v.id}')">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openAddVitals() {
+  document.getElementById('vitals-edit-id').value = '';
+  document.getElementById('vitals-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('vitals-by').value = currentUser.name;
+  ['vitals-bp','vitals-temp','vitals-pulse','vitals-rr','vitals-o2','vitals-weight'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  openModal('modal-vitals');
+}
+
+async function saveVitals() {
+  const date = document.getElementById('vitals-date').value;
+  const by = document.getElementById('vitals-by').value.trim();
+  if (!date || !by) { toast('Please fill in Date and Recorded By'); return; }
+  const entry = {
+    id: uid(),
+    resident_id: currentResidentId,
+    vitals_date: date,
+    bp: document.getElementById('vitals-bp').value.trim(),
+    temp: document.getElementById('vitals-temp').value.trim(),
+    pulse: document.getElementById('vitals-pulse').value.trim(),
+    rr: document.getElementById('vitals-rr').value.trim(),
+    o2_sat: document.getElementById('vitals-o2').value.trim(),
+    weight: document.getElementById('vitals-weight').value.trim(),
+    recorded_by: by,
+    created_at: new Date().toISOString()
+  };
+  await db.from('vitals').insert(entry);
+  closeModal('modal-vitals');
+  toast('Vitals saved');
+  renderVitals();
+}
+
+async function deleteVitals(id) {
+  if (!confirm('Delete this vitals entry?')) return;
+  await db.from('vitals').delete().eq('id', id);
+  renderVitals();
+  toast('Vitals entry deleted');
+}
+
+async function printVitalsSheet() {
+  const residents = await getResidents();
+  const res = residents.find(r => r.id === currentResidentId);
+  const vitals = await getVitals(currentResidentId);
+  const resName = res ? res.name : '';
+  const dob = res ? fmtDate(res.dob) : '';
+
+  // Split into pages of 15 rows each (matching the original sheet layout)
+  const chunkSize = 15;
+  const pages = [];
+  for (let i = 0; i < Math.max(vitals.length, 1); i += chunkSize) {
+    pages.push(vitals.slice(i, i + chunkSize));
+  }
+
+  const buildPage = (rows) => {
+    // Build left half (rows 0-14) and right half mirrors same rows side-by-side
+    const leftRows = rows.slice(0, 15);
+    const rightRows = rows.slice(0, 15); // same page, two columns
+    const allRows = Array.from({ length: 15 }, (_, i) => leftRows[i] || null);
+    const col = (v) => `<td style="border:1px solid #000;padding:3px 4px;font-size:10px;min-width:36px;height:22px;">${v || ''}</td>`;
+    const rowsHTML = allRows.map((v, i) => {
+      const right = allRows[i];
+      return `<tr>
+        ${col(v ? fmtDate(v.vitals_date) : '')}
+        ${col(v ? v.bp : '')}${col(v ? v.temp : '')}${col(v ? v.pulse : '')}${col(v ? v.rr : '')}${col(v ? v.o2_sat : '')}${col(v ? v.weight : '')}
+        <td style="border:2px solid #b8860b;background:#b8860b;width:6px;"></td>
+        ${col('')}${col('')}${col('')}${col('')}${col('')}${col('')}${col('')}
+      </tr>`;
+    }).join('');
+    return rowsHTML;
+  };
+
+  const pagesHTML = pages.map(rows => buildPage(rows)).join('<div style="page-break-before:always;"></div>');
+
+  const win = window.open('', '_blank', 'width=1100,height=850');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Vitals Sheet — ${resName}</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Times New Roman',Times,serif; background:#fff; color:#000; padding:28px 36px; width:1050px; margin:0 auto; }
+  .header { text-align:center; margin-bottom:16px; }
+  .header img { width:70px; height:70px; object-fit:contain; display:block; margin:0 auto 8px; }
+  .org { font-size:15px; font-weight:bold; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px; }
+  .addr { font-size:11px; margin-bottom:6px; font-style:italic; }
+  .title { font-size:16px; font-weight:bold; text-decoration:underline; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:14px; }
+  table { width:100%; border-collapse:collapse; }
+  th { background:#b8860b; color:#fff; border:1px solid #8a6408; padding:5px 4px; font-size:10px; font-weight:bold; text-align:center; letter-spacing:0.03em; }
+  td { border:1px solid #000; padding:2px 4px; font-size:10px; height:22px; }
+  .divider-col { background:#b8860b; border:2px solid #b8860b; width:8px; padding:0; }
+  .footer { margin-top:18px; font-size:12px; }
+  .footer-line { border-bottom:1px solid #000; display:inline-block; min-width:280px; margin-left:6px; }
+  @media print { body { padding:18px 24px; } @page { size:landscape; margin:0.4in; } }
+</style></head><body>
+<div class="header">
+  <img src="harmony_living_house_logo.png" alt="Logo">
+  <div class="org">Harmony Living House Adult Family LLC</div>
+  <div class="addr">120 Newaukum Village Dr &nbsp;|&nbsp; Chehalis, WA 98532</div>
+  <div class="title">Vitals Sheet</div>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>Date</th><th>BP</th><th>TEMP</th><th>PULSE</th><th>RR</th><th>O2 Sat</th><th>WEIGHT</th>
+      <th class="divider-col"></th>
+      <th>Date</th><th>BP</th><th>TEMP</th><th>PULSE</th><th>RR</th><th>O2 Sat</th><th>WEIGHT</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${Array.from({ length: 15 }, (_, i) => {
+      const v = vitals[i] || null;
+      const v2 = vitals[i + 15] || null;
+      const col = (val) => `<td>${val || ''}</td>`;
+      return `<tr>
+        ${col(v ? fmtDate(v.vitals_date) : '')}
+        ${col(v ? v.bp : '')}${col(v ? v.temp : '')}${col(v ? v.pulse : '')}${col(v ? v.rr : '')}${col(v ? v.o2_sat : '')}${col(v ? v.weight : '')}
+        <td class="divider-col"></td>
+        ${col(v2 ? fmtDate(v2.vitals_date) : '')}
+        ${col(v2 ? v2.bp : '')}${col(v2 ? v2.temp : '')}${col(v2 ? v2.pulse : '')}${col(v2 ? v2.rr : '')}${col(v2 ? v2.o2_sat : '')}${col(v2 ? v2.weight : '')}
+      </tr>`;
+    }).join('')}
+  </tbody>
+</table>
+<div class="footer" style="margin-top:20px;">
+  <div style="margin-bottom:10px;"><strong>Residents Name:</strong> <span class="footer-line">${resName}</span></div>
+  <div><strong>Date of Birth:</strong> <span class="footer-line" style="min-width:160px;">${dob}</span></div>
+</div>
+</body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => {
+    win.print();
+    win.addEventListener('afterprint', () => { win.close(); window.focus(); });
+  }, 700);
+}
+
+// ══════════════════════════════════
+// MEDICATIONS
+// ══════════════════════════════════
+async function getMedications(residentId) {
+  const { data } = await db.from('medications').select('*').eq('resident_id', residentId).order('created_at', { ascending: false });
+  return data || [];
+}
+
+async function renderMedications() {
+  const meds = await getMedications(currentResidentId);
+  const container = document.getElementById('medications-list');
+  if (!meds.length) {
+    container.innerHTML = `<div class="empty-state">
+      <div style="font-size:48px;margin-bottom:12px;">💊</div>
+      <h4>No Medications Recorded</h4>
+      <p>Add the first medication for this resident using the button above.</p>
+    </div>`;
+    return;
+  }
+  const statusColors = { active: 'badge-green', discontinued: 'badge-red', onhold: 'badge-warn' };
+  container.innerHTML = meds.map(m => `
+    <div class="med-card">
+      <div class="med-icon">💊</div>
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div class="med-name">${m.name}</div>
+          <span class="badge ${statusColors[m.status] || 'badge-green'}" style="text-transform:capitalize;">${m.status || 'Active'}</span>
+        </div>
+        <div class="med-detail">
+          <strong>Dosage:</strong> ${m.dosage || '—'} &nbsp;·&nbsp;
+          <strong>Frequency:</strong> ${m.frequency || '—'} &nbsp;·&nbsp;
+          <strong>Route:</strong> ${m.route || '—'}<br>
+          ${m.physician ? `<strong>Physician:</strong> ${m.physician} &nbsp;·&nbsp; ` : ''}
+          ${m.start_date ? `<strong>Started:</strong> ${fmtDate(m.start_date)}` : ''}
+          ${m.end_date ? ` &nbsp;·&nbsp; <strong>End:</strong> ${fmtDate(m.end_date)}` : ''}
+          ${m.notes ? `<br><strong>Notes:</strong> ${m.notes}` : ''}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="btn btn-secondary btn-sm" onclick="editMedication('${m.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteMedication('${m.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openAddMedication() {
+  document.getElementById('med-modal-title').textContent = 'Add Medication';
+  document.getElementById('med-edit-id').value = '';
+  ['med-name','med-dosage','med-physician','med-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('med-frequency').value = '';
+  document.getElementById('med-route').value = '';
+  document.getElementById('med-status').value = 'active';
+  document.getElementById('med-start').value = new Date().toISOString().split('T')[0];
+  document.getElementById('med-end').value = '';
+  openModal('modal-medication');
+}
+
+async function editMedication(id) {
+  const meds = await getMedications(currentResidentId);
+  const m = meds.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('med-modal-title').textContent = 'Edit Medication';
+  document.getElementById('med-edit-id').value = id;
+  document.getElementById('med-name').value = m.name || '';
+  document.getElementById('med-dosage').value = m.dosage || '';
+  document.getElementById('med-frequency').value = m.frequency || '';
+  document.getElementById('med-route').value = m.route || '';
+  document.getElementById('med-physician').value = m.physician || '';
+  document.getElementById('med-start').value = m.start_date || '';
+  document.getElementById('med-end').value = m.end_date || '';
+  document.getElementById('med-status').value = m.status || 'active';
+  document.getElementById('med-notes').value = m.notes || '';
+  openModal('modal-medication');
+}
+
+async function saveMedication() {
+  const name = document.getElementById('med-name').value.trim();
+  const dosage = document.getElementById('med-dosage').value.trim();
+  if (!name || !dosage) { toast('Please fill in Medication Name and Dosage'); return; }
+  const editId = document.getElementById('med-edit-id').value;
+  const med = {
+    id: editId || uid(),
+    resident_id: currentResidentId,
+    name, dosage,
+    frequency: document.getElementById('med-frequency').value,
+    route: document.getElementById('med-route').value,
+    physician: document.getElementById('med-physician').value.trim(),
+    start_date: document.getElementById('med-start').value,
+    end_date: document.getElementById('med-end').value,
+    status: document.getElementById('med-status').value,
+    notes: document.getElementById('med-notes').value.trim(),
+    created_at: new Date().toISOString()
+  };
+  await db.from('medications').upsert(med);
+  closeModal('modal-medication');
+  toast(editId ? 'Medication updated' : 'Medication added');
+  renderMedications();
+}
+
+async function deleteMedication(id) {
+  if (!confirm('Delete this medication record?')) return;
+  await db.from('medications').delete().eq('id', id);
+  renderMedications();
+  toast('Medication deleted');
+}
+
+// ══════════════════════════════════
+// BODY MAP
+// ══════════════════════════════════
+let selectedBodyRegions = {};
+
+function toggleBodyRegion(el) {
+  const region = el.getAttribute('data-region');
+  const label = el.getAttribute('data-label');
+  if (selectedBodyRegions[region]) {
+    delete selectedBodyRegions[region];
+    el.classList.remove('selected');
+  } else {
+    selectedBodyRegions[region] = label;
+    el.classList.add('selected');
+  }
+  updateBodyMapLegend();
+}
+
+function updateBodyMapLegend() {
+  const legend = document.getElementById('ir-body-legend');
+  const entries = Object.entries(selectedBodyRegions);
+  if (!entries.length) {
+    legend.innerHTML = '<span style="color:var(--text3);font-style:italic;background:none;border:none;">None selected</span>';
+    return;
+  }
+  legend.innerHTML = entries.map(([num, label]) =>
+    `<span onclick="deselectRegion('${num}')" title="Click to deselect">#${num} ${label}</span>`
+  ).join('');
+}
+
+function deselectRegion(num) {
+  delete selectedBodyRegions[num];
+  document.querySelectorAll(`.body-region[data-region="${num}"]`).forEach(el => el.classList.remove('selected'));
+  updateBodyMapLegend();
+}
+
+function resetBodyMap() {
+  selectedBodyRegions = {};
+  document.querySelectorAll('.body-region.selected').forEach(el => el.classList.remove('selected'));
+  updateBodyMapLegend();
+}
+
+function getBodyRegionsText() {
+  const entries = Object.entries(selectedBodyRegions);
+  if (!entries.length) return '';
+  return entries.map(([num, label]) => `#${num} ${label}`).join(', ');
+}
+
+// ══════════════════════════════════
+// CALENDAR VIEW (Analytics)
+// ══════════════════════════════════
+let calCurrentDate = new Date();
+let calPopup = null;
+
+async function renderCalendar(notes, incidents) {
+  const year = calCurrentDate.getFullYear();
+  const month = calCurrentDate.getMonth();
+  const today = new Date();
+
+  const monthName = calCurrentDate.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+  document.getElementById('cal-month-label').textContent = monthName;
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+  // Build note/incident lookup by date string
+  const notesByDate = {};
+  notes.forEach(n => {
+    if (!n.note_date) return;
+    if (!notesByDate[n.note_date]) notesByDate[n.note_date] = [];
+    notesByDate[n.note_date].push(n);
+  });
+  const incidentsByDate = {};
+  incidents.forEach(i => {
+    if (!i.incident_date) return;
+    if (!incidentsByDate[i.incident_date]) incidentsByDate[i.incident_date] = [];
+    incidentsByDate[i.incident_date].push(i);
+  });
+
+  const grid = document.getElementById('cal-days-grid');
+  grid.innerHTML = '';
+
+  // Leading days from prev month
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = document.createElement('div');
+    d.className = 'cal-day other-month';
+    d.innerHTML = `<div class="cal-day-num">${daysInPrevMonth - i}</div>`;
+    grid.appendChild(d);
+  }
+
+  // Current month days
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const isToday = today.getFullYear() === year && today.getMonth() === month && today.getDate() === day;
+    const dayNotes = notesByDate[dateStr] || [];
+    const dayIncidents = incidentsByDate[dateStr] || [];
+
+    const d = document.createElement('div');
+    d.className = 'cal-day' + (isToday ? ' today' : '');
+    d.innerHTML = `
+      <div class="cal-day-num">${day}</div>
+      <div>
+        ${dayNotes.slice(0,3).map(() => `<span class="cal-dot cal-dot-note"></span>`).join('')}
+        ${dayIncidents.slice(0,3).map(() => `<span class="cal-dot cal-dot-incident"></span>`).join('')}
+      </div>
+      ${dayNotes.length > 0 ? `<div style="font-size:9px;color:var(--accent);margin-top:2px;">${dayNotes.length} note${dayNotes.length>1?'s':''}</div>` : ''}
+      ${dayIncidents.length > 0 ? `<div style="font-size:9px;color:var(--danger);">${dayIncidents.length} incident${dayIncidents.length>1?'s':''}</div>` : ''}
+    `;
+
+    if (dayNotes.length || dayIncidents.length) {
+      d.onclick = (e) => showCalPopup(e, dateStr, dayNotes, dayIncidents);
+    }
+    grid.appendChild(d);
+  }
+
+  // Trailing days
+  const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+  for (let i = 1; i <= totalCells - firstDay - daysInMonth; i++) {
+    const d = document.createElement('div');
+    d.className = 'cal-day other-month';
+    d.innerHTML = `<div class="cal-day-num">${i}</div>`;
+    grid.appendChild(d);
+  }
+}
+
+function showCalPopup(event, dateStr, notes, incidents) {
+  if (calPopup) calPopup.remove();
+  calPopup = document.createElement('div');
+  calPopup.className = 'cal-day-popup';
+  calPopup.innerHTML = `
+    <div class="cal-popup-title">📅 ${fmtDate(dateStr)}</div>
+    ${notes.map(n => `<div class="cal-popup-item">📋 <strong>${n.created_by}</strong> — ${(n.behavior_notes||'').slice(0,60)}${(n.behavior_notes||'').length>60?'…':''}</div>`).join('')}
+    ${incidents.map(i => `<div class="cal-popup-item" style="color:var(--danger);">⚠️ <strong>Incident</strong> — ${(i.description||'').slice(0,60)}${(i.description||'').length>60?'…':''}</div>`).join('')}
+    <div style="margin-top:10px;text-align:right;"><button class="btn btn-secondary btn-sm" onclick="document.querySelector('.cal-day-popup').remove()">Close</button></div>
+  `;
+  document.body.appendChild(calPopup);
+  const rect = event.currentTarget.getBoundingClientRect();
+  calPopup.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+  calPopup.style.left = Math.min(rect.left, window.innerWidth - 300) + 'px';
+  event.stopPropagation();
+  setTimeout(() => document.addEventListener('click', () => { if(calPopup) { calPopup.remove(); calPopup = null; } }, { once: true }), 100);
 }
 
 // ══════════════════════════════════
