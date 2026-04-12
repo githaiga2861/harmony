@@ -98,26 +98,20 @@
     object-fit: contain;
     display: block;
   }
-  .sidebar-brand-fade {
-    width: 100%;
-    height: 48px;
-    background: linear-gradient(to bottom, #ffffff 0%, #1a1a1a 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 2px;
-  }
-  .sidebar-brand-fade .portal-label {
+  .sidebar-portal-label {
     font-size: 9.5px;
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.0);
-    background: linear-gradient(to bottom, #b8860b 0%, rgba(255,255,255,0.55) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-top: 10px;
+    color: #1a1a1a;
+    margin: 8px 0 0;
+    text-align: center;
+  }
+  .sidebar-brand-fade {
+    width: 100%;
+    height: 28px;
+    background: linear-gradient(to bottom, #ffffff 0%, #1a1a1a 100%);
+    margin-top: 6px;
   }
   .sidebar-nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 2px; }
   .nav-item {
@@ -451,9 +445,8 @@
     <nav class="sidebar" id="sidebar">
       <div class="sidebar-brand">
         <img src="harmony_living_house_logo.png" alt="Harmony Living House" class="sidebar-logo">
-        <div class="sidebar-brand-fade">
-          <span class="portal-label">Admin Portal</span>
-        </div>
+        <div class="sidebar-portal-label">Admin Portal</div>
+        <div class="sidebar-brand-fade"></div>
       </div>
       <div class="sidebar-nav">
         <button class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
