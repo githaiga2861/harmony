@@ -1,0 +1,24 @@
+{
+  "name": "Harmony Living House Admin",
+  "short_name": "HLH Admin",
+  "description": "Harmony Living House Adult Family LLC — Staff Admin Portal",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#b8860b",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "harmony_living_house_logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "harmony_living_house_logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
