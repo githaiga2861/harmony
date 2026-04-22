@@ -1791,239 +1791,230 @@
 </div>
 
 <!-- MODAL: Add ADL Entry -->
+<!-- MODAL: Add ADL Entry -->
 <div class="modal-overlay" id="modal-adl">
   <div class="modal modal-lg">
     <div class="modal-header">
-      <h3 id="adl-modal-title">Log Daily Living Entry</h3>
+      <h3 id="adl-modal-title">Daily Log</h3>
       <button class="btn-close" onclick="closeModal('modal-adl')">
         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="adl-edit-id">
-      <div class="form-grid">
-        <div class="field">
-          <label>Date *</label>
-          <input type="date" id="adl-date">
+
+      <style>
+        .adl-topbar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px;}
+        .adl-sec-hdr{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--accent);margin:16px 0 8px;padding-bottom:5px;border-bottom:2px solid var(--accent-light);}
+        .adl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+        .adl-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+        .adl-card-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:7px;}
+        .adl-pills{display:flex;flex-wrap:wrap;gap:4px;}
+        .adl-pill{border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:12px;cursor:pointer;background:var(--surface);color:var(--text2);transition:all 0.1s;white-space:nowrap;font-family:inherit;}
+        .adl-pill:hover{border-color:var(--accent);color:var(--accent);}
+        .adl-pill.p-green{background:#e6f4ea;color:#1e7e34;border-color:#a8d5b0;font-weight:700;}
+        .adl-pill.p-amber{background:#fff3cd;color:#856404;border-color:#ffe08a;font-weight:700;}
+        .adl-pill.p-red{background:#fdf0ef;color:#c0392b;border-color:#f5c0bb;font-weight:700;}
+        @media(max-width:600px){.adl-grid{grid-template-columns:1fr 1fr;}.adl-topbar{grid-template-columns:1fr 1fr;}}
+      </style>
+
+      <div class="adl-topbar">
+        <div class="field" style="margin:0">
+          <label style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:5px;">Date *</label>
+          <input type="date" id="adl-date" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;">
         </div>
-        <div class="field">
-          <label>Shift</label>
-          <select id="adl-shift">
+        <div class="field" style="margin:0">
+          <label style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:5px;">Shift</label>
+          <select id="adl-shift" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;">
             <option value="">— Select —</option>
             <option>Day</option>
             <option>Evening</option>
             <option>Night</option>
           </select>
         </div>
-        <div class="field">
-          <label>Documented By *</label>
-          <input type="text" id="adl-by" placeholder="Staff name">
+        <div class="field" style="margin:0">
+          <label style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:5px;">Documented By *</label>
+          <input type="text" id="adl-by" placeholder="Your name" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;">
         </div>
       </div>
 
-      <div class="form-section-title">Personal Hygiene</div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Showered / Bathed</label>
-          <select id="adl-shower">
-            <option value="">— Select —</option>
-            <option value="independent">Independent</option>
-            <option value="assisted">Assisted</option>
-            <option value="refused">Refused</option>
-            <option value="not_applicable">N/A</option>
-          </select>
+      <div class="adl-sec-hdr">Hygiene</div>
+      <div class="adl-grid">
+        <div class="adl-card">
+          <div class="adl-card-label">Shower / bath</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="shower" data-val="done" data-cls="p-green" onclick="adlTick(this)">Done</button>
+            <button class="adl-pill" data-field="shower" data-val="assisted" data-cls="p-amber" onclick="adlTick(this)">Assisted</button>
+            <button class="adl-pill" data-field="shower" data-val="refused" data-cls="p-red" onclick="adlTick(this)">Refused</button>
+            <button class="adl-pill" data-field="shower" data-val="na" data-cls="p-amber" onclick="adlTick(this)">N/A</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Oral Hygiene (brushed teeth)</label>
-          <select id="adl-oral">
-            <option value="">— Select —</option>
-            <option value="independent">Independent</option>
-            <option value="assisted">Assisted</option>
-            <option value="refused">Refused</option>
-            <option value="not_applicable">N/A</option>
-          </select>
+        <div class="adl-card">
+          <div class="adl-card-label">Oral hygiene</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="oral" data-val="done" data-cls="p-green" onclick="adlTick(this)">Done</button>
+            <button class="adl-pill" data-field="oral" data-val="assisted" data-cls="p-amber" onclick="adlTick(this)">Assisted</button>
+            <button class="adl-pill" data-field="oral" data-val="refused" data-cls="p-red" onclick="adlTick(this)">Refused</button>
+            <button class="adl-pill" data-field="oral" data-val="na" data-cls="p-amber" onclick="adlTick(this)">N/A</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Grooming (hair, nails)</label>
-          <select id="adl-grooming">
-            <option value="">— Select —</option>
-            <option value="independent">Independent</option>
-            <option value="assisted">Assisted</option>
-            <option value="refused">Refused</option>
-            <option value="not_applicable">N/A</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Dressing</label>
-          <select id="adl-dressing">
-            <option value="">— Select —</option>
-            <option value="independent">Independent</option>
-            <option value="assisted">Assisted</option>
-            <option value="refused">Refused</option>
-            <option value="not_applicable">N/A</option>
-          </select>
+        <div class="adl-card">
+          <div class="adl-card-label">Dressed self</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="dressing" data-val="done" data-cls="p-green" onclick="adlTick(this)">Done</button>
+            <button class="adl-pill" data-field="dressing" data-val="assisted" data-cls="p-amber" onclick="adlTick(this)">Assisted</button>
+            <button class="adl-pill" data-field="dressing" data-val="refused" data-cls="p-red" onclick="adlTick(this)">Refused</button>
+            <button class="adl-pill" data-field="dressing" data-val="na" data-cls="p-amber" onclick="adlTick(this)">N/A</button>
+          </div>
         </div>
       </div>
 
-      <div class="form-section-title">Meals</div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Breakfast</label>
-          <select id="adl-breakfast">
-            <option value="">— Select —</option>
-            <option value="ate_all">Ate all</option>
-            <option value="ate_most">Ate most (&gt;75%)</option>
-            <option value="ate_some">Ate some (25–75%)</option>
-            <option value="ate_little">Ate little (&lt;25%)</option>
-            <option value="refused">Refused</option>
-            <option value="not_applicable">N/A</option>
-          </select>
+      <div class="adl-sec-hdr">Meals &amp; Fluids</div>
+      <div class="adl-grid">
+        <div class="adl-card">
+          <div class="adl-card-label">Breakfast</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="breakfast" data-val="all" data-cls="p-green" onclick="adlTick(this)">All</button>
+            <button class="adl-pill" data-field="breakfast" data-val="most" data-cls="p-green" onclick="adlTick(this)">Most</button>
+            <button class="adl-pill" data-field="breakfast" data-val="little" data-cls="p-amber" onclick="adlTick(this)">Little</button>
+            <button class="adl-pill" data-field="breakfast" data-val="refused" data-cls="p-red" onclick="adlTick(this)">Refused</button>
+            <button class="adl-pill" data-field="breakfast" data-val="na" data-cls="p-amber" onclick="adlTick(this)">N/A</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Lunch</label>
-          <select id="adl-lunch">
-            <option value="">— Select —</option>
-            <option value="ate_all">Ate all</option>
-            <option value="ate_most">Ate most (&gt;75%)</option>
-            <option value="ate_some">Ate some (25–75%)</option>
-            <option value="ate_little">Ate little (&lt;25%)</option>
-            <option value="refused">Refused</option>
-            <option value="not_applicable">N/A</option>
-          </select>
+        <div class="adl-card">
+          <div class="adl-card-label">Lunch</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="lunch" data-val="all" data-cls="p-green" onclick="adlTick(this)">All</button>
+            <button class="adl-pill" data-field="lunch" data-val="most" data-cls="p-green" onclick="adlTick(this)">Most</button>
+            <button class="adl-pill" data-field="lunch" data-val="little" data-cls="p-amber" onclick="adlTick(this)">Little</button>
+            <button class="adl-pill" data-field="lunch" data-val="refused" data-cls="p-red" onclick="adlTick(this)">Refused</button>
+            <button class="adl-pill" data-field="lunch" data-val="na" data-cls="p-amber" onclick="adlTick(this)">N/A</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Dinner</label>
-          <select id="adl-dinner">
-            <option value="">— Select —</option>
-            <option value="ate_all">Ate all</option>
-            <option value="ate_most">Ate most (&gt;75%)</option>
-            <option value="ate_some">Ate some (25–75%)</option>
-            <option value="ate_little">Ate little (&lt;25%)</option>
-            <option value="refused">Refused</option>
-            <option value="not_applicable">N/A</option>
-          </select>
+        <div class="adl-card">
+          <div class="adl-card-label">Dinner</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="dinner" data-val="all" data-cls="p-green" onclick="adlTick(this)">All</button>
+            <button class="adl-pill" data-field="dinner" data-val="most" data-cls="p-green" onclick="adlTick(this)">Most</button>
+            <button class="adl-pill" data-field="dinner" data-val="little" data-cls="p-amber" onclick="adlTick(this)">Little</button>
+            <button class="adl-pill" data-field="dinner" data-val="refused" data-cls="p-red" onclick="adlTick(this)">Refused</button>
+            <button class="adl-pill" data-field="dinner" data-val="na" data-cls="p-amber" onclick="adlTick(this)">N/A</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Snacks / Other</label>
-          <select id="adl-snacks">
-            <option value="">— Select —</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-            <option value="not_applicable">N/A</option>
-          </select>
+        <div class="adl-card">
+          <div class="adl-card-label">Fluids</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="fluids" data-val="good" data-cls="p-green" onclick="adlTick(this)">Good</button>
+            <button class="adl-pill" data-field="fluids" data-val="fair" data-cls="p-amber" onclick="adlTick(this)">Fair</button>
+            <button class="adl-pill" data-field="fluids" data-val="poor" data-cls="p-red" onclick="adlTick(this)">Poor</button>
+            <button class="adl-pill" data-field="fluids" data-val="refused" data-cls="p-red" onclick="adlTick(this)">Refused</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Fluid Intake</label>
-          <select id="adl-fluids">
-            <option value="">— Select —</option>
-            <option value="good">Good (≥6 glasses)</option>
-            <option value="fair">Fair (3–5 glasses)</option>
-            <option value="poor">Poor (&lt;3 glasses)</option>
-            <option value="refused">Refused</option>
-          </select>
+        <div class="adl-card">
+          <div class="adl-card-label">Snacks</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="snacks" data-val="yes" data-cls="p-green" onclick="adlTick(this)">Taken</button>
+            <button class="adl-pill" data-field="snacks" data-val="refused" data-cls="p-red" onclick="adlTick(this)">Refused</button>
+            <button class="adl-pill" data-field="snacks" data-val="na" data-cls="p-amber" onclick="adlTick(this)">N/A</button>
+          </div>
         </div>
       </div>
 
-      <div class="form-section-title">Mobility &amp; Safety</div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Ambulation / Mobility</label>
-          <select id="adl-mobility">
-            <option value="">— Select —</option>
-            <option value="independent">Independent</option>
-            <option value="assisted_device">Assisted — device (walker/cane)</option>
-            <option value="assisted_staff">Assisted — staff</option>
-            <option value="wheelchair">Wheelchair</option>
-            <option value="bedbound">Bedbound</option>
-          </select>
+      <div class="adl-sec-hdr">Wellbeing &amp; Safety</div>
+      <div class="adl-grid">
+        <div class="adl-card">
+          <div class="adl-card-label">Mood</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="mood" data-val="calm" data-cls="p-green" onclick="adlTick(this)">Calm</button>
+            <button class="adl-pill" data-field="mood" data-val="happy" data-cls="p-green" onclick="adlTick(this)">Happy</button>
+            <button class="adl-pill" data-field="mood" data-val="anxious" data-cls="p-amber" onclick="adlTick(this)">Anxious</button>
+            <button class="adl-pill" data-field="mood" data-val="withdrawn" data-cls="p-amber" onclick="adlTick(this)">Withdrawn</button>
+            <button class="adl-pill" data-field="mood" data-val="agitated" data-cls="p-red" onclick="adlTick(this)">Agitated</button>
+            <button class="adl-pill" data-field="mood" data-val="confused" data-cls="p-red" onclick="adlTick(this)">Confused</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Continence</label>
-          <select id="adl-continence">
-            <option value="">— Select —</option>
-            <option value="continent">Continent</option>
-            <option value="occasional_incontinence">Occasional incontinence</option>
-            <option value="incontinent_bowel">Incontinent — bowel</option>
-            <option value="incontinent_bladder">Incontinent — bladder</option>
-            <option value="incontinent_both">Incontinent — bowel &amp; bladder</option>
-          </select>
+        <div class="adl-card">
+          <div class="adl-card-label">Sleep (last night)</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="sleep" data-val="good" data-cls="p-green" onclick="adlTick(this)">Good</button>
+            <button class="adl-pill" data-field="sleep" data-val="restless" data-cls="p-amber" onclick="adlTick(this)">Restless</button>
+            <button class="adl-pill" data-field="sleep" data-val="poor" data-cls="p-red" onclick="adlTick(this)">Poor</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Bowel Movement</label>
-          <select id="adl-bowel">
-            <option value="">— Select —</option>
-            <option value="yes_normal">Yes — normal</option>
-            <option value="yes_loose">Yes — loose/diarrhea</option>
-            <option value="yes_hard">Yes — hard/constipated</option>
-            <option value="no">No</option>
-          </select>
+        <div class="adl-card">
+          <div class="adl-card-label">Medications</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="meds_taken" data-val="all" data-cls="p-green" onclick="adlTick(this)">All taken</button>
+            <button class="adl-pill" data-field="meds_taken" data-val="partial" data-cls="p-amber" onclick="adlTick(this)">Partial</button>
+            <button class="adl-pill" data-field="meds_taken" data-val="refused" data-cls="p-red" onclick="adlTick(this)">Refused</button>
+            <button class="adl-pill" data-field="meds_taken" data-val="not_due" data-cls="p-amber" onclick="adlTick(this)">Not due</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Fall Risk Today</label>
-          <select id="adl-fall-risk">
-            <option value="">— Select —</option>
-            <option value="low">Low</option>
-            <option value="moderate">Moderate</option>
-            <option value="high">High</option>
-          </select>
+        <div class="adl-card">
+          <div class="adl-card-label">Bowel movement</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="bowel" data-val="yes" data-cls="p-green" onclick="adlTick(this)">Yes</button>
+            <button class="adl-pill" data-field="bowel" data-val="no" data-cls="p-amber" onclick="adlTick(this)">No</button>
+            <button class="adl-pill" data-field="bowel" data-val="na" data-cls="p-amber" onclick="adlTick(this)">N/A</button>
+          </div>
         </div>
-      </div>
-
-      <div class="form-section-title">Mental &amp; Emotional Wellbeing</div>
-      <div class="form-grid">
-        <div class="field">
-          <label>Mood / Affect</label>
-          <select id="adl-mood">
-            <option value="">— Select —</option>
-            <option value="calm_pleasant">Calm &amp; pleasant</option>
-            <option value="anxious">Anxious</option>
-            <option value="confused">Confused / disoriented</option>
-            <option value="agitated">Agitated</option>
-            <option value="depressed">Depressed / withdrawn</option>
-            <option value="happy">Happy / engaged</option>
-          </select>
+        <div class="adl-card">
+          <div class="adl-card-label">Fall risk</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="fall_risk" data-val="low" data-cls="p-green" onclick="adlTick(this)">Low</button>
+            <button class="adl-pill" data-field="fall_risk" data-val="moderate" data-cls="p-amber" onclick="adlTick(this)">Moderate</button>
+            <button class="adl-pill" data-field="fall_risk" data-val="high" data-cls="p-red" onclick="adlTick(this)">High</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Sleep (previous night)</label>
-          <select id="adl-sleep">
-            <option value="">— Select —</option>
-            <option value="slept_well">Slept well</option>
-            <option value="restless">Restless / interrupted</option>
-            <option value="poor">Poor — awake most of night</option>
-            <option value="refused_bed">Refused bed</option>
-          </select>
+        <div class="adl-card">
+          <div class="adl-card-label">Mobility</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="mobility" data-val="independent" data-cls="p-green" onclick="adlTick(this)">Independent</button>
+            <button class="adl-pill" data-field="mobility" data-val="device" data-cls="p-amber" onclick="adlTick(this)">Device</button>
+            <button class="adl-pill" data-field="mobility" data-val="assisted" data-cls="p-amber" onclick="adlTick(this)">Staff assist</button>
+            <button class="adl-pill" data-field="mobility" data-val="wheelchair" data-cls="p-amber" onclick="adlTick(this)">Wheelchair</button>
+            <button class="adl-pill" data-field="mobility" data-val="bedbound" data-cls="p-red" onclick="adlTick(this)">Bedbound</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Participated in Activities</label>
-          <select id="adl-activities">
-            <option value="">— Select —</option>
-            <option value="yes_engaged">Yes — actively engaged</option>
-            <option value="yes_passive">Yes — passive/observed</option>
-            <option value="no">No</option>
-            <option value="refused">Refused</option>
-          </select>
+        <div class="adl-card">
+          <div class="adl-card-label">Continence</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="continence" data-val="continent" data-cls="p-green" onclick="adlTick(this)">Continent</button>
+            <button class="adl-pill" data-field="continence" data-val="occasional" data-cls="p-amber" onclick="adlTick(this)">Occasional</button>
+            <button class="adl-pill" data-field="continence" data-val="incontinent" data-cls="p-red" onclick="adlTick(this)">Incontinent</button>
+          </div>
         </div>
-        <div class="field">
-          <label>Medication Taken</label>
-          <select id="adl-meds-taken">
-            <option value="">— Select —</option>
-            <option value="all_taken">All taken as prescribed</option>
-            <option value="partial">Partial — some refused</option>
-            <option value="refused">Refused all</option>
-            <option value="not_due">Not due this shift</option>
-          </select>
+        <div class="adl-card">
+          <div class="adl-card-label">Activities</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="activities" data-val="joined" data-cls="p-green" onclick="adlTick(this)">Joined</button>
+            <button class="adl-pill" data-field="activities" data-val="partial" data-cls="p-amber" onclick="adlTick(this)">Partial</button>
+            <button class="adl-pill" data-field="activities" data-val="refused" data-cls="p-red" onclick="adlTick(this)">Refused</button>
+            <button class="adl-pill" data-field="activities" data-val="na" data-cls="p-amber" onclick="adlTick(this)">N/A</button>
+          </div>
+        </div>
+        <div class="adl-card">
+          <div class="adl-card-label">Pain reported</div>
+          <div class="adl-pills">
+            <button class="adl-pill" data-field="pain" data-val="none" data-cls="p-green" onclick="adlTick(this)">None</button>
+            <button class="adl-pill" data-field="pain" data-val="mild" data-cls="p-amber" onclick="adlTick(this)">Mild</button>
+            <button class="adl-pill" data-field="pain" data-val="moderate" data-cls="p-amber" onclick="adlTick(this)">Moderate</button>
+            <button class="adl-pill" data-field="pain" data-val="severe" data-cls="p-red" onclick="adlTick(this)">Severe</button>
+          </div>
         </div>
       </div>
 
-      <div class="form-section-title">Additional Notes</div>
-      <div class="field">
-        <label>Observations / Comments</label>
-        <textarea id="adl-notes" rows="4" placeholder="Any additional observations about the resident's daily activities, behavior, or concerns..."></textarea>
+      <div style="margin-top:16px;">
+        <div class="form-section-title">Notes / Concerns (optional)</div>
+        <div class="field">
+          <textarea id="adl-notes" rows="2" placeholder="Flag anything unusual or add context..."></textarea>
+        </div>
       </div>
+
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-adl')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveADL()">Save ADL Entry</button>
+      <button class="btn btn-primary" onclick="saveADL()">Save Daily Log</button>
     </div>
   </div>
 </div>
@@ -4307,72 +4298,87 @@ function startNotifScheduler() {
 // ══════════════════════════════════
 // ADL — Activities of Daily Living
 // ══════════════════════════════════
-const ADL_LABELS = {
-  shower:    { label: 'Shower / Bath',        icon: '🚿' },
-  oral:      { label: 'Oral Hygiene',          icon: '🦷' },
-  grooming:  { label: 'Grooming',              icon: '💈' },
-  dressing:  { label: 'Dressing',              icon: '👕' },
-  breakfast: { label: 'Breakfast',             icon: '🍳' },
-  lunch:     { label: 'Lunch',                 icon: '🥗' },
-  dinner:    { label: 'Dinner',                icon: '🍽️' },
-  snacks:    { label: 'Snacks',                icon: '🍎' },
-  fluids:    { label: 'Fluid Intake',          icon: '💧' },
-  mobility:  { label: 'Mobility',              icon: '🚶' },
-  continence:{ label: 'Continence',            icon: '🏥' },
-  bowel:     { label: 'Bowel Movement',        icon: '📋' },
-  fall_risk: { label: 'Fall Risk',             icon: '⚠️' },
-  mood:      { label: 'Mood / Affect',         icon: '😊' },
-  sleep:     { label: 'Sleep',                 icon: '😴' },
-  activities:{ label: 'Participated in Activities', icon: '🎯' },
-  meds_taken:{ label: 'Medications Taken',     icon: '💊' },
-};
+
+let adlState = {};
+
+function adlTick(btn) {
+  const field = btn.getAttribute('data-field');
+  const val   = btn.getAttribute('data-val');
+  const cls   = btn.getAttribute('data-cls');
+  btn.closest('.adl-pills').querySelectorAll('.adl-pill')
+    .forEach(b => b.classList.remove('p-green','p-amber','p-red'));
+  if (adlState[field] === val) {
+    delete adlState[field];
+  } else {
+    btn.classList.add(cls);
+    adlState[field] = val;
+  }
+}
+
+function adlRestore(data) {
+  adlState = {};
+  document.querySelectorAll('.adl-pill').forEach(b => b.classList.remove('p-green','p-amber','p-red'));
+  if (!data) return;
+  ['shower','oral','dressing','breakfast','lunch','dinner','fluids','snacks',
+   'mood','sleep','meds_taken','bowel','fall_risk','mobility','continence','activities','pain'
+  ].forEach(f => {
+    if (!data[f]) return;
+    const btn = document.querySelector(`.adl-pill[data-field="${f}"][data-val="${data[f]}"]`);
+    if (btn) { adlState[f] = data[f]; btn.classList.add(btn.getAttribute('data-cls')); }
+  });
+}
 
 function adlDisplayVal(val) {
-  if (!val || val === '') return '<span style="color:var(--text3);font-style:italic;">—</span>';
   const map = {
-    independent:'Independent', assisted:'Assisted', refused:'Refused', not_applicable:'N/A',
-    ate_all:'Ate all', ate_most:'Ate most (>75%)', ate_some:'Ate some (25–75%)', ate_little:'Ate little (<25%)',
-    good:'Good (≥6 glasses)', fair:'Fair (3–5 glasses)', poor:'Poor (<3 glasses)',
-    assisted_device:'Assisted – device', assisted_staff:'Assisted – staff', wheelchair:'Wheelchair', bedbound:'Bedbound',
-    continent:'Continent', occasional_incontinence:'Occasional incontinence', incontinent_bowel:'Incontinent – bowel',
-    incontinent_bladder:'Incontinent – bladder', incontinent_both:'Incontinent – bowel & bladder',
-    yes_normal:'Yes – normal', yes_loose:'Yes – loose/diarrhea', yes_hard:'Yes – hard/constipated', no:'No',
+    done:'Done', assisted:'Assisted', refused:'Refused', na:'N/A',
+    all:'All', most:'Most', little:'Little',
+    good:'Good', fair:'Fair', poor:'Poor', yes:'Yes', no:'No',
+    calm:'Calm', happy:'Happy', anxious:'Anxious', withdrawn:'Withdrawn',
+    agitated:'Agitated', confused:'Confused',
+    all:'All taken', partial:'Partial', not_due:'Not due',
+    continent:'Continent', occasional:'Occasional', incontinent:'Incontinent',
     low:'Low', moderate:'Moderate', high:'High',
-    calm_pleasant:'Calm & pleasant', anxious:'Anxious', confused:'Confused', agitated:'Agitated', depressed:'Depressed', happy:'Happy',
-    slept_well:'Slept well', restless:'Restless', poor:'Poor', refused_bed:'Refused bed',
-    yes_engaged:'Yes – engaged', yes_passive:'Yes – passive',
-    all_taken:'All taken', partial:'Partial', not_due:'Not due this shift',
-    yes:'Yes'
+    independent:'Independent', device:'Device', bedbound:'Bedbound',
+    joined:'Joined', none:'None', mild:'Mild', severe:'Severe',
+    wheelchair:'Wheelchair', taken:'Taken', restless:'Restless',
   };
   return map[val] || val;
 }
 
-function adlFlagColor(key, val) {
-  if (!val) return '';
-  const warn = ['refused','ate_little','poor','high','incontinent_both','incontinent_bowel','incontinent_bladder','agitated','depressed','confused','refused_bed'];
-  const ok = ['independent','ate_all','ate_most','good','continent','slept_well','calm_pleasant','happy','all_taken','low'];
-  if (warn.includes(val)) return 'color:#c0392b;font-weight:600;';
-  if (ok.includes(val)) return 'color:#1e7e34;';
-  return '';
+function adlFlagCss(val) {
+  const red   = ['refused','agitated','confused','poor','high','incontinent','severe','bedbound'];
+  const amber = ['little','fair','anxious','withdrawn','restless','partial','moderate',
+                 'device','occasional','no','mild','assisted','not_due'];
+  if (red.includes(val))   return 'background:#fdf0ef;color:#c0392b;border-color:#f5c0bb;font-weight:700;';
+  if (amber.includes(val)) return 'background:#fff3cd;color:#856404;border-color:#ffe08a;font-weight:700;';
+  return 'background:#e6f4ea;color:#1e7e34;border-color:#a8d5b0;';
 }
 
 async function renderADL() {
-  const { data: entries } = await db.from('adl_entries').select('*').eq('resident_id', currentResidentId).order('adl_date', { ascending: false });
+  const { data: entries } = await db.from('adl_entries').select('*')
+    .eq('resident_id', currentResidentId).order('adl_date', { ascending: false });
   const container = document.getElementById('profile-adl-list');
   if (!entries || !entries.length) {
-    container.innerHTML = `<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">🏠</div><h4>No ADL Entries Yet</h4><p>Log the first daily living entry for this resident using the button above.</p></div>`;
+    container.innerHTML = `<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">🏠</div><h4>No Daily Logs Yet</h4><p>Use the "Log ADL Entry" button above to record today's daily activities.</p></div>`;
     return;
   }
+  const fields = [
+    {k:'shower',l:'Shower'},{k:'oral',l:'Oral hygiene'},{k:'dressing',l:'Dressed'},
+    {k:'breakfast',l:'Breakfast'},{k:'lunch',l:'Lunch'},{k:'dinner',l:'Dinner'},
+    {k:'fluids',l:'Fluids'},{k:'snacks',l:'Snacks'},
+    {k:'mood',l:'Mood'},{k:'sleep',l:'Sleep'},{k:'meds_taken',l:'Meds'},
+    {k:'bowel',l:'Bowel'},{k:'fall_risk',l:'Fall risk'},{k:'mobility',l:'Mobility'},
+    {k:'continence',l:'Continence'},{k:'activities',l:'Activities'},{k:'pain',l:'Pain'},
+  ];
   container.innerHTML = entries.map(e => {
-    const fields = ['shower','oral','grooming','dressing','breakfast','lunch','dinner','fluids','mobility','mood','sleep','meds_taken'];
-    const pills = fields.filter(k => e[k] && e[k] !== '').map(k => {
-      const style = adlFlagColor(k, e[k]);
-      return `<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;background:var(--surface2);margin:2px;${style}">${ADL_LABELS[k].icon} ${ADL_LABELS[k].label}: <strong>${adlDisplayVal(e[k])}</strong></span>`;
+    const pills = fields.filter(d => e[d.k]).map(d => {
+      const css = adlFlagCss(e[d.k]);
+      return `<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.5px;border:1px solid;margin:2px;${css}">${d.l}: ${adlDisplayVal(e[d.k])}</span>`;
     }).join('');
     return `<div class="note-card" style="cursor:default;">
       <div class="note-card-header">
         <div>
-          <div class="note-date">${fmtDate(e.adl_date)} ${e.shift ? '· ' + e.shift + ' Shift' : ''}</div>
+          <div class="note-date">${fmtDate(e.adl_date)}${e.shift ? ' · ' + e.shift + ' Shift' : ''}</div>
           <div class="note-staff">By ${e.documented_by}</div>
         </div>
         <div class="note-actions">
@@ -4380,59 +4386,40 @@ async function renderADL() {
           <button class="btn btn-danger btn-sm" onclick="deleteADL('${e.id}')">Delete</button>
         </div>
       </div>
-      <div style="margin-top:10px;line-height:1.8;">${pills}</div>
-      ${e.notes ? `<div class="note-preview" style="margin-top:8px;">${e.notes}</div>` : ''}
+      <div style="margin-top:10px;line-height:1.9;">${pills || '<span style="color:var(--text3);font-style:italic;font-size:13px;">No responses recorded</span>'}</div>
+      ${e.notes ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:13px;color:var(--text2);">${e.notes}</div>` : ''}
     </div>`;
   }).join('');
 }
 
 function openAddADL() {
-  document.getElementById('adl-modal-title').textContent = 'Log Daily Living Entry';
+  document.getElementById('adl-modal-title').textContent = 'Daily Log';
   document.getElementById('adl-edit-id').value = '';
   document.getElementById('adl-date').value = new Date().toISOString().split('T')[0];
   document.getElementById('adl-by').value = currentUser.name;
   document.getElementById('adl-shift').value = '';
-  ['adl-shower','adl-oral','adl-grooming','adl-dressing','adl-breakfast','adl-lunch','adl-dinner','adl-snacks','adl-fluids','adl-mobility','adl-continence','adl-bowel','adl-fall-risk','adl-mood','adl-sleep','adl-activities','adl-meds-taken'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
   document.getElementById('adl-notes').value = '';
+  adlRestore(null);
   openModal('modal-adl');
 }
 
 async function editADL(id) {
   const { data: e } = await db.from('adl_entries').select('*').eq('id', id).single();
   if (!e) return;
-  document.getElementById('adl-modal-title').textContent = 'Edit ADL Entry';
+  document.getElementById('adl-modal-title').textContent = 'Edit Daily Log';
   document.getElementById('adl-edit-id').value = id;
   document.getElementById('adl-date').value = e.adl_date || '';
   document.getElementById('adl-shift').value = e.shift || '';
   document.getElementById('adl-by').value = e.documented_by || '';
-  document.getElementById('adl-shower').value = e.shower || '';
-  document.getElementById('adl-oral').value = e.oral || '';
-  document.getElementById('adl-grooming').value = e.grooming || '';
-  document.getElementById('adl-dressing').value = e.dressing || '';
-  document.getElementById('adl-breakfast').value = e.breakfast || '';
-  document.getElementById('adl-lunch').value = e.lunch || '';
-  document.getElementById('adl-dinner').value = e.dinner || '';
-  document.getElementById('adl-snacks').value = e.snacks || '';
-  document.getElementById('adl-fluids').value = e.fluids || '';
-  document.getElementById('adl-mobility').value = e.mobility || '';
-  document.getElementById('adl-continence').value = e.continence || '';
-  document.getElementById('adl-bowel').value = e.bowel || '';
-  document.getElementById('adl-fall-risk').value = e.fall_risk || '';
-  document.getElementById('adl-mood').value = e.mood || '';
-  document.getElementById('adl-sleep').value = e.sleep || '';
-  document.getElementById('adl-activities').value = e.activities || '';
-  document.getElementById('adl-meds-taken').value = e.meds_taken || '';
   document.getElementById('adl-notes').value = e.notes || '';
+  adlRestore(e);
   openModal('modal-adl');
 }
 
 async function saveADL() {
   const date = document.getElementById('adl-date').value;
-  const by = document.getElementById('adl-by').value.trim();
-  if (!date || !by) { toast('Please fill in Date and Documented By'); return; }
+  const by   = document.getElementById('adl-by').value.trim();
+  if (!date || !by) { toast('Please fill in Date and your name'); return; }
   const editId = document.getElementById('adl-edit-id').value;
   const entry = {
     id: editId || uid(),
@@ -4440,37 +4427,37 @@ async function saveADL() {
     adl_date: date,
     shift: document.getElementById('adl-shift').value,
     documented_by: by,
-    shower: document.getElementById('adl-shower').value,
-    oral: document.getElementById('adl-oral').value,
-    grooming: document.getElementById('adl-grooming').value,
-    dressing: document.getElementById('adl-dressing').value,
-    breakfast: document.getElementById('adl-breakfast').value,
-    lunch: document.getElementById('adl-lunch').value,
-    dinner: document.getElementById('adl-dinner').value,
-    snacks: document.getElementById('adl-snacks').value,
-    fluids: document.getElementById('adl-fluids').value,
-    mobility: document.getElementById('adl-mobility').value,
-    continence: document.getElementById('adl-continence').value,
-    bowel: document.getElementById('adl-bowel').value,
-    fall_risk: document.getElementById('adl-fall-risk').value,
-    mood: document.getElementById('adl-mood').value,
-    sleep: document.getElementById('adl-sleep').value,
-    activities: document.getElementById('adl-activities').value,
-    meds_taken: document.getElementById('adl-meds-taken').value,
-    notes: document.getElementById('adl-notes').value.trim(),
+    shower:     adlState.shower     || null,
+    oral:       adlState.oral       || null,
+    dressing:   adlState.dressing   || null,
+    breakfast:  adlState.breakfast  || null,
+    lunch:      adlState.lunch      || null,
+    dinner:     adlState.dinner     || null,
+    fluids:     adlState.fluids     || null,
+    snacks:     adlState.snacks     || null,
+    mood:       adlState.mood       || null,
+    sleep:      adlState.sleep      || null,
+    meds_taken: adlState.meds_taken || null,
+    bowel:      adlState.bowel      || null,
+    fall_risk:  adlState.fall_risk  || null,
+    mobility:   adlState.mobility   || null,
+    continence: adlState.continence || null,
+    activities: adlState.activities || null,
+    pain:       adlState.pain       || null,
+    notes:      document.getElementById('adl-notes').value.trim(),
     created_at: new Date().toISOString()
   };
   await db.from('adl_entries').upsert(entry);
   closeModal('modal-adl');
-  toast(editId ? 'ADL entry updated' : 'ADL entry saved');
+  toast(editId ? 'Daily log updated' : 'Daily log saved');
   renderADL();
 }
 
 async function deleteADL(id) {
-  if (!confirm('Delete this ADL entry?')) return;
+  if (!confirm('Delete this daily log entry?')) return;
   await db.from('adl_entries').delete().eq('id', id);
   renderADL();
-  toast('ADL entry deleted');
+  toast('Entry deleted');
 }
 
 // ══════════════════════════════════
