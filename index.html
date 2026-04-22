@@ -608,6 +608,10 @@
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
           Analytics
         </button>
+        <button class="nav-item" onclick="showPage('payments')" id="nav-payments">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Payments
+        </button>
       </div>
       <div class="sidebar-footer">
         <div class="staff-badge">
@@ -775,6 +779,8 @@
             <button class="profile-tab active" id="ptab-notes" onclick="switchProfileTab('notes')">📋 Progress Notes</button>
             <button class="profile-tab" id="ptab-vitals" onclick="switchProfileTab('vitals')">❤️ Vitals</button>
             <button class="profile-tab" id="ptab-medications" onclick="switchProfileTab('medications')">💊 Medications</button>
+            <button class="profile-tab" id="ptab-adl" onclick="switchProfileTab('adl')">🏠 Daily Living</button>
+            <button class="profile-tab" id="ptab-appointments" onclick="switchProfileTab('appointments')">📅 Appointments</button>
             <button class="profile-tab" id="ptab-incidents" onclick="switchProfileTab('incidents')">⚠️ Incidents</button>
           </div>
 
@@ -835,6 +841,30 @@
               </button>
             </div>
             <div id="medications-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+          </div>
+
+          <!-- TAB: ADL -->
+          <div id="profile-tab-adl" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <h3 style="font-size:15px;font-weight:600;">Daily Living Activities (ADL)</h3>
+              <button class="btn btn-primary btn-sm" onclick="openAddADL()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Log ADL Entry
+              </button>
+            </div>
+            <div id="profile-adl-list" class="notes-list"></div>
+          </div>
+
+          <!-- TAB: APPOINTMENTS -->
+          <div id="profile-tab-appointments" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <h3 style="font-size:15px;font-weight:600;">Doctor Appointments</h3>
+              <button class="btn btn-primary btn-sm" onclick="openAddAppointment()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Appointment
+              </button>
+            </div>
+            <div id="profile-appointments-list" class="notes-list"></div>
           </div>
 
           <!-- TAB: INCIDENTS -->
@@ -996,6 +1026,63 @@
             </div>
           </div>
 
+        </div>
+
+        <!-- PAYMENTS TRACKER -->
+        <div class="page" id="page-payments">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+            <div class="stat-card">
+              <div class="stat-icon green" style="float:right">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              </div>
+              <div class="label">Total Collected</div>
+              <div class="value" id="pay-stat-total">$0</div>
+              <div class="sub">All time</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon blue" style="float:right">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div class="label">This Month</div>
+              <div class="value" id="pay-stat-month">$0</div>
+              <div class="sub">Current calendar month</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon warn" style="float:right">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              </div>
+              <div class="label">Paying Residents</div>
+              <div class="value" id="pay-stat-residents">0</div>
+              <div class="sub">Unique payers</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon red" style="float:right">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <div class="label">Total Payments</div>
+              <div class="value" id="pay-stat-count">0</div>
+              <div class="sub">Transactions recorded</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Payment Records</h3>
+              <button class="btn btn-primary btn-sm" onclick="openAddPayment()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Record Payment
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="search-bar">
+                <input class="search-input" id="pay-search" placeholder="Search by resident or notes..." oninput="renderPaymentsPage()">
+                <input type="date" id="pay-date-filter" class="search-input" style="max-width:180px;" oninput="renderPaymentsPage()">
+                <select id="pay-resident-filter" class="search-input" style="max-width:200px;" onchange="renderPaymentsPage()">
+                  <option value="">All Residents</option>
+                </select>
+              </div>
+              <div id="payments-list" class="notes-list"></div>
+            </div>
+          </div>
         </div>
 
         <!-- ALL INCIDENTS -->
@@ -1703,8 +1790,395 @@
   </div>
 </div>
 
-<div id="toast"></div>
+<!-- MODAL: Add ADL Entry -->
+<div class="modal-overlay" id="modal-adl">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="adl-modal-title">Log Daily Living Entry</h3>
+      <button class="btn-close" onclick="closeModal('modal-adl')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="adl-edit-id">
+      <div class="form-grid">
+        <div class="field">
+          <label>Date *</label>
+          <input type="date" id="adl-date">
+        </div>
+        <div class="field">
+          <label>Shift</label>
+          <select id="adl-shift">
+            <option value="">— Select —</option>
+            <option>Day</option>
+            <option>Evening</option>
+            <option>Night</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Documented By *</label>
+          <input type="text" id="adl-by" placeholder="Staff name">
+        </div>
+      </div>
 
+      <div class="form-section-title">Personal Hygiene</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Showered / Bathed</label>
+          <select id="adl-shower">
+            <option value="">— Select —</option>
+            <option value="independent">Independent</option>
+            <option value="assisted">Assisted</option>
+            <option value="refused">Refused</option>
+            <option value="not_applicable">N/A</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Oral Hygiene (brushed teeth)</label>
+          <select id="adl-oral">
+            <option value="">— Select —</option>
+            <option value="independent">Independent</option>
+            <option value="assisted">Assisted</option>
+            <option value="refused">Refused</option>
+            <option value="not_applicable">N/A</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Grooming (hair, nails)</label>
+          <select id="adl-grooming">
+            <option value="">— Select —</option>
+            <option value="independent">Independent</option>
+            <option value="assisted">Assisted</option>
+            <option value="refused">Refused</option>
+            <option value="not_applicable">N/A</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Dressing</label>
+          <select id="adl-dressing">
+            <option value="">— Select —</option>
+            <option value="independent">Independent</option>
+            <option value="assisted">Assisted</option>
+            <option value="refused">Refused</option>
+            <option value="not_applicable">N/A</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section-title">Meals</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Breakfast</label>
+          <select id="adl-breakfast">
+            <option value="">— Select —</option>
+            <option value="ate_all">Ate all</option>
+            <option value="ate_most">Ate most (&gt;75%)</option>
+            <option value="ate_some">Ate some (25–75%)</option>
+            <option value="ate_little">Ate little (&lt;25%)</option>
+            <option value="refused">Refused</option>
+            <option value="not_applicable">N/A</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Lunch</label>
+          <select id="adl-lunch">
+            <option value="">— Select —</option>
+            <option value="ate_all">Ate all</option>
+            <option value="ate_most">Ate most (&gt;75%)</option>
+            <option value="ate_some">Ate some (25–75%)</option>
+            <option value="ate_little">Ate little (&lt;25%)</option>
+            <option value="refused">Refused</option>
+            <option value="not_applicable">N/A</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Dinner</label>
+          <select id="adl-dinner">
+            <option value="">— Select —</option>
+            <option value="ate_all">Ate all</option>
+            <option value="ate_most">Ate most (&gt;75%)</option>
+            <option value="ate_some">Ate some (25–75%)</option>
+            <option value="ate_little">Ate little (&lt;25%)</option>
+            <option value="refused">Refused</option>
+            <option value="not_applicable">N/A</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Snacks / Other</label>
+          <select id="adl-snacks">
+            <option value="">— Select —</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+            <option value="not_applicable">N/A</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Fluid Intake</label>
+          <select id="adl-fluids">
+            <option value="">— Select —</option>
+            <option value="good">Good (≥6 glasses)</option>
+            <option value="fair">Fair (3–5 glasses)</option>
+            <option value="poor">Poor (&lt;3 glasses)</option>
+            <option value="refused">Refused</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section-title">Mobility &amp; Safety</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Ambulation / Mobility</label>
+          <select id="adl-mobility">
+            <option value="">— Select —</option>
+            <option value="independent">Independent</option>
+            <option value="assisted_device">Assisted — device (walker/cane)</option>
+            <option value="assisted_staff">Assisted — staff</option>
+            <option value="wheelchair">Wheelchair</option>
+            <option value="bedbound">Bedbound</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Continence</label>
+          <select id="adl-continence">
+            <option value="">— Select —</option>
+            <option value="continent">Continent</option>
+            <option value="occasional_incontinence">Occasional incontinence</option>
+            <option value="incontinent_bowel">Incontinent — bowel</option>
+            <option value="incontinent_bladder">Incontinent — bladder</option>
+            <option value="incontinent_both">Incontinent — bowel &amp; bladder</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Bowel Movement</label>
+          <select id="adl-bowel">
+            <option value="">— Select —</option>
+            <option value="yes_normal">Yes — normal</option>
+            <option value="yes_loose">Yes — loose/diarrhea</option>
+            <option value="yes_hard">Yes — hard/constipated</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Fall Risk Today</label>
+          <select id="adl-fall-risk">
+            <option value="">— Select —</option>
+            <option value="low">Low</option>
+            <option value="moderate">Moderate</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section-title">Mental &amp; Emotional Wellbeing</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Mood / Affect</label>
+          <select id="adl-mood">
+            <option value="">— Select —</option>
+            <option value="calm_pleasant">Calm &amp; pleasant</option>
+            <option value="anxious">Anxious</option>
+            <option value="confused">Confused / disoriented</option>
+            <option value="agitated">Agitated</option>
+            <option value="depressed">Depressed / withdrawn</option>
+            <option value="happy">Happy / engaged</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Sleep (previous night)</label>
+          <select id="adl-sleep">
+            <option value="">— Select —</option>
+            <option value="slept_well">Slept well</option>
+            <option value="restless">Restless / interrupted</option>
+            <option value="poor">Poor — awake most of night</option>
+            <option value="refused_bed">Refused bed</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Participated in Activities</label>
+          <select id="adl-activities">
+            <option value="">— Select —</option>
+            <option value="yes_engaged">Yes — actively engaged</option>
+            <option value="yes_passive">Yes — passive/observed</option>
+            <option value="no">No</option>
+            <option value="refused">Refused</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Medication Taken</label>
+          <select id="adl-meds-taken">
+            <option value="">— Select —</option>
+            <option value="all_taken">All taken as prescribed</option>
+            <option value="partial">Partial — some refused</option>
+            <option value="refused">Refused all</option>
+            <option value="not_due">Not due this shift</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section-title">Additional Notes</div>
+      <div class="field">
+        <label>Observations / Comments</label>
+        <textarea id="adl-notes" rows="4" placeholder="Any additional observations about the resident's daily activities, behavior, or concerns..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-adl')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveADL()">Save ADL Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Appointment -->
+<div class="modal-overlay" id="modal-appointment">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="appt-modal-title">Add Doctor Appointment</h3>
+      <button class="btn-close" onclick="closeModal('modal-appointment')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="appt-edit-id">
+      <div class="form-grid">
+        <div class="field">
+          <label>Appointment Date *</label>
+          <input type="date" id="appt-date">
+        </div>
+        <div class="field">
+          <label>Appointment Time</label>
+          <input type="time" id="appt-time">
+        </div>
+        <div class="field span2">
+          <label>Doctor / Provider Name *</label>
+          <input type="text" id="appt-doctor" placeholder="e.g. Dr. Sarah Thompson">
+        </div>
+        <div class="field">
+          <label>Specialty / Type</label>
+          <select id="appt-type">
+            <option value="">— Select —</option>
+            <option>Primary Care</option>
+            <option>Cardiology</option>
+            <option>Neurology</option>
+            <option>Psychiatry</option>
+            <option>Dentistry</option>
+            <option>Ophthalmology</option>
+            <option>Orthopedics</option>
+            <option>Pulmonology</option>
+            <option>Endocrinology</option>
+            <option>Physical Therapy</option>
+            <option>Occupational Therapy</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="appt-status">
+            <option value="upcoming">Upcoming</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="rescheduled">Rescheduled</option>
+          </select>
+        </div>
+        <div class="field span2">
+          <label>Location / Clinic</label>
+          <input type="text" id="appt-location" placeholder="e.g. Chehalis Medical Center">
+        </div>
+        <div class="field span2">
+          <label>Reason / Purpose</label>
+          <input type="text" id="appt-reason" placeholder="e.g. Follow-up on blood pressure medication">
+        </div>
+        <div class="field span2">
+          <label>Transportation Needed</label>
+          <select id="appt-transport">
+            <option value="">— Select —</option>
+            <option value="yes_arranged">Yes — arranged</option>
+            <option value="yes_needed">Yes — needs arranging</option>
+            <option value="no">No — resident has own transport</option>
+            <option value="telehealth">Telehealth — no transport needed</option>
+          </select>
+        </div>
+        <div class="field span2">
+          <label>Notes / Follow-up Instructions</label>
+          <textarea id="appt-notes" rows="3" placeholder="Doctor's instructions, referrals, follow-up actions..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-appointment')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAppointment()">Save Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Record Payment -->
+<div class="modal-overlay" id="modal-payment">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="payment-modal-title">Record Payment</h3>
+      <button class="btn-close" onclick="closeModal('modal-payment')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="pay-edit-id">
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Resident *</label>
+          <select id="pay-resident-id">
+            <option value="">— Select Resident —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Payment Date *</label>
+          <input type="date" id="pay-date">
+        </div>
+        <div class="field">
+          <label>Amount ($) *</label>
+          <input type="number" id="pay-amount" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="field">
+          <label>Payment Method</label>
+          <select id="pay-method">
+            <option value="">— Select —</option>
+            <option>Cash</option>
+            <option>Check</option>
+            <option>Bank Transfer</option>
+            <option>Money Order</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Payment Period</label>
+          <select id="pay-period">
+            <option value="">— Select —</option>
+            <option>Weekly</option>
+            <option>Bi-weekly</option>
+            <option>Monthly</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field span2">
+          <label>Description / Notes</label>
+          <input type="text" id="pay-notes" placeholder="e.g. April 2025 room and board, Medicaid co-pay...">
+        </div>
+        <div class="field">
+          <label>Received By</label>
+          <input type="text" id="pay-received-by" placeholder="Staff name">
+        </div>
+        <div class="field">
+          <label>Receipt Number (auto-generated if blank)</label>
+          <input type="text" id="pay-receipt-num" placeholder="e.g. HLH-2025-001">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-payment')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePayment()">Save &amp; Generate Receipt</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
 <script>
  const SUPABASE_URL = 'https://gkmvglzjrsneqkrlvohp.supabase.co';
  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrbXZnbHpqcnNuZXFrcmx2b2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2OTU0NTMsImV4cCI6MjA5MDI3MTQ1M30.bcGB06-v9xmJmgkY-4KbnHPgi13qP7_ng-BJHifd0UY';
@@ -1768,6 +2242,14 @@ async function deleteIncidentReportFromDb(id) {
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
+async function migrateVitalsRecorder() {
+  const { data, error } = await db.from('vitals')
+    .update({ recorded_by: 'Peninnah Nyandia' })
+    .ilike('recorded_by', '%Githaiga%');
+  if (!error) toast('Vitals recorder names updated to Peninnah Nyandia');
+  else toast('Migration error: ' + error.message);
+}
+
 // ══════════════════════════════════
 // AUTH
 // ══════════════════════════════════
@@ -1821,7 +2303,7 @@ document.getElementById('login-password').addEventListener('keydown', e => { if 
 // ══════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════
-const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports' };
+const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Payments Tracker' };
 
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1836,6 +2318,7 @@ function showPage(name) {
   if (name === 'analytics') renderAnalytics();
   if (name === 'residents') renderResidentTable();
   if (name === 'incidents') renderAllIncidents();
+  if (name === 'payments') renderPaymentsPage();
 }
 
 // ══════════════════════════════════
@@ -3027,13 +3510,15 @@ function toast(msg) {
 // PROFILE TABS
 // ══════════════════════════════════
 function switchProfileTab(tab) {
-  ['notes','vitals','medications','incidents'].forEach(t => {
+  ['notes','vitals','medications','adl','appointments','incidents'].forEach(t => {
     document.getElementById('profile-tab-' + t).style.display = t === tab ? 'block' : 'none';
     document.getElementById('ptab-' + t).classList.toggle('active', t === tab);
   });
   if (tab === 'vitals') renderVitals();
   if (tab === 'medications') renderMedications();
   if (tab === 'incidents') renderProfileIncidents();
+  if (tab === 'adl') renderADL();
+  if (tab === 'appointments') renderAppointments();
 }
 
 // ══════════════════════════════════
@@ -3176,33 +3661,6 @@ async function printVitalsSheet() {
   const resName = res ? res.name : '';
   const dob = res ? fmtDate(res.dob) : '';
 
-  // Split into pages of 15 rows each (matching the original sheet layout)
-  const chunkSize = 15;
-  const pages = [];
-  for (let i = 0; i < Math.max(vitals.length, 1); i += chunkSize) {
-    pages.push(vitals.slice(i, i + chunkSize));
-  }
-
-  const buildPage = (rows) => {
-    // Build left half (rows 0-14) and right half mirrors same rows side-by-side
-    const leftRows = rows.slice(0, 15);
-    const rightRows = rows.slice(0, 15); // same page, two columns
-    const allRows = Array.from({ length: 15 }, (_, i) => leftRows[i] || null);
-    const col = (v) => `<td style="border:1px solid #000;padding:3px 4px;font-size:10px;min-width:36px;height:22px;">${v || ''}</td>`;
-    const rowsHTML = allRows.map((v, i) => {
-      const right = allRows[i];
-      return `<tr>
-        ${col(v ? fmtDate(v.vitals_date) : '')}
-        ${col(v ? v.bp : '')}${col(v ? v.temp : '')}${col(v ? v.pulse : '')}${col(v ? v.rr : '')}${col(v ? v.o2_sat : '')}${col(v ? v.weight : '')}
-        <td style="border:2px solid #b8860b;background:#b8860b;width:6px;"></td>
-        ${col('')}${col('')}${col('')}${col('')}${col('')}${col('')}${col('')}
-      </tr>`;
-    }).join('');
-    return rowsHTML;
-  };
-
-  const pagesHTML = pages.map(rows => buildPage(rows)).join('<div style="page-break-before:always;"></div>');
-
   const win = window.open('', '_blank', 'width=1100,height=850');
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>Vitals Sheet — ${resName}</title>
@@ -3215,9 +3673,10 @@ async function printVitalsSheet() {
   .addr { font-size:11px; margin-bottom:6px; font-style:italic; }
   .title { font-size:16px; font-weight:bold; text-decoration:underline; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:14px; }
   table { width:100%; border-collapse:collapse; }
-  th { background:#b8860b; color:#fff; border:1px solid #8a6408; padding:5px 4px; font-size:10px; font-weight:bold; text-align:center; letter-spacing:0.03em; }
-  td { border:1px solid #000; padding:2px 4px; font-size:10px; height:22px; }
-  .divider-col { background:#b8860b; border:2px solid #b8860b; width:8px; padding:0; }
+  th { background:#b8860b; color:#fff; border:1px solid #8a6408; padding:7px 5px; font-size:11.5px; font-weight:bold; text-align:center; letter-spacing:0.02em; }
+  td { border:1px solid #000; padding:4px 5px; font-size:13px; height:26px; font-family:'Times New Roman',Times,serif; }
+  .divider-col { background:#5a4000; border:2px solid #5a4000; width:10px; padding:0; }
+  th.divider-col { background:#5a4000; border:2px solid #3a2800; }
   .footer { margin-top:18px; font-size:12px; }
   .footer-line { border-bottom:1px solid #000; display:inline-block; min-width:280px; margin-left:6px; }
   @media print { body { padding:18px 24px; } @page { size:landscape; margin:0.4in; } }
@@ -3231,16 +3690,28 @@ async function printVitalsSheet() {
 <table>
   <thead>
     <tr>
-      <th>Date</th><th>BP</th><th>TEMP</th><th>PULSE</th><th>RR</th><th>O2 Sat</th><th>WEIGHT</th>
+      <th style="min-width:90px;">Date</th>
+      <th>BP<br><span style="font-weight:normal;font-size:10px;">(mmHg)</span></th>
+      <th>Temp<br><span style="font-weight:normal;font-size:10px;">(°F)</span></th>
+      <th>Pulse<br><span style="font-weight:normal;font-size:10px;">(bpm)</span></th>
+      <th>RR<br><span style="font-weight:normal;font-size:10px;">(breaths/min)</span></th>
+      <th>O2 Sat<br><span style="font-weight:normal;font-size:10px;">(%)</span></th>
+      <th>Weight<br><span style="font-weight:normal;font-size:10px;">(lbs)</span></th>
       <th class="divider-col"></th>
-      <th>Date</th><th>BP</th><th>TEMP</th><th>PULSE</th><th>RR</th><th>O2 Sat</th><th>WEIGHT</th>
+      <th style="min-width:90px;">Date</th>
+      <th>BP<br><span style="font-weight:normal;font-size:10px;">(mmHg)</span></th>
+      <th>Temp<br><span style="font-weight:normal;font-size:10px;">(°F)</span></th>
+      <th>Pulse<br><span style="font-weight:normal;font-size:10px;">(bpm)</span></th>
+      <th>RR<br><span style="font-weight:normal;font-size:10px;">(breaths/min)</span></th>
+      <th>O2 Sat<br><span style="font-weight:normal;font-size:10px;">(%)</span></th>
+      <th>Weight<br><span style="font-weight:normal;font-size:10px;">(lbs)</span></th>
     </tr>
   </thead>
   <tbody>
     ${Array.from({ length: 15 }, (_, i) => {
       const v = vitals[i] || null;
       const v2 = vitals[i + 15] || null;
-      const col = (val) => `<td>${val || ''}</td>`;
+      const col = (val) => `<td style="font-size:14px;">${val || ''}</td>`;
       return `<tr>
         ${col(v ? fmtDate(v.vitals_date) : '')}
         ${col(v ? v.bp : '')}${col(v ? v.temp : '')}${col(v ? v.pulse : '')}${col(v ? v.rr : '')}${col(v ? v.o2_sat : '')}${col(v ? v.weight : '')}
@@ -3252,8 +3723,8 @@ async function printVitalsSheet() {
   </tbody>
 </table>
 <div class="footer" style="margin-top:20px;">
-  <div style="margin-bottom:10px;"><strong>Residents Name:</strong> <span class="footer-line">${resName}</span></div>
-  <div><strong>Date of Birth:</strong> <span class="footer-line" style="min-width:160px;">${dob}</span></div>
+  <div style="margin-bottom:10px;font-size:13px;"><strong>Resident's Name:</strong> <span class="footer-line" style="font-size:13px;">${resName}</span></div>
+  <div style="font-size:13px;"><strong>Date of Birth:</strong> <span class="footer-line" style="min-width:160px;font-size:13px;">${dob}</span></div>
 </div>
 </body></html>`);
   win.document.close();
@@ -3831,6 +4302,504 @@ function startNotifScheduler() {
       fireSystemNotif();
     }
   }, 30 * 60 * 1000);
+}
+
+// ══════════════════════════════════
+// ADL — Activities of Daily Living
+// ══════════════════════════════════
+const ADL_LABELS = {
+  shower:    { label: 'Shower / Bath',        icon: '🚿' },
+  oral:      { label: 'Oral Hygiene',          icon: '🦷' },
+  grooming:  { label: 'Grooming',              icon: '💈' },
+  dressing:  { label: 'Dressing',              icon: '👕' },
+  breakfast: { label: 'Breakfast',             icon: '🍳' },
+  lunch:     { label: 'Lunch',                 icon: '🥗' },
+  dinner:    { label: 'Dinner',                icon: '🍽️' },
+  snacks:    { label: 'Snacks',                icon: '🍎' },
+  fluids:    { label: 'Fluid Intake',          icon: '💧' },
+  mobility:  { label: 'Mobility',              icon: '🚶' },
+  continence:{ label: 'Continence',            icon: '🏥' },
+  bowel:     { label: 'Bowel Movement',        icon: '📋' },
+  fall_risk: { label: 'Fall Risk',             icon: '⚠️' },
+  mood:      { label: 'Mood / Affect',         icon: '😊' },
+  sleep:     { label: 'Sleep',                 icon: '😴' },
+  activities:{ label: 'Participated in Activities', icon: '🎯' },
+  meds_taken:{ label: 'Medications Taken',     icon: '💊' },
+};
+
+function adlDisplayVal(val) {
+  if (!val || val === '') return '<span style="color:var(--text3);font-style:italic;">—</span>';
+  const map = {
+    independent:'Independent', assisted:'Assisted', refused:'Refused', not_applicable:'N/A',
+    ate_all:'Ate all', ate_most:'Ate most (>75%)', ate_some:'Ate some (25–75%)', ate_little:'Ate little (<25%)',
+    good:'Good (≥6 glasses)', fair:'Fair (3–5 glasses)', poor:'Poor (<3 glasses)',
+    assisted_device:'Assisted – device', assisted_staff:'Assisted – staff', wheelchair:'Wheelchair', bedbound:'Bedbound',
+    continent:'Continent', occasional_incontinence:'Occasional incontinence', incontinent_bowel:'Incontinent – bowel',
+    incontinent_bladder:'Incontinent – bladder', incontinent_both:'Incontinent – bowel & bladder',
+    yes_normal:'Yes – normal', yes_loose:'Yes – loose/diarrhea', yes_hard:'Yes – hard/constipated', no:'No',
+    low:'Low', moderate:'Moderate', high:'High',
+    calm_pleasant:'Calm & pleasant', anxious:'Anxious', confused:'Confused', agitated:'Agitated', depressed:'Depressed', happy:'Happy',
+    slept_well:'Slept well', restless:'Restless', poor:'Poor', refused_bed:'Refused bed',
+    yes_engaged:'Yes – engaged', yes_passive:'Yes – passive',
+    all_taken:'All taken', partial:'Partial', not_due:'Not due this shift',
+    yes:'Yes'
+  };
+  return map[val] || val;
+}
+
+function adlFlagColor(key, val) {
+  if (!val) return '';
+  const warn = ['refused','ate_little','poor','high','incontinent_both','incontinent_bowel','incontinent_bladder','agitated','depressed','confused','refused_bed'];
+  const ok = ['independent','ate_all','ate_most','good','continent','slept_well','calm_pleasant','happy','all_taken','low'];
+  if (warn.includes(val)) return 'color:#c0392b;font-weight:600;';
+  if (ok.includes(val)) return 'color:#1e7e34;';
+  return '';
+}
+
+async function renderADL() {
+  const { data: entries } = await db.from('adl_entries').select('*').eq('resident_id', currentResidentId).order('adl_date', { ascending: false });
+  const container = document.getElementById('profile-adl-list');
+  if (!entries || !entries.length) {
+    container.innerHTML = `<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">🏠</div><h4>No ADL Entries Yet</h4><p>Log the first daily living entry for this resident using the button above.</p></div>`;
+    return;
+  }
+  container.innerHTML = entries.map(e => {
+    const fields = ['shower','oral','grooming','dressing','breakfast','lunch','dinner','fluids','mobility','mood','sleep','meds_taken'];
+    const pills = fields.filter(k => e[k] && e[k] !== '').map(k => {
+      const style = adlFlagColor(k, e[k]);
+      return `<span style="display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;background:var(--surface2);margin:2px;${style}">${ADL_LABELS[k].icon} ${ADL_LABELS[k].label}: <strong>${adlDisplayVal(e[k])}</strong></span>`;
+    }).join('');
+    return `<div class="note-card" style="cursor:default;">
+      <div class="note-card-header">
+        <div>
+          <div class="note-date">${fmtDate(e.adl_date)} ${e.shift ? '· ' + e.shift + ' Shift' : ''}</div>
+          <div class="note-staff">By ${e.documented_by}</div>
+        </div>
+        <div class="note-actions">
+          <button class="btn btn-secondary btn-sm" onclick="editADL('${e.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteADL('${e.id}')">Delete</button>
+        </div>
+      </div>
+      <div style="margin-top:10px;line-height:1.8;">${pills}</div>
+      ${e.notes ? `<div class="note-preview" style="margin-top:8px;">${e.notes}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function openAddADL() {
+  document.getElementById('adl-modal-title').textContent = 'Log Daily Living Entry';
+  document.getElementById('adl-edit-id').value = '';
+  document.getElementById('adl-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('adl-by').value = currentUser.name;
+  document.getElementById('adl-shift').value = '';
+  ['adl-shower','adl-oral','adl-grooming','adl-dressing','adl-breakfast','adl-lunch','adl-dinner','adl-snacks','adl-fluids','adl-mobility','adl-continence','adl-bowel','adl-fall-risk','adl-mood','adl-sleep','adl-activities','adl-meds-taken'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('adl-notes').value = '';
+  openModal('modal-adl');
+}
+
+async function editADL(id) {
+  const { data: e } = await db.from('adl_entries').select('*').eq('id', id).single();
+  if (!e) return;
+  document.getElementById('adl-modal-title').textContent = 'Edit ADL Entry';
+  document.getElementById('adl-edit-id').value = id;
+  document.getElementById('adl-date').value = e.adl_date || '';
+  document.getElementById('adl-shift').value = e.shift || '';
+  document.getElementById('adl-by').value = e.documented_by || '';
+  document.getElementById('adl-shower').value = e.shower || '';
+  document.getElementById('adl-oral').value = e.oral || '';
+  document.getElementById('adl-grooming').value = e.grooming || '';
+  document.getElementById('adl-dressing').value = e.dressing || '';
+  document.getElementById('adl-breakfast').value = e.breakfast || '';
+  document.getElementById('adl-lunch').value = e.lunch || '';
+  document.getElementById('adl-dinner').value = e.dinner || '';
+  document.getElementById('adl-snacks').value = e.snacks || '';
+  document.getElementById('adl-fluids').value = e.fluids || '';
+  document.getElementById('adl-mobility').value = e.mobility || '';
+  document.getElementById('adl-continence').value = e.continence || '';
+  document.getElementById('adl-bowel').value = e.bowel || '';
+  document.getElementById('adl-fall-risk').value = e.fall_risk || '';
+  document.getElementById('adl-mood').value = e.mood || '';
+  document.getElementById('adl-sleep').value = e.sleep || '';
+  document.getElementById('adl-activities').value = e.activities || '';
+  document.getElementById('adl-meds-taken').value = e.meds_taken || '';
+  document.getElementById('adl-notes').value = e.notes || '';
+  openModal('modal-adl');
+}
+
+async function saveADL() {
+  const date = document.getElementById('adl-date').value;
+  const by = document.getElementById('adl-by').value.trim();
+  if (!date || !by) { toast('Please fill in Date and Documented By'); return; }
+  const editId = document.getElementById('adl-edit-id').value;
+  const entry = {
+    id: editId || uid(),
+    resident_id: currentResidentId,
+    adl_date: date,
+    shift: document.getElementById('adl-shift').value,
+    documented_by: by,
+    shower: document.getElementById('adl-shower').value,
+    oral: document.getElementById('adl-oral').value,
+    grooming: document.getElementById('adl-grooming').value,
+    dressing: document.getElementById('adl-dressing').value,
+    breakfast: document.getElementById('adl-breakfast').value,
+    lunch: document.getElementById('adl-lunch').value,
+    dinner: document.getElementById('adl-dinner').value,
+    snacks: document.getElementById('adl-snacks').value,
+    fluids: document.getElementById('adl-fluids').value,
+    mobility: document.getElementById('adl-mobility').value,
+    continence: document.getElementById('adl-continence').value,
+    bowel: document.getElementById('adl-bowel').value,
+    fall_risk: document.getElementById('adl-fall-risk').value,
+    mood: document.getElementById('adl-mood').value,
+    sleep: document.getElementById('adl-sleep').value,
+    activities: document.getElementById('adl-activities').value,
+    meds_taken: document.getElementById('adl-meds-taken').value,
+    notes: document.getElementById('adl-notes').value.trim(),
+    created_at: new Date().toISOString()
+  };
+  await db.from('adl_entries').upsert(entry);
+  closeModal('modal-adl');
+  toast(editId ? 'ADL entry updated' : 'ADL entry saved');
+  renderADL();
+}
+
+async function deleteADL(id) {
+  if (!confirm('Delete this ADL entry?')) return;
+  await db.from('adl_entries').delete().eq('id', id);
+  renderADL();
+  toast('ADL entry deleted');
+}
+
+// ══════════════════════════════════
+// APPOINTMENTS
+// ══════════════════════════════════
+async function renderAppointments() {
+  const { data: appts } = await db.from('appointments').select('*').eq('resident_id', currentResidentId).order('appt_date', { ascending: false });
+  const container = document.getElementById('profile-appointments-list');
+  if (!appts || !appts.length) {
+    container.innerHTML = `<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">📅</div><h4>No Appointments Yet</h4><p>Add doctor appointments using the button above. You can add as many as needed.</p></div>`;
+    return;
+  }
+  const statusColors = { upcoming: 'badge-warn', completed: 'badge-green', cancelled: 'badge-red', rescheduled: 'badge-warn' };
+  const transportLabels = { yes_arranged:'Transport arranged', yes_needed:'Transport needed', no:'Own transport', telehealth:'Telehealth' };
+  container.innerHTML = appts.map(a => {
+    const isPast = a.appt_date && new Date(a.appt_date + 'T23:59:59') < new Date() && a.status === 'upcoming';
+    return `<div class="note-card" style="cursor:default;${isPast?'border-left:3px solid var(--warn);':''}">
+      <div class="note-card-header">
+        <div>
+          <div class="note-date">${fmtDate(a.appt_date)} ${a.appt_time ? 'at ' + a.appt_time : ''}</div>
+          <div class="note-staff">${a.doctor} ${a.appt_type ? '· ' + a.appt_type : ''} &nbsp; <span class="badge ${statusColors[a.status]||'badge-green'}" style="text-transform:capitalize;">${a.status||'Upcoming'}</span></div>
+        </div>
+        <div class="note-actions">
+          <button class="btn btn-secondary btn-sm" onclick="editAppointment('${a.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteAppointment('${a.id}')">Delete</button>
+        </div>
+      </div>
+      ${a.reason ? `<div class="note-preview" style="margin-top:6px;"><strong>Reason:</strong> ${a.reason}</div>` : ''}
+      ${a.location ? `<div class="note-preview"><strong>Location:</strong> ${a.location}</div>` : ''}
+      ${a.transport ? `<div class="note-preview"><strong>Transport:</strong> ${transportLabels[a.transport]||a.transport}</div>` : ''}
+      ${a.notes ? `<div class="note-preview"><strong>Notes:</strong> ${a.notes}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function openAddAppointment() {
+  document.getElementById('appt-modal-title').textContent = 'Add Doctor Appointment';
+  document.getElementById('appt-edit-id').value = '';
+  document.getElementById('appt-date').value = '';
+  document.getElementById('appt-time').value = '';
+  document.getElementById('appt-doctor').value = '';
+  document.getElementById('appt-type').value = '';
+  document.getElementById('appt-status').value = 'upcoming';
+  document.getElementById('appt-location').value = '';
+  document.getElementById('appt-reason').value = '';
+  document.getElementById('appt-transport').value = '';
+  document.getElementById('appt-notes').value = '';
+  openModal('modal-appointment');
+}
+
+async function editAppointment(id) {
+  const { data: a } = await db.from('appointments').select('*').eq('id', id).single();
+  if (!a) return;
+  document.getElementById('appt-modal-title').textContent = 'Edit Appointment';
+  document.getElementById('appt-edit-id').value = id;
+  document.getElementById('appt-date').value = a.appt_date || '';
+  document.getElementById('appt-time').value = a.appt_time || '';
+  document.getElementById('appt-doctor').value = a.doctor || '';
+  document.getElementById('appt-type').value = a.appt_type || '';
+  document.getElementById('appt-status').value = a.status || 'upcoming';
+  document.getElementById('appt-location').value = a.location || '';
+  document.getElementById('appt-reason').value = a.reason || '';
+  document.getElementById('appt-transport').value = a.transport || '';
+  document.getElementById('appt-notes').value = a.notes || '';
+  openModal('modal-appointment');
+}
+
+async function saveAppointment() {
+  const date = document.getElementById('appt-date').value;
+  const doctor = document.getElementById('appt-doctor').value.trim();
+  if (!date || !doctor) { toast('Please fill in Appointment Date and Doctor Name'); return; }
+  const editId = document.getElementById('appt-edit-id').value;
+  const appt = {
+    id: editId || uid(),
+    resident_id: currentResidentId,
+    appt_date: date,
+    appt_time: document.getElementById('appt-time').value,
+    doctor,
+    appt_type: document.getElementById('appt-type').value,
+    status: document.getElementById('appt-status').value,
+    location: document.getElementById('appt-location').value.trim(),
+    reason: document.getElementById('appt-reason').value.trim(),
+    transport: document.getElementById('appt-transport').value,
+    notes: document.getElementById('appt-notes').value.trim(),
+    created_at: new Date().toISOString()
+  };
+  await db.from('appointments').upsert(appt);
+  closeModal('modal-appointment');
+  toast(editId ? 'Appointment updated' : 'Appointment added');
+  renderAppointments();
+}
+
+async function deleteAppointment(id) {
+  if (!confirm('Delete this appointment?')) return;
+  await db.from('appointments').delete().eq('id', id);
+  renderAppointments();
+  toast('Appointment deleted');
+}
+
+// ══════════════════════════════════
+// PAYMENTS TRACKER
+// ══════════════════════════════════
+function genReceiptNum() {
+  const now = new Date();
+  const yr = now.getFullYear();
+  const mo = String(now.getMonth()+1).padStart(2,'0');
+  const rand = Math.floor(Math.random()*9000)+1000;
+  return `HLH-${yr}${mo}-${rand}`;
+}
+
+async function renderPaymentsPage() {
+  const residents = await getResidents();
+  const sel = document.getElementById('pay-resident-filter');
+  if (sel && sel.options.length <= 1) {
+    residents.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.id; opt.textContent = r.name;
+      sel.appendChild(opt);
+    });
+  }
+  const q = (document.getElementById('pay-search')?.value || '').toLowerCase();
+  const dateF = document.getElementById('pay-date-filter')?.value;
+  const resF = document.getElementById('pay-resident-filter')?.value;
+  const { data: allPayments } = await db.from('payments').select('*').order('pay_date', { ascending: false });
+  let payments = allPayments || [];
+  if (q) payments = payments.filter(p => JSON.stringify(p).toLowerCase().includes(q));
+  if (dateF) payments = payments.filter(p => p.pay_date === dateF);
+  if (resF) payments = payments.filter(p => p.resident_id === resF);
+  const total = (allPayments||[]).reduce((s,p) => s + parseFloat(p.amount||0), 0);
+  const thisMonth = new Date().toISOString().slice(0,7);
+  const monthTotal = (allPayments||[]).filter(p => p.pay_date && p.pay_date.startsWith(thisMonth)).reduce((s,p) => s + parseFloat(p.amount||0), 0);
+  const uniquePayers = new Set((allPayments||[]).map(p => p.resident_id)).size;
+  document.getElementById('pay-stat-total').textContent = '$' + total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('pay-stat-month').textContent = '$' + monthTotal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  document.getElementById('pay-stat-residents').textContent = uniquePayers;
+  document.getElementById('pay-stat-count').textContent = (allPayments||[]).length;
+  const container = document.getElementById('payments-list');
+  if (!payments.length) {
+    container.innerHTML = `<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">💳</div><h4>No Payments Recorded</h4><p>Record the first payment using the button above.</p></div>`;
+    return;
+  }
+  container.innerHTML = payments.map(p => {
+    const res = residents.find(r => r.id === p.resident_id);
+    const amt = parseFloat(p.amount||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    return `<div class="note-card" style="cursor:default;">
+      <div class="note-card-header">
+        <div>
+          <div class="note-date" style="display:flex;align-items:center;gap:12px;">
+            <span>${res ? res.name : 'Unknown'}</span>
+            <span style="font-size:18px;font-weight:700;color:#1e7e34;">$${amt}</span>
+          </div>
+          <div class="note-staff">${fmtDate(p.pay_date)} · ${p.method||'—'} · ${p.period||''} · Receipt: ${p.receipt_num||'—'}</div>
+        </div>
+        <div class="note-actions">
+          <button class="btn btn-secondary btn-sm" onclick="printReceipt('${p.id}')">🖨️ Receipt</button>
+          <button class="btn btn-danger btn-sm" onclick="deletePayment('${p.id}')">Delete</button>
+        </div>
+      </div>
+      ${p.notes ? `<div class="note-preview">${p.notes}</div>` : ''}
+      ${p.received_by ? `<div class="note-preview" style="font-size:12px;color:var(--text3);">Received by: ${p.received_by}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function openAddPayment() {
+  const residents = await getResidents();
+  const sel = document.getElementById('pay-resident-id');
+  sel.innerHTML = '<option value="">— Select Resident —</option>';
+  residents.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id; opt.textContent = r.name;
+    sel.appendChild(opt);
+  });
+  document.getElementById('payment-modal-title').textContent = 'Record Payment';
+  document.getElementById('pay-edit-id').value = '';
+  document.getElementById('pay-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('pay-amount').value = '';
+  document.getElementById('pay-method').value = '';
+  document.getElementById('pay-period').value = '';
+  document.getElementById('pay-notes').value = '';
+  document.getElementById('pay-received-by').value = currentUser.name;
+  document.getElementById('pay-receipt-num').value = genReceiptNum();
+  openModal('modal-payment');
+}
+
+async function savePayment() {
+  const resId = document.getElementById('pay-resident-id').value;
+  const date = document.getElementById('pay-date').value;
+  const amount = document.getElementById('pay-amount').value;
+  if (!resId || !date || !amount) { toast('Please fill in Resident, Date, and Amount'); return; }
+  const editId = document.getElementById('pay-edit-id').value;
+  const payment = {
+    id: editId || uid(),
+    resident_id: resId,
+    pay_date: date,
+    amount: parseFloat(amount).toFixed(2),
+    method: document.getElementById('pay-method').value,
+    period: document.getElementById('pay-period').value,
+    notes: document.getElementById('pay-notes').value.trim(),
+    received_by: document.getElementById('pay-received-by').value.trim(),
+    receipt_num: document.getElementById('pay-receipt-num').value.trim() || genReceiptNum(),
+    created_at: new Date().toISOString()
+  };
+  await db.from('payments').upsert(payment);
+  closeModal('modal-payment');
+  toast('Payment recorded');
+  renderPaymentsPage();
+  await printReceipt(payment.id);
+}
+
+async function deletePayment(id) {
+  if (!confirm('Delete this payment record? This cannot be undone.')) return;
+  await db.from('payments').delete().eq('id', id);
+  renderPaymentsPage();
+  toast('Payment deleted');
+}
+
+async function printReceipt(id) {
+  const { data: p } = await db.from('payments').select('*').eq('id', id).single();
+  if (!p) return;
+  const residents = await getResidents();
+  const res = residents.find(r => r.id === p.resident_id);
+  const resName = res ? res.name : 'Unknown Resident';
+  const resAddr = res ? (res.room ? 'Room: ' + res.room : '') : '';
+  const amt = parseFloat(p.amount||0);
+  const amtStr = amt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const amtWords = numberToWords(amt);
+  const now = new Date();
+  const printedAt = now.toLocaleDateString('en-US', { timeZone:'America/Los_Angeles', month:'long', day:'numeric', year:'numeric' });
+
+  const win = window.open('', '_blank', 'width=700,height=900');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>Receipt ${p.receipt_num}</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Times New Roman',Times,serif; background:#fff; color:#000; padding:40px 50px; width:650px; margin:0 auto; }
+  .header { text-align:center; border-bottom:2px solid #b8860b; padding-bottom:16px; margin-bottom:20px; }
+  .header img { width:80px; height:80px; object-fit:contain; display:block; margin:0 auto 10px; }
+  .org-name { font-size:15px; font-weight:bold; text-transform:uppercase; letter-spacing:0.05em; color:#1a1a1a; }
+  .org-sub { font-size:11px; color:#555; margin-top:3px; }
+  .receipt-title { margin:20px 0 4px; font-size:20px; font-weight:bold; text-transform:uppercase; letter-spacing:0.08em; text-align:center; color:#b8860b; }
+  .receipt-num { text-align:center; font-size:12px; color:#555; margin-bottom:20px; }
+  .section { margin-bottom:14px; }
+  .row { display:flex; justify-content:space-between; border-bottom:0.5px solid #ddd; padding:7px 0; font-size:12px; }
+  .row .lbl { color:#444; }
+  .row .val { font-weight:bold; text-align:right; }
+  .amount-box { background:#f8f4e8; border:2px solid #b8860b; border-radius:6px; padding:14px 18px; margin:18px 0; text-align:center; }
+  .amount-fig { font-size:28px; font-weight:bold; color:#b8860b; letter-spacing:0.04em; }
+  .amount-words { font-size:11.5px; color:#555; margin-top:4px; font-style:italic; }
+  .footer { margin-top:28px; border-top:1px solid #000; padding-top:16px; }
+  .sig-row { display:flex; justify-content:space-between; margin-top:24px; }
+  .sig-block { text-align:center; }
+  .sig-line { border-bottom:1px solid #000; width:180px; display:inline-block; margin-bottom:4px; }
+  .sig-label { font-size:10px; color:#555; }
+  .legal { margin-top:18px; font-size:9.5px; color:#888; text-align:center; line-height:1.6; border-top:0.5px solid #ccc; padding-top:10px; }
+  @media print { body { padding:28px 36px; } @page { size:letter; margin:0.6in; } }
+</style></head><body>
+<div class="header">
+  <img src="harmony_living_house_logo.png" alt="Harmony Living House Logo">
+  <div class="org-name">Harmony Living House Adult Family LLC</div>
+  <div class="org-sub">120 Newaukum Village Dr &nbsp;·&nbsp; Chehalis, WA 98532</div>
+  <div class="org-sub">Washington State Licensed Adult Family Home</div>
+</div>
+
+<div class="receipt-title">Official Payment Receipt</div>
+<div class="receipt-num">Receipt No: <strong>${p.receipt_num}</strong></div>
+
+<div class="section">
+  <div class="row"><span class="lbl">Resident Name</span><span class="val">${resName}</span></div>
+  ${resAddr ? `<div class="row"><span class="lbl">Room / Unit</span><span class="val">${resAddr}</span></div>` : ''}
+  <div class="row"><span class="lbl">Payment Date</span><span class="val">${fmtDate(p.pay_date)}</span></div>
+  <div class="row"><span class="lbl">Payment Period</span><span class="val">${p.period||'—'}</span></div>
+  <div class="row"><span class="lbl">Payment Method</span><span class="val">${p.method||'—'}</span></div>
+  ${p.notes ? `<div class="row"><span class="lbl">Description</span><span class="val" style="max-width:300px;text-align:right;">${p.notes}</span></div>` : ''}
+</div>
+
+<div class="amount-box">
+  <div class="amount-fig">$${amtStr}</div>
+  <div class="amount-words">Dollars: ${amtWords}</div>
+</div>
+
+<div class="section">
+  <div class="row"><span class="lbl">Received By</span><span class="val">${p.received_by||'—'}</span></div>
+  <div class="row"><span class="lbl">Date Issued</span><span class="val">${printedAt}</span></div>
+</div>
+
+<div class="footer">
+  <div class="sig-row">
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <div class="sig-label">Authorized Signature</div>
+    </div>
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <div class="sig-label">Resident / Representative Signature</div>
+    </div>
+  </div>
+</div>
+
+<div class="legal">
+  This receipt is an official record of payment to Harmony Living House Adult Family LLC.<br>
+  Please retain this document for your records. This receipt confirms payment only and does not constitute a contract.<br>
+  For questions regarding this payment, contact the facility administrator at 120 Newaukum Village Dr, Chehalis, WA 98532.
+</div>
+</body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => {
+    win.print();
+    win.addEventListener('afterprint', () => { win.close(); window.focus(); });
+  }, 700);
+}
+
+function numberToWords(n) {
+  if (!n || n === 0) return 'Zero and 00/100';
+  const ones = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const tens = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  function hw(n) {
+    if (n < 20) return ones[n];
+    if (n < 100) return tens[Math.floor(n/10)] + (n%10 ? ' ' + ones[n%10] : '');
+    return ones[Math.floor(n/100)] + ' Hundred' + (n%100 ? ' ' + hw(n%100) : '');
+  }
+  const dollars = Math.floor(n);
+  const cents = Math.round((n - dollars) * 100);
+  let result = '';
+  if (dollars >= 1000) result += hw(Math.floor(dollars/1000)) + ' Thousand ';
+  if (dollars % 1000 >= 100) result += hw(Math.floor((dollars%1000)/100)) + ' Hundred ';
+  if (dollars % 100 > 0) result += hw(dollars%100);
+  return (result.trim() || 'Zero') + ' and ' + String(cents).padStart(2,'0') + '/100 Dollars';
 }
 
 // ══════════════════════════════════
