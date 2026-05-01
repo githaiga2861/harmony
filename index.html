@@ -1192,6 +1192,10 @@
                   <span style="font-size:20px;">🌙</span>
                   <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">After Hours Text Line</div><a href="tel:2534731155" style="font-size:15px;font-weight:700;color:#1e7e34;text-decoration:none;">253-473-1155</a></div>
                 </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:#e6f4ea;border-radius:8px;">
+                  <span style="font-size:20px;">📧</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Email — Shannon Lawson</div><a href="mailto:slawson@lincolnrx.com" style="font-size:14px;font-weight:600;color:#1e7e34;text-decoration:none;">slawson@lincolnrx.com</a></div>
+                </div>
               </div>
             </div>
 
@@ -5099,21 +5103,50 @@ async function printReceipt(id) {
 }
 
 function numberToWords(n) {
-  if (!n || n === 0) return 'Zero and 00/100';
-  const ones = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  if (!n || n === 0) return 'Zero Dollars and Zero Cents';
+  const ones = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine',
+                'Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen',
+                'Seventeen','Eighteen','Nineteen'];
   const tens = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
-  function hw(n) {
-    if (n < 20) return ones[n];
-    if (n < 100) return tens[Math.floor(n/10)] + (n%10 ? ' ' + ones[n%10] : '');
-    return ones[Math.floor(n/100)] + ' Hundred' + (n%100 ? ' ' + hw(n%100) : '');
+
+  function hw(num) {
+    if (num === 0) return '';
+    if (num < 20) return ones[num];
+    if (num < 100) return tens[Math.floor(num/10)] + (num%10 ? ' ' + ones[num%10] : '');
+    return ones[Math.floor(num/100)] + ' Hundred' + (num%100 ? ' and ' + hw(num%100) : '');
   }
+
+  function fullNumber(num) {
+    if (num === 0) return 'Zero';
+    let result = '';
+    if (num >= 1000000) {
+      result += hw(Math.floor(num/1000000)) + ' Million ';
+      num = num % 1000000;
+    }
+    if (num >= 1000) {
+      result += hw(Math.floor(num/1000)) + ' Thousand ';
+      num = num % 1000;
+    }
+    if (num >= 100) {
+      result += ones[Math.floor(num/100)] + ' Hundred';
+      num = num % 100;
+      if (num > 0) result += ' and ';
+    }
+    if (num > 0) result += hw(num);
+    return result.trim();
+  }
+
   const dollars = Math.floor(n);
   const cents = Math.round((n - dollars) * 100);
-  let result = '';
-  if (dollars >= 1000) result += hw(Math.floor(dollars/1000)) + ' Thousand ';
-  if (dollars % 1000 >= 100) result += hw(Math.floor((dollars%1000)/100)) + ' Hundred ';
-  if (dollars % 100 > 0) result += hw(dollars%100);
-  return (result.trim() || 'Zero') + ' and ' + String(cents).padStart(2,'0') + '/100 Dollars';
+
+  const dollarWords = fullNumber(dollars);
+  const centWords = fullNumber(cents);
+
+  const dollarPart = dollarWords + (dollars === 1 ? ' Dollar' : ' Dollars');
+  const centPart = centWords + (cents === 1 ? ' Cent' : ' Cents');
+
+  if (cents === 0) return dollarPart + ' and Zero Cents';
+  return dollarPart + ' and ' + centPart;
 }
 
 // ══════════════════════════════════
