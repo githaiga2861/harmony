@@ -741,7 +741,7 @@
               </div>
               <table>
                 <thead><tr>
-                  <th>Name &amp; Status</th><th>Date of Birth</th><th>Age</th><th>Date Added</th><th>Progress Notes</th><th>Incident Reports</th><th>Actions</th>
+                  <th>Name &amp; Status</th><th>Date of Birth</th><th>Age</th><th>Date Admitted</th><th>Record Added</th><th>Progress Notes</th><th>Incident Reports</th><th>Actions</th>
                 </tr></thead>
                 <tbody id="residents-table"></tbody>
               </table>
@@ -784,7 +784,8 @@
               <div class="profile-meta" style="flex-wrap:wrap;">
                 <span id="profile-dob">DOB: —</span>
                 <span id="profile-age">Age: —</span>
-                <span id="profile-admitted">Added: —</span>
+                <span id="profile-admitted">Admitted: —</span>
+                <span id="profile-record-added" style="color:rgba(255,255,255,0.55);font-size:11px;"></span>
                 <span id="profile-diagnosis" style="color:rgba(255,255,255,0.7);"></span>
               </div>
             </div>
@@ -1238,6 +1239,10 @@
           <input type="date" id="res-dob">
         </div>
         <div class="field">
+          <label>Date Admitted to Facility *</label>
+          <input type="date" id="res-admitted">
+        </div>
+        <div class="field">
           <label>Room / Unit</label>
           <input type="text" id="res-room" placeholder="e.g. Room 3A">
         </div>
@@ -1289,6 +1294,10 @@
         <div class="field">
           <label>Date of Birth *</label>
           <input type="date" id="edit-res-dob">
+        </div>
+        <div class="field">
+          <label>Date Admitted to Facility *</label>
+          <input type="date" id="edit-res-admitted">
         </div>
         <div class="field">
           <label>Room / Unit</label>
@@ -2566,7 +2575,8 @@ async function renderResidentTable() {
       </td>
       <td>${fmtDate(r.dob)}</td>
       <td>${calcAge(r.dob)}</td>
-      <td>${fmtDate(r.created_at?.split('T')[0])}</td>
+      <td>${r.admitted_date ? fmtDate(r.admitted_date) : '<span style="color:var(--text3);font-style:italic;font-size:12px;">Not set</span>'}</td>
+      <td style="color:var(--text3);font-size:12px;">${fmtDate(r.created_at?.split('T')[0])}</td>
       <td><span class="badge badge-green">${noteCount} note${noteCount !== 1 ? 's' : ''}</span></td>
       <td><span class="badge badge-red">${incidentCount} report${incidentCount !== 1 ? 's' : ''}</span></td>
       <td style="display:flex;gap:6px;">
@@ -2578,9 +2588,10 @@ async function renderResidentTable() {
 }
 
 function openAddResident() {
-  ['res-name','res-dob','res-room','res-diagnosis','res-contact','res-contact2','res-contact3','res-phone'].forEach(id => {
+  ['res-name','res-dob','res-admitted','res-room','res-diagnosis','res-contact','res-contact2','res-contact3','res-phone'].forEach(id => {
     document.getElementById(id).value = '';
   });
+  document.getElementById('res-admitted').value = new Date().toISOString().split('T')[0];
   openModal('modal-resident');
 }
 
@@ -2588,8 +2599,10 @@ async function handleSaveResident() {
   const name = document.getElementById('res-name').value.trim();
   const dob = document.getElementById('res-dob').value;
   if (!name || !dob) { toast('Please fill in Name and Date of Birth'); return; }
+  const admittedRaw = document.getElementById('res-admitted').value;
   const res = {
     id: uid(), name: name, dob: dob,
+    admitted_date: admittedRaw || new Date().toISOString().split('T')[0],
     room: document.getElementById('res-room').value.trim(),
     diagnosis: document.getElementById('res-diagnosis').value.trim(),
     emergency_contact: document.getElementById('res-contact').value.trim(),
@@ -2619,6 +2632,7 @@ async function openEditResident(id) {
   document.getElementById('edit-res-id').value = id;
   document.getElementById('edit-res-name').value = r.name || '';
   document.getElementById('edit-res-dob').value = r.dob || '';
+  document.getElementById('edit-res-admitted').value = r.admitted_date || r.created_at?.split('T')[0] || '';
   document.getElementById('edit-res-room').value = r.room || '';
   document.getElementById('edit-res-diagnosis').value = r.diagnosis || '';
   document.getElementById('edit-res-phone').value = r.resident_phone || '';
@@ -2635,6 +2649,7 @@ async function handleUpdateResident() {
   if (!name || !dob) { toast('Please fill in Name and Date of Birth'); return; }
   await db.from('residents').update({
     name, dob,
+    admitted_date: document.getElementById('edit-res-admitted').value || dob,
     room: document.getElementById('edit-res-room').value.trim(),
     diagnosis: document.getElementById('edit-res-diagnosis').value.trim(),
     resident_phone: document.getElementById('edit-res-phone').value.trim(),
@@ -2648,9 +2663,10 @@ async function handleUpdateResident() {
 }
 
 function calcDaysAdmitted(res) {
-  if (!res.created_at) return null;
   if (res.status === 'discharged') return null;
-  const start = new Date(res.created_at);
+  const raw = res.admitted_date || res.created_at?.split('T')[0];
+  if (!raw) return null;
+  const start = new Date(raw + 'T00:00:00');
   const now = new Date();
   const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
   return diff;
@@ -2668,7 +2684,10 @@ async function openProfile(id) {
   document.getElementById('profile-avatar').textContent = res.name.charAt(0).toUpperCase();
   document.getElementById('profile-dob').textContent = 'DOB: ' + fmtDate(res.dob);
   document.getElementById('profile-age').textContent = 'Age: ' + calcAge(res.dob);
-  document.getElementById('profile-admitted').textContent = 'Added: ' + fmtDate(res.created_at?.split('T')[0]);
+  const admittedDisplay = res.admitted_date ? fmtDate(res.admitted_date) : fmtDate(res.created_at?.split('T')[0]);
+  document.getElementById('profile-admitted').textContent = 'Admitted: ' + admittedDisplay;
+  const recordAddedEl = document.getElementById('profile-record-added');
+  if (recordAddedEl) recordAddedEl.textContent = 'Record added: ' + fmtDate(res.created_at?.split('T')[0]);
   document.getElementById('profile-diagnosis').textContent = res.diagnosis ? '· ' + res.diagnosis : '';
   document.getElementById('profile-status-select').value = res.status || 'active';
   showResidentPhoto(res.photo || null);
