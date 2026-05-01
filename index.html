@@ -354,10 +354,19 @@
   .page.active { display: block; }
 
   /* ── RESIDENT STATUS BADGES ── */
-  .status-active { background:#e6f4ea; color:#1e7e34; }
-  .status-hospitalized { background:#fff3cd; color:#856404; }
-  .status-onleave { background:#e8f0fe; color:#1a73e8; }
-  .status-discharged { background:#f8d7da; color:#721c24; }
+  .status-active { background:#e6f4ea; color:#1e7e34; border:1px solid #a8d5b0; }
+  .status-hospitalized { background:#fff3cd; color:#856404; border:1px solid #ffe08a; }
+  .status-onleave { background:#e8f0fe; color:#1a73e8; border:1px solid #b0c8f8; }
+  .status-discharged { background:#f8d7da; color:#721c24; border:1px solid #f5b8be; }
+
+  /* ── PROFILE REFINEMENTS ── */
+  .profile-tab { padding:9px 16px; font-size:13px; }
+  .note-card { padding:14px 16px; }
+  .med-card { padding:12px 14px; }
+  td { padding:10px 14px; }
+  .card-header h3 { font-size:14px; }
+  .profile-header { padding:22px; }
+  .profile-name { font-size:22px; }
 
   /* ── PHOTO UPLOAD ── */
   .resident-photo-wrap {
@@ -612,6 +621,10 @@
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           Payments
         </button>
+        <button class="nav-item" onclick="showPage('contacts')" id="nav-contacts">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.64-1.64a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Quick Contacts
+        </button>
       </div>
       <div class="sidebar-footer">
         <div class="staff-badge">
@@ -728,7 +741,7 @@
               </div>
               <table>
                 <thead><tr>
-                  <th>Name</th><th>Date of Birth</th><th>Age</th><th>Date Added</th><th>Progress Notes</th><th>Incident Reports</th><th>Actions</th>
+                  <th>Name &amp; Status</th><th>Date of Birth</th><th>Age</th><th>Date Added</th><th>Progress Notes</th><th>Incident Reports</th><th>Actions</th>
                 </tr></thead>
                 <tbody id="residents-table"></tbody>
               </table>
@@ -764,14 +777,27 @@
                   <option value="onleave">🔵 On Leave</option>
                   <option value="discharged">🔴 Discharged</option>
                 </select>
+                <button onclick="openEditResident(currentResidentId)" style="padding:5px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.12);color:#fff;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;">
+                  ✏️ Edit Profile
+                </button>
               </div>
-              <div class="profile-meta">
+              <div class="profile-meta" style="flex-wrap:wrap;">
                 <span id="profile-dob">DOB: —</span>
                 <span id="profile-age">Age: —</span>
                 <span id="profile-admitted">Added: —</span>
                 <span id="profile-diagnosis" style="color:rgba(255,255,255,0.7);"></span>
               </div>
             </div>
+            <div id="profile-days-admitted" style="display:none;text-align:center;padding:12px 20px;background:rgba(255,255,255,0.1);border-radius:10px;border:1px solid rgba(255,255,255,0.2);flex-shrink:0;min-width:100px;"></div>
+          </div>
+
+          <!-- Emergency Contacts Strip -->
+          <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;box-shadow:var(--shadow);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <div style="font-size:11px;font-weight:700;color:var(--danger);text-transform:uppercase;letter-spacing:0.07em;">🚨 Emergency Contacts &amp; Resident Phone</div>
+              <button onclick="openEditResident(currentResidentId)" class="btn btn-secondary btn-sm" style="font-size:11px;">Edit Contacts</button>
+            </div>
+            <div id="profile-emergency-contacts" style="display:none;"></div>
           </div>
 
           <!-- Profile Tab Nav -->
@@ -1104,6 +1130,97 @@
           </div>
         </div>
 
+      <!-- QUICK CONTACTS -->
+        <div class="page" id="page-contacts">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+
+            <div class="card">
+              <div class="card-header" style="background:linear-gradient(135deg,#1a1a1a,#b8860b);border-radius:10px 10px 0 0;">
+                <h3 style="color:#fff;font-family:'DM Serif Display',serif;font-size:16px;">🏠 Harmony House</h3>
+              </div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">📱</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Cell</div><a href="tel:3605573737" style="font-size:15px;font-weight:700;color:var(--accent);text-decoration:none;">360-557-3737</a></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">📧</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Email</div><a href="mailto:hello@harmonylivinghouse.com" style="font-size:14px;font-weight:600;color:var(--accent);text-decoration:none;">hello@harmonylivinghouse.com</a></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">📠</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Fax</div><div style="font-size:15px;font-weight:700;color:var(--text);">360-648-9890</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header" style="background:linear-gradient(135deg,#1a4a8a,#2563eb);border-radius:10px 10px 0 0;">
+                <h3 style="color:#fff;font-family:'DM Serif Display',serif;font-size:16px;">🩺 Home Doctor — Dominic Keja</h3>
+              </div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">📱</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Cell</div><a href="tel:2533251121" style="font-size:15px;font-weight:700;color:#1a73e8;text-decoration:none;">253-325-1121</a></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">📠</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Fax</div><div style="font-size:15px;font-weight:700;color:var(--text);">800-807-976</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:#e8f0fe;border-radius:8px;">
+                  <span style="font-size:20px;">🌐</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Aryna Interpreted Care — Email</div><a href="mailto:info@arynyhealthcare.com" style="font-size:13px;font-weight:600;color:#1a73e8;text-decoration:none;">info@arynyhealthcare.com</a></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header" style="background:linear-gradient(135deg,#1a5e3a,#22863a);border-radius:10px 10px 0 0;">
+                <h3 style="color:#fff;font-family:'DM Serif Display',serif;font-size:16px;">💊 Lincoln Pharmacy</h3>
+              </div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">📞</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Office Phone</div><a href="tel:2534731155" style="font-size:15px;font-weight:700;color:#1e7e34;text-decoration:none;">253-473-1155</a></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">📠</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Fax</div><div style="font-size:15px;font-weight:700;color:var(--text);">253-473-1158</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:#e6f4ea;border-radius:8px;">
+                  <span style="font-size:20px;">🌙</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">After Hours Text Line</div><a href="tel:2534731155" style="font-size:15px;font-weight:700;color:#1e7e34;text-decoration:none;">253-473-1155</a></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header" style="background:linear-gradient(135deg,#6b1a8a,#9333ea);border-radius:10px 10px 0 0;">
+                <h3 style="color:#fff;font-family:'DM Serif Display',serif;font-size:16px;">👩‍⚕️ Shannon Lawson — Consulting Nurse</h3>
+              </div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">📱</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Call / Text</div><a href="tel:2537226099" style="font-size:15px;font-weight:700;color:#7c3aed;text-decoration:none;">253-722-6099</a></div>
+                </div>
+                <div style="padding:10px;background:#f5f0ff;border-radius:8px;border-left:3px solid #9333ea;">
+                  <div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;">Resident DOBs on file</div>
+                  <div style="font-size:12.5px;color:var(--text2);line-height:2;">
+                    <div>Karl R. &nbsp;—&nbsp; <span style="color:var(--text3);font-style:italic;">on file</span></div>
+                    <div>Tammy T. &nbsp;—&nbsp; <strong>05/10/1965</strong></div>
+                    <div>Matthew &nbsp;—&nbsp; <span style="color:var(--text3);font-style:italic;">on file</span></div>
+                    <div>Emanuel &nbsp;—&nbsp; <span style="color:var(--text3);font-style:italic;">on file</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:var(--radius);padding:14px 18px;font-size:13px;color:var(--text2);">
+            <strong style="color:var(--accent);">📌 Note:</strong> All numbers are clickable on mobile-accessible devices. These are the facility's primary emergency and operational contacts.
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -1137,14 +1254,79 @@
           <input type="text" id="res-diagnosis" placeholder="e.g. Alcohol use disorder, COPD">
         </div>
         <div class="field span2">
-          <label>Emergency Contact</label>
-          <input type="text" id="res-contact" placeholder="Name and phone number">
+          <label>Resident's Own Phone Number</label>
+          <input type="text" id="res-phone" placeholder="e.g. 253-555-0100">
+        </div>
+        <div class="field span2">
+          <label>Emergency Contact 1 (Name &amp; Phone) *</label>
+          <input type="text" id="res-contact" placeholder="e.g. Jane Doe — 253-555-0199 (Sister)">
+        </div>
+        <div class="field span2">
+          <label>Emergency Contact 2 (Name &amp; Phone)</label>
+          <input type="text" id="res-contact2" placeholder="e.g. John Doe — 253-555-0188 (Son)">
+        </div>
+        <div class="field span2">
+          <label>Emergency Contact 3 (Name &amp; Phone)</label>
+          <input type="text" id="res-contact3" placeholder="Optional third contact">
         </div>
       </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-resident')">Cancel</button>
       <button class="btn btn-primary" onclick="handleSaveResident()">Save Resident</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Edit Resident -->
+<div class="modal-overlay" id="modal-edit-resident">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Edit Resident Details</h3>
+      <button class="btn-close" onclick="closeModal('modal-edit-resident')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-res-id">
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Full Name *</label>
+          <input type="text" id="edit-res-name" placeholder="e.g. Teresa Johnson">
+        </div>
+        <div class="field">
+          <label>Date of Birth *</label>
+          <input type="date" id="edit-res-dob">
+        </div>
+        <div class="field">
+          <label>Room / Unit</label>
+          <input type="text" id="edit-res-room" placeholder="e.g. Room 3A">
+        </div>
+        <div class="field span2">
+          <label>Primary Diagnosis / Condition</label>
+          <input type="text" id="edit-res-diagnosis" placeholder="e.g. Alcohol use disorder, COPD">
+        </div>
+        <div class="field span2">
+          <label>Resident's Own Phone Number</label>
+          <input type="text" id="edit-res-phone" placeholder="e.g. 253-555-0100">
+        </div>
+        <div class="field span2">
+          <label>Emergency Contact 1 (Name &amp; Phone) *</label>
+          <input type="text" id="edit-res-contact" placeholder="e.g. Jane Doe — 253-555-0199 (Sister)">
+        </div>
+        <div class="field span2">
+          <label>Emergency Contact 2 (Name &amp; Phone)</label>
+          <input type="text" id="edit-res-contact2" placeholder="e.g. John Doe — 253-555-0188 (Son)">
+        </div>
+        <div class="field span2">
+          <label>Emergency Contact 3 (Name &amp; Phone)</label>
+          <input type="text" id="edit-res-contact3" placeholder="Optional third contact">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-edit-resident')">Cancel</button>
+      <button class="btn btn-primary" onclick="handleUpdateResident()">Save Changes</button>
     </div>
   </div>
 </div>
@@ -2294,7 +2476,7 @@ document.getElementById('login-password').addEventListener('keydown', e => { if 
 // ══════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════
-const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Payments Tracker' };
+const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Payments Tracker', contacts: 'Quick Contacts' };
 
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2378,8 +2560,18 @@ async function renderResidentTable() {
   tbody.innerHTML = residents.map(r => {
     const noteCount = notes.filter(n => n.resident_id === r.id).length;
     const incidentCount = incidents.filter(i => i.resident_id === r.id).length;
+    const statusMap = {
+      active: { label: 'Active', cls: 'status-active' },
+      hospitalized: { label: 'Hospitalized', cls: 'status-hospitalized' },
+      onleave: { label: 'On Leave', cls: 'status-onleave' },
+      discharged: { label: 'Discharged', cls: 'status-discharged' },
+    };
+    const st = statusMap[r.status || 'active'] || statusMap.active;
     return `<tr>
-      <td><span class="resident-name" onclick="openProfile('${r.id}')">${r.name}</span></td>
+      <td>
+        <span class="resident-name" onclick="openProfile('${r.id}')">${r.name}</span>
+        <span class="badge ${st.cls}" style="margin-left:6px;font-size:10px;">${st.label}</span>
+      </td>
       <td>${fmtDate(r.dob)}</td>
       <td>${calcAge(r.dob)}</td>
       <td>${fmtDate(r.created_at?.split('T')[0])}</td>
@@ -2394,7 +2586,7 @@ async function renderResidentTable() {
 }
 
 function openAddResident() {
-  ['res-name','res-dob','res-room','res-diagnosis','res-contact'].forEach(id => {
+  ['res-name','res-dob','res-room','res-diagnosis','res-contact','res-contact2','res-contact3','res-phone'].forEach(id => {
     document.getElementById(id).value = '';
   });
   openModal('modal-resident');
@@ -2409,6 +2601,9 @@ async function handleSaveResident() {
     room: document.getElementById('res-room').value.trim(),
     diagnosis: document.getElementById('res-diagnosis').value.trim(),
     emergency_contact: document.getElementById('res-contact').value.trim(),
+    emergency_contact2: document.getElementById('res-contact2').value.trim(),
+    emergency_contact3: document.getElementById('res-contact3').value.trim(),
+    resident_phone: document.getElementById('res-phone').value.trim(),
     created_at: new Date().toISOString(),
     created_by: currentUser.name
   };
@@ -2423,6 +2618,50 @@ async function deleteResident(id) {
   await deleteResidentFromDb(id);
   renderResidentTable();
   toast('Resident deleted');
+}
+
+async function openEditResident(id) {
+  const residents = await getResidents();
+  const r = residents.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('edit-res-id').value = id;
+  document.getElementById('edit-res-name').value = r.name || '';
+  document.getElementById('edit-res-dob').value = r.dob || '';
+  document.getElementById('edit-res-room').value = r.room || '';
+  document.getElementById('edit-res-diagnosis').value = r.diagnosis || '';
+  document.getElementById('edit-res-phone').value = r.resident_phone || '';
+  document.getElementById('edit-res-contact').value = r.emergency_contact || '';
+  document.getElementById('edit-res-contact2').value = r.emergency_contact2 || '';
+  document.getElementById('edit-res-contact3').value = r.emergency_contact3 || '';
+  openModal('modal-edit-resident');
+}
+
+async function handleUpdateResident() {
+  const id = document.getElementById('edit-res-id').value;
+  const name = document.getElementById('edit-res-name').value.trim();
+  const dob = document.getElementById('edit-res-dob').value;
+  if (!name || !dob) { toast('Please fill in Name and Date of Birth'); return; }
+  await db.from('residents').update({
+    name, dob,
+    room: document.getElementById('edit-res-room').value.trim(),
+    diagnosis: document.getElementById('edit-res-diagnosis').value.trim(),
+    resident_phone: document.getElementById('edit-res-phone').value.trim(),
+    emergency_contact: document.getElementById('edit-res-contact').value.trim(),
+    emergency_contact2: document.getElementById('edit-res-contact2').value.trim(),
+    emergency_contact3: document.getElementById('edit-res-contact3').value.trim(),
+  }).eq('id', id);
+  closeModal('modal-edit-resident');
+  toast('Resident details updated');
+  await openProfile(id);
+}
+
+function calcDaysAdmitted(res) {
+  if (!res.created_at) return null;
+  if (res.status === 'discharged') return null;
+  const start = new Date(res.created_at);
+  const now = new Date();
+  const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  return diff;
 }
 
 // ══════════════════════════════════
@@ -2442,6 +2681,46 @@ async function openProfile(id) {
   document.getElementById('profile-status-select').value = res.status || 'active';
   showResidentPhoto(res.photo || null);
   checkBirthday(res);
+
+  // Days admitted counter
+  const daysEl = document.getElementById('profile-days-admitted');
+  const days = calcDaysAdmitted(res);
+  if (daysEl) {
+    if (days !== null) {
+      daysEl.innerHTML = `<span style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.6);">Days in Facility</span><br><span style="font-size:22px;font-weight:700;color:#fff;">${days}</span>`;
+      daysEl.style.display = 'block';
+    } else {
+      daysEl.innerHTML = `<span style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.6);">Status</span><br><span style="font-size:14px;font-weight:700;color:#f5c6c2;">Discharged</span>`;
+      daysEl.style.display = 'block';
+    }
+  }
+
+  // Emergency contacts panel
+  const ecEl = document.getElementById('profile-emergency-contacts');
+  if (ecEl) {
+    const contacts = [
+      res.resident_phone ? { label: "Resident's Phone", val: res.resident_phone, icon: '📱' } : null,
+      res.emergency_contact ? { label: 'Emergency Contact 1', val: res.emergency_contact, icon: '🚨' } : null,
+      res.emergency_contact2 ? { label: 'Emergency Contact 2', val: res.emergency_contact2, icon: '🚨' } : null,
+      res.emergency_contact3 ? { label: 'Emergency Contact 3', val: res.emergency_contact3, icon: '🚨' } : null,
+    ].filter(Boolean);
+    if (contacts.length) {
+      ecEl.innerHTML = contacts.map(c => `
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:16px;">${c.icon}</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">${c.label}</div>
+            <div style="font-size:13.5px;font-weight:600;color:var(--text);word-break:break-word;">${c.val}</div>
+          </div>
+        </div>
+      `).join('');
+      ecEl.style.display = 'block';
+    } else {
+      ecEl.innerHTML = `<div style="font-size:13px;color:var(--text3);font-style:italic;padding:8px 0;">No contacts recorded. <button class="btn btn-secondary btn-sm" style="margin-left:6px;" onclick="openEditResident('${id}')">Add now</button></div>`;
+      ecEl.style.display = 'block';
+    }
+  }
+
   switchProfileTab('notes');
   renderProfileNotes();
   showPage('profile');
