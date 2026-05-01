@@ -2465,6 +2465,7 @@ function initApp() {
   document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
   refreshDashboard();
   renderResidentTable();
+  populateResidentFilter(); // pre-load all dropdowns immediately on login
   startNotifScheduler();
 }
 
@@ -2485,11 +2486,11 @@ function showPage(name) {
   if (nav) nav.classList.add('active');
   document.getElementById('topbar-title').textContent = pageTitles[name] || name;
   if (name === 'dashboard') refreshDashboard();
-  if (name === 'notes') { renderAllNotes(); populateResidentFilter(); }
+  if (name === 'notes') { await populateResidentFilter(); renderAllNotes(); }
   if (name === 'analytics') renderAnalytics();
   if (name === 'residents') renderResidentTable();
-  if (name === 'incidents') renderAllIncidents();
-  if (name === 'payments') renderPaymentsPage();
+  if (name === 'incidents') { await populateResidentFilter(); renderAllIncidents(); }
+  if (name === 'payments') { await populateResidentFilter(); renderPaymentsPage(); }
 }
 
 // ══════════════════════════════════
@@ -2644,8 +2645,10 @@ async function handleUpdateResident() {
   const name = document.getElementById('edit-res-name').value.trim();
   const dob = document.getElementById('edit-res-dob').value;
   if (!name || !dob) { toast('Please fill in Name and Date of Birth'); return; }
-  await db.from('residents').update({
-    name, dob,
+
+  const { error } = await db.from('residents').update({
+    name,
+    dob,
     admitted_date: document.getElementById('edit-res-admitted').value || dob,
     room: document.getElementById('edit-res-room').value.trim(),
     diagnosis: document.getElementById('edit-res-diagnosis').value.trim(),
@@ -2654,9 +2657,22 @@ async function handleUpdateResident() {
     emergency_contact2: document.getElementById('edit-res-contact2').value.trim(),
     emergency_contact3: document.getElementById('edit-res-contact3').value.trim(),
   }).eq('id', id);
+
+  if (error) { toast('Error saving: ' + error.message); return; }
+
   closeModal('modal-edit-resident');
-  toast('Resident details updated');
-  await openProfile(id);
+  toast('✅ Resident updated — all pages refreshed');
+
+  // Refresh every part of the app that shows resident data
+  await Promise.all([
+    openProfile(id),          // re-renders profile header, contacts, tabs
+    renderResidentTable(),    // residents page
+    refreshDashboard(),       // dashboard recent notes + stats
+    populateResidentFilter(), // notes page filter dropdown
+    renderAllNotes(),         // all notes page (resident name references)
+    renderAllIncidents(),     // all incidents page (resident name references)
+    renderPaymentsPage(),     // payments page (resident name references)
+  ]);
 }
 
 function calcDaysAdmitted(res) {
@@ -3062,16 +3078,33 @@ async function exportPDF() {
 // ALL NOTES PAGE
 // ══════════════════════════════════
 async function populateResidentFilter() {
-  const sel = document.getElementById('notes-resident-filter');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">All Residents</option>';
   const residents = await getResidents();
-  residents.forEach(r => {
-    const opt = document.createElement('option');
-    opt.value = r.id; opt.textContent = r.name;
-    sel.appendChild(opt);
+
+  // Rebuild every resident dropdown across all pages simultaneously
+  const dropdownIds = [
+    'notes-resident-filter',
+    'incidents-resident-filter',
+    'pay-resident-filter',
+    'pay-resident-id',
+  ];
+
+  dropdownIds.forEach(dropdownId => {
+    const sel = document.getElementById(dropdownId);
+    if (!sel) return;
+    const cur = sel.value;
+    const isPaymentSelect = dropdownId === 'pay-resident-id';
+    sel.innerHTML = isPaymentSelect
+      ? '<option value="">— Select Resident —</option>'
+      : '<option value="">All Residents</option>';
+    residents.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.id;
+      opt.textContent = r.name;
+      sel.appendChild(opt);
+    });
+    // Restore previous selection if the resident still exists
+    if (residents.find(r => r.id === cur)) sel.value = cur;
   });
-  sel.value = cur;
 }
 
 async function renderAllNotes() {
@@ -3113,19 +3146,12 @@ async function renderAllIncidents() {
   const dateF = document.getElementById('incidents-date-filter')?.value;
   const resF = document.getElementById('incidents-resident-filter')?.value;
   const residents = await getResidents();
-  const sel = document.getElementById('incidents-resident-filter');
-  if (sel && sel.options.length <= 1) {
-    residents.forEach(r => {
-      const opt = document.createElement('option');
-      opt.value = r.id; opt.textContent = r.name;
-      sel.appendChild(opt);
-    });
-  }
   const { data: allReports } = await db.from('incident_reports').select('*').order('incident_date', { ascending: false });
   let reports = allReports || [];
   if (q) reports = reports.filter(r => JSON.stringify(r).toLowerCase().includes(q));
   if (dateF) reports = reports.filter(r => r.incident_date === dateF);
   if (resF) reports = reports.filter(r => r.resident_id === resF);
+  // Note: dropdown is now always populated by populateResidentFilter()
   const container = document.getElementById('all-incidents-list');
   if (!reports.length) {
     container.innerHTML = `<div class="empty-state"><h4>No incident reports found</h4><p>Try adjusting your search filters.</p></div>`;
@@ -3834,8 +3860,30 @@ function showResidentPhoto(dataUrl) {
 // ══════════════════════════════════
 async function saveResidentStatus() {
   const status = document.getElementById('profile-status-select').value;
-  await db.from('residents').update({ status }).eq('id', currentResidentId);
-  toast('Status updated');
+  const { error } = await db.from('residents').update({ status }).eq('id', currentResidentId);
+  if (error) { toast('Error saving status: ' + error.message); return; }
+  toast('✅ Status updated');
+
+  // Re-render all pages that reflect resident status
+  await Promise.all([
+    renderResidentTable(),
+    refreshDashboard(),
+    renderPaymentsPage(),
+  ]);
+
+  // Re-render the days counter on the profile immediately
+  const residents = await getResidents();
+  const res = residents.find(r => r.id === currentResidentId);
+  if (!res) return;
+  const daysEl = document.getElementById('profile-days-admitted');
+  if (daysEl) {
+    const days = calcDaysAdmitted(res);
+    if (days !== null) {
+      daysEl.innerHTML = `<span style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.6);">Days in Facility</span><br><span style="font-size:22px;font-weight:700;color:#fff;">${days}</span>`;
+    } else {
+      daysEl.innerHTML = `<span style="font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.6);">Status</span><br><span style="font-size:14px;font-weight:700;color:#f5c6c2;">Discharged</span>`;
+    }
+  }
 }
 
 // ══════════════════════════════════
@@ -4857,14 +4905,6 @@ function genReceiptNum() {
 
 async function renderPaymentsPage() {
   const residents = await getResidents();
-  const sel = document.getElementById('pay-resident-filter');
-  if (sel && sel.options.length <= 1) {
-    residents.forEach(r => {
-      const opt = document.createElement('option');
-      opt.value = r.id; opt.textContent = r.name;
-      sel.appendChild(opt);
-    });
-  }
   const q = (document.getElementById('pay-search')?.value || '').toLowerCase();
   const dateF = document.getElementById('pay-date-filter')?.value;
   const resF = document.getElementById('pay-resident-filter')?.value;
