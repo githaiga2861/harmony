@@ -619,7 +619,11 @@
         </button>
         <button class="nav-item" onclick="showPage('payments')" id="nav-payments">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-          Payments
+          Financials
+        </button>
+        <button class="nav-item" onclick="showPage('staffdocs')" id="nav-staffdocs">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Staff Documents
         </button>
         <button class="nav-item" onclick="showPage('contacts')" id="nav-contacts">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.64-1.64a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
@@ -1057,22 +1061,31 @@
 
         <!-- PAYMENTS TRACKER -->
         <div class="page" id="page-payments">
+          <!-- Shared top stats bar -->
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
             <div class="stat-card">
               <div class="stat-icon green" style="float:right">
                 <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
               </div>
-              <div class="label">Total Collected</div>
+              <div class="label">Total Income</div>
               <div class="value" id="pay-stat-total">$0</div>
-              <div class="sub">All time</div>
+              <div class="sub">All time collected</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon red" style="float:right">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <div class="label">Total Expenses</div>
+              <div class="value" id="pay-stat-expenses">$0</div>
+              <div class="sub">All time spent</div>
             </div>
             <div class="stat-card">
               <div class="stat-icon blue" style="float:right">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
               </div>
-              <div class="label">This Month</div>
-              <div class="value" id="pay-stat-month">$0</div>
-              <div class="sub">Current calendar month</div>
+              <div class="label">Net This Month</div>
+              <div class="value" id="pay-stat-net-month">$0</div>
+              <div class="sub">Income minus expenses</div>
             </div>
             <div class="stat-card">
               <div class="stat-icon warn" style="float:right">
@@ -1082,33 +1095,104 @@
               <div class="value" id="pay-stat-residents">0</div>
               <div class="sub">Unique payers</div>
             </div>
-            <div class="stat-card">
-              <div class="stat-icon red" style="float:right">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              </div>
-              <div class="label">Total Payments</div>
-              <div class="value" id="pay-stat-count">0</div>
-              <div class="sub">Transactions recorded</div>
-            </div>
           </div>
-          <div class="card">
-            <div class="card-header">
-              <h3>Payment Records</h3>
-              <button class="btn btn-primary btn-sm" onclick="openAddPayment()">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Record Payment
-              </button>
-            </div>
-            <div class="card-body">
-              <div class="search-bar">
-                <input class="search-input" id="pay-search" placeholder="Search by resident or notes..." oninput="renderPaymentsPage()">
-                <input type="date" id="pay-date-filter" class="search-input" style="max-width:180px;" oninput="renderPaymentsPage()">
-                <select id="pay-resident-filter" class="search-input" style="max-width:200px;" onchange="renderPaymentsPage()">
-                  <option value="">All Residents</option>
-                </select>
+
+          <!-- Two-column layout: Income | Expenses -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+
+            <!-- LEFT: INCOME -->
+            <div class="card">
+              <div style="background:linear-gradient(135deg,#1a3d1a,#1e7e34);border-radius:10px 10px 0 0;padding:14px 18px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                  <h3 style="color:#fff;font-size:14px;margin:0;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:-2px;margin-right:6px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                    Income / Payments Received
+                  </h3>
+                  <button class="btn btn-sm" onclick="openAddPayment()" style="background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.4);font-size:12px;">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Record Payment
+                  </button>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button onclick="printIncomeReport()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    Print Income Register
+                  </button>
+                  <button onclick="exportIncomeReportPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    PDF Income Report
+                  </button>
+                  <button onclick="exportFinancialSummaryPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                    P&amp;L Summary PDF
+                  </button>
+                </div>
               </div>
-              <div id="payments-list" class="notes-list"></div>
+              <div class="card-body" style="padding:14px 16px;">
+                <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                  <input class="search-input" id="pay-search" placeholder="Search payments..." oninput="renderPaymentsPage()" style="flex:1;min-width:120px;font-size:13px;">
+                  <input type="date" id="pay-date-filter" class="search-input" style="max-width:150px;font-size:13px;" oninput="renderPaymentsPage()">
+                  <select id="pay-resident-filter" class="search-input" style="max-width:160px;font-size:13px;" onchange="renderPaymentsPage()">
+                    <option value="">All Residents</option>
+                  </select>
+                </div>
+                <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">
+                  <span id="pay-stat-count">0</span> payment(s) &nbsp;·&nbsp; This month: <span id="pay-stat-month">$0</span>
+                </div>
+                <div id="payments-list" class="notes-list" style="max-height:65vh;overflow-y:auto;"></div>
+              </div>
             </div>
+
+            <!-- RIGHT: EXPENSES -->
+            <div class="card">
+              <div style="background:linear-gradient(135deg,#6b1a1a,#c0392b);border-radius:10px 10px 0 0;padding:14px 18px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                  <h3 style="color:#fff;font-size:14px;margin:0;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align:-2px;margin-right:6px;"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+                    Facility Expenses
+                  </h3>
+                  <button class="btn btn-sm" onclick="openAddExpense()" style="background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.4);font-size:12px;">
+                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Expense
+                  </button>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button onclick="printExpenseReport()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    Print Expense Register
+                  </button>
+                  <button onclick="exportExpenseReportPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    PDF Expense Report
+                  </button>
+                </div>
+              </div>
+              <div class="card-body" style="padding:14px 16px;">
+                <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                  <input class="search-input" id="exp-search" placeholder="Search expenses..." oninput="renderExpensesPanel()" style="flex:1;min-width:120px;font-size:13px;">
+                  <input type="date" id="exp-date-filter" class="search-input" style="max-width:150px;font-size:13px;" oninput="renderExpensesPanel()">
+                  <select id="exp-cat-filter" class="search-input" style="max-width:160px;font-size:13px;" onchange="renderExpensesPanel()">
+                    <option value="">All Categories</option>
+                    <option>Food &amp; Groceries</option>
+                    <option>Household Supplies</option>
+                    <option>Personal Care Supplies</option>
+                    <option>Medications &amp; Medical</option>
+                    <option>Staff Wages</option>
+                    <option>Utilities</option>
+                    <option>Maintenance &amp; Repairs</option>
+                    <option>Transportation</option>
+                    <option>Office &amp; Admin</option>
+                    <option>Insurance</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">
+                  <span id="exp-stat-count">0</span> expense(s) &nbsp;·&nbsp; This month: <span id="exp-stat-month">$0</span>
+                </div>
+                <div id="expenses-list" class="notes-list" style="max-height:65vh;overflow-y:auto;"></div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -1130,6 +1214,287 @@
             </div>
           </div>
         </div>
+
+      <!-- STAFF DOCUMENTS -->
+      <div class="page" id="page-staffdocs">
+
+        <!-- Tab switcher -->
+        <div style="display:flex;gap:0;margin-bottom:24px;border-bottom:2px solid var(--border);">
+          <button class="profile-tab active" id="sdtab-orientation" onclick="switchStaffDocTab('orientation')" style="font-size:14px;padding:10px 22px;">
+            📋 Staff Orientation Checklist
+          </button>
+          <button class="profile-tab" id="sdtab-credentials" onclick="switchStaffDocTab('credentials')" style="font-size:14px;padding:10px 22px;">
+            🏅 Caregiver Credentials Checklist
+          </button>
+        </div>
+
+        <!-- ══ ORIENTATION CHECKLIST ══ -->
+        <div id="staffdoc-tab-orientation">
+          <div class="card">
+            <div class="card-header" style="background:linear-gradient(135deg,#1a1a1a,#b8860b);border-radius:10px 10px 0 0;padding:16px 22px;">
+              <div>
+                <div style="color:#fff;font-family:'DM Serif Display',serif;font-size:17px;">Staff New Employee Orientation Checklist</div>
+                <div style="color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;">Harmony Living House Adult Family LLC · 120 Newaukum Village Dr, Chehalis, WA 98532</div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button onclick="printOrientationForm()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🖨️ Print</button>
+                <button onclick="exportOrientationPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⬇️ PDF</button>
+                <button onclick="saveOrientationDraft()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save Draft</button>
+                <button onclick="clearOrientationForm()" style="background:rgba(255,0,0,0.15);color:#ffaaaa;border:1px solid rgba(255,100,100,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Clear</button>
+              </div>
+            </div>
+            <div class="card-body" style="padding:24px 28px;">
+
+              <!-- Header fields -->
+              <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:18px;">
+                <div class="field" style="margin:0;">
+                  <label>Trainee Name</label>
+                  <input type="text" id="ori-trainee-name" placeholder="Full name of trainee">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">
+                  <div class="field" style="margin:0;">
+                    <label>Date of Hire</label>
+                    <input type="date" id="ori-hire-date">
+                  </div>
+                  <div class="field" style="margin:0;">
+                    <label>Orientation Date 1</label>
+                    <input type="date" id="ori-date1">
+                  </div>
+                  <div class="field" style="margin:0;">
+                    <label>Orientation Date 2</label>
+                    <input type="date" id="ori-date2">
+                  </div>
+                  <div class="field" style="margin:0;">
+                    <label>Orientation Date 3</label>
+                    <input type="date" id="ori-date3">
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                  <div class="field" style="margin:0;">
+                    <label>Signature of Trainer</label>
+                    <input type="text" id="ori-trainer-sig" placeholder="Trainer name / signature">
+                  </div>
+                  <div class="field" style="margin:0;">
+                    <label>Signature of Trainee</label>
+                    <input type="text" id="ori-trainee-sig" placeholder="Trainee name / signature">
+                  </div>
+                  <div class="field" style="margin:0;">
+                    <label>No. of Hours of Training</label>
+                    <input type="text" id="ori-hours" placeholder="e.g. 5">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Checklist table -->
+              <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                  <thead>
+                    <tr>
+                      <th style="width:90px;background:#1a1a1a;color:#fff;padding:8px 10px;border:1px solid #333;text-align:center;font-size:11px;">Check When Complete</th>
+                      <th style="background:#1a1a1a;color:#fff;padding:8px 10px;border:1px solid #333;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;">The Following Topics Have Been Covered In This Orientation</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ori-checklist-tbody">
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Last Day + Notes -->
+              <div style="margin-top:20px;display:grid;grid-template-columns:1fr 2fr;gap:18px;align-items:start;">
+                <div class="field" style="margin:0;">
+                  <label style="font-weight:700;color:var(--text);">LAST DAY OF WORK</label>
+                  <input type="date" id="ori-last-day">
+                </div>
+                <div class="field" style="margin:0;">
+                  <label style="font-weight:700;color:var(--text);">Notes or Requests for This Trainee</label>
+                  <textarea id="ori-notes" rows="4" placeholder="Any notes or requests..."></textarea>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ CREDENTIALS CHECKLIST ══ -->
+        <div id="staffdoc-tab-credentials" style="display:none;">
+          <div class="card">
+            <div class="card-header" style="background:linear-gradient(135deg,#1a2a6b,#2563eb);border-radius:10px 10px 0 0;padding:16px 22px;">
+              <div>
+                <div style="color:#fff;font-family:'DM Serif Display',serif;font-size:17px;">Caregiver Credentials Checklist</div>
+                <div style="color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;">Harmony Living House Adult Family LLC · 120 Newaukum Village Dr, Chehalis, WA 98532</div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button onclick="printCredentialsForm()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🖨️ Print</button>
+                <button onclick="exportCredentialsPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⬇️ PDF</button>
+                <button onclick="saveCredentialsDraft()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save Draft</button>
+                <button onclick="clearCredentialsForm()" style="background:rgba(255,0,0,0.15);color:#ffaaaa;border:1px solid rgba(255,100,100,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Clear</button>
+              </div>
+            </div>
+            <div class="card-body" style="padding:24px 28px;">
+
+              <!-- Header fields -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;">
+                <div class="field" style="margin:0;">
+                  <label>Staff Name</label>
+                  <input type="text" id="cred-staff-name" placeholder="Full name">
+                </div>
+                <div class="field" style="margin:0;">
+                  <label>Date of Birth (DOB)</label>
+                  <input type="date" id="cred-dob">
+                </div>
+                <div class="field" style="margin:0;">
+                  <label>Hire Date</label>
+                  <input type="date" id="cred-hire-date">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                  <div class="field" style="margin:0;">
+                    <label>Orientation Date 1</label>
+                    <input type="date" id="cred-ori-date1">
+                  </div>
+                  <div class="field" style="margin:0;">
+                    <label>Orientation Date 2</label>
+                    <input type="date" id="cred-ori-date2">
+                  </div>
+                  <div class="field" style="margin:0;">
+                    <label>Orientation Date 3</label>
+                    <input type="date" id="cred-ori-date3">
+                  </div>
+                </div>
+              </div>
+
+              <!-- TABLE 1: Date of Completion -->
+              <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid var(--accent-light);">Section 1 — Credentials &amp; Training Completion</div>
+              <div style="overflow-x:auto;margin-bottom:22px;">
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                  <thead>
+                    <tr>
+                      <th style="background:#1a1a1a;color:#fff;padding:7px 10px;border:1px solid #333;text-align:left;width:65%;font-size:11.5px;">Credential / Training</th>
+                      <th style="background:#1a1a1a;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11.5px;">Date of Completion</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td style="border:1px solid var(--border);padding:7px 10px;">Fingerprint Background Check Result</td><td style="border:1px solid var(--border);padding:4px 8px;"><input type="date" id="cred-fingerprint" style="width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;"></td></tr>
+                    <tr><td style="border:1px solid var(--border);padding:7px 10px;">TB Test: &nbsp; <span style="font-weight:700;">Step 1</span></td><td style="border:1px solid var(--border);padding:4px 8px;"><input type="date" id="cred-tb-step1" style="width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;"></td></tr>
+                    <tr><td style="border:1px solid var(--border);padding:7px 10px;padding-left:40px;"><span style="font-weight:700;">Step 2</span></td><td style="border:1px solid var(--border);padding:4px 8px;"><input type="date" id="cred-tb-step2" style="width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;"></td></tr>
+                    <tr><td style="border:1px solid var(--border);padding:7px 10px;">Chest X-Ray or TB Annual Questionnaire</td><td style="border:1px solid var(--border);padding:4px 8px;"><input type="date" id="cred-tb-xray" style="width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;"></td></tr>
+                    <tr><td style="border:1px solid var(--border);padding:7px 10px;">Nursing Assistant Training</td><td style="border:1px solid var(--border);padding:4px 8px;"><input type="date" id="cred-na-training" style="width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;"></td></tr>
+                    <tr><td style="border:1px solid var(--border);padding:7px 10px;">70 Hours Basic Training: &nbsp; <span style="font-weight:700;">Core Basic</span></td><td style="border:1px solid var(--border);padding:4px 8px;"><input type="date" id="cred-70hr-core" style="width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;"></td></tr>
+                    <tr><td style="border:1px solid var(--border);padding:7px 10px;padding-left:40px;"><span style="font-weight:700;">Population Specific</span></td><td style="border:1px solid var(--border);padding:4px 8px;"><input type="date" id="cred-70hr-pop" style="width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;"></td></tr>
+                    <tr>
+                      <td style="border:1px solid var(--border);padding:7px 10px;">
+                        Exempt From HCA-C (Employment Verification) &nbsp;&nbsp;
+                        <label style="cursor:pointer;font-size:13px;"><input type="checkbox" id="cred-hcac-yes" style="accent-color:var(--accent);margin-right:3px;"> YES</label>
+                        &nbsp;&nbsp;
+                        <label style="cursor:pointer;font-size:13px;"><input type="checkbox" id="cred-hcac-no" style="accent-color:var(--accent);margin-right:3px;"> NO</label>
+                      </td>
+                      <td style="border:1px solid var(--border);padding:4px 8px;"></td>
+                    </tr>
+                    <tr><td style="border:1px solid var(--border);padding:7px 10px;">Orientation and Training (5 Hours)</td><td style="border:1px solid var(--border);padding:4px 8px;"><input type="date" id="cred-ori-5hr" style="width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;"></td></tr>
+                    <tr><td style="border:1px solid var(--border);padding:7px 10px;">Nurse Delegation Core Training</td><td style="border:1px solid var(--border);padding:4px 8px;"><input type="date" id="cred-nurse-core" style="width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;"></td></tr>
+                    <tr><td style="border:1px solid var(--border);padding:7px 10px;">Nurse Delegation: Special Focus on Diabetes</td><td style="border:1px solid var(--border);padding:4px 8px;"><input type="date" id="cred-nurse-diabetes" style="width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;"></td></tr>
+                    <tr><td style="border:1px solid var(--border);padding:7px 10px;">Specialty Training: &nbsp; <span style="font-weight:700;">Dementia</span></td><td style="border:1px solid var(--border);padding:4px 8px;"><input type="date" id="cred-spec-dementia" style="width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;"></td></tr>
+                    <tr><td style="border:1px solid var(--border);padding:7px 10px;padding-left:40px;"><span style="font-weight:700;">Mental Health</span></td><td style="border:1px solid var(--border);padding:4px 8px;"><input type="date" id="cred-spec-mh" style="width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;"></td></tr>
+                    <tr><td style="border:1px solid var(--border);padding:7px 10px;padding-left:40px;"><span style="font-weight:700;">Developmental Disability</span></td><td style="border:1px solid var(--border);padding:4px 8px;"><input type="date" id="cred-spec-dd" style="width:100%;border:none;font-family:inherit;font-size:13px;background:transparent;"></td></tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- TABLE 2: Expiry dates -->
+              <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid var(--accent-light);">Section 2 — Expiry / Renewal Dates</div>
+              <div style="overflow-x:auto;margin-bottom:20px;">
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                  <thead>
+                    <tr>
+                      <th style="background:#1a1a1a;color:#fff;padding:7px 10px;border:1px solid #333;text-align:left;font-size:11.5px;">Credential</th>
+                      <th style="background:#1a1a1a;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11px;">EXPIRES</th>
+                      <th style="background:#1a1a1a;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11px;">EXPIRES</th>
+                      <th style="background:#1a1a1a;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11px;">EXPIRES</th>
+                      <th style="background:#1a1a1a;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11px;">EXPIRES</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="border:1px solid var(--border);padding:7px 10px;">Name and DOB Background Check Result <span style="font-size:11px;color:var(--text3);">(Valid 2 Years)</span></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-bg-exp1" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-bg-exp2" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-bg-exp3" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-bg-exp4" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                    </tr>
+                    <tr>
+                      <td style="border:1px solid var(--border);padding:7px 10px;">CPR/First Aid <span style="font-size:11px;color:var(--text3);">(Usually Valid for 2 Yrs)</span></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-cpr-exp1" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-cpr-exp2" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-cpr-exp3" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-cpr-exp4" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                    </tr>
+                    <tr>
+                      <td style="border:1px solid var(--border);padding:7px 10px;">Department of Health <span style="font-size:11px;color:var(--text3);">Expires on Bday</span></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-doh-exp1" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-doh-exp2" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-doh-exp3" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-doh-exp4" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                    </tr>
+                    <tr>
+                      <td style="border:1px solid var(--border);padding:7px 10px;padding-left:40px;font-weight:700;">NAR</td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-nar-exp1" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-nar-exp2" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-nar-exp3" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-nar-exp4" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                    </tr>
+                    <tr>
+                      <td style="border:1px solid var(--border);padding:7px 10px;padding-left:40px;font-weight:700;">NAC</td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-nac-exp1" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-nac-exp2" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-nac-exp3" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-nac-exp4" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                    </tr>
+                    <tr>
+                      <td style="border:1px solid var(--border);padding:7px 10px;padding-left:40px;font-weight:700;">HCA-C</td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-hcac-exp1" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-hcac-exp2" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-hcac-exp3" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-hcac-exp4" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                    </tr>
+                    <tr>
+                      <td style="border:1px solid var(--border);padding:7px 10px;">Food Safety / Food Worker's Permit</td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-food-exp1" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-food-exp2" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-food-exp3" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;"><input type="date" id="cred-food-exp4" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                    </tr>
+                    <tr style="background:#e8f4fd;">
+                      <td style="border:1px solid var(--border);padding:7px 10px;font-weight:700;">Continuing Education</td>
+                      <td colspan="4" style="border:1px solid var(--border);background:#e8f4fd;"></td>
+                    </tr>
+                    <tr style="background:#e8f4fd;">
+                      <td style="border:1px solid var(--border);padding:7px 10px;padding-left:40px;">From Birthday</td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;background:#e8f4fd;"><input type="date" id="cred-ce-from1" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;background:#e8f4fd;"><input type="date" id="cred-ce-from2" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;background:#e8f4fd;"><input type="date" id="cred-ce-from3" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;background:#e8f4fd;"><input type="date" id="cred-ce-from4" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                    </tr>
+                    <tr style="background:#e8f4fd;">
+                      <td style="border:1px solid var(--border);padding:7px 10px;padding-left:40px;">To Birthday</td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;background:#e8f4fd;"><input type="date" id="cred-ce-to1" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;background:#e8f4fd;"><input type="date" id="cred-ce-to2" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;background:#e8f4fd;"><input type="date" id="cred-ce-to3" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                      <td style="border:1px solid var(--border);padding:3px 5px;background:#e8f4fd;"><input type="date" id="cred-ce-to4" style="width:100%;border:none;font-family:inherit;font-size:12px;background:transparent;"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Last Day of Employment -->
+              <div class="field" style="max-width:260px;">
+                <label style="font-weight:700;color:var(--text);">Last Day of Employment</label>
+                <input type="date" id="cred-last-day">
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
 
       <!-- QUICK CONTACTS -->
         <div class="page" id="page-contacts">
@@ -2353,6 +2718,97 @@
   </div>
 </div>
 
+<!-- MODAL: Add/Edit Expense -->
+<div class="modal-overlay" id="modal-expense">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="expense-modal-title">Add Expense</h3>
+      <button class="btn-close" onclick="closeModal('modal-expense')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="exp-edit-id">
+      <div class="form-grid">
+        <div class="field">
+          <label>Date *</label>
+          <input type="date" id="exp-date">
+        </div>
+        <div class="field">
+          <label>Amount ($) *</label>
+          <input type="number" id="exp-amount" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="field span2">
+          <label>Category *</label>
+          <select id="exp-category">
+            <option value="">— Select Category —</option>
+            <optgroup label="Food &amp; Household">
+              <option>Food &amp; Groceries</option>
+              <option>Household Supplies</option>
+              <option>Personal Care Supplies</option>
+            </optgroup>
+            <optgroup label="Medical">
+              <option>Medications &amp; Medical</option>
+              <option>Medical Equipment</option>
+            </optgroup>
+            <optgroup label="Staffing">
+              <option>Staff Wages</option>
+              <option>Staff Training</option>
+            </optgroup>
+            <optgroup label="Facility">
+              <option>Utilities</option>
+              <option>Maintenance &amp; Repairs</option>
+              <option>Transportation</option>
+              <option>Insurance</option>
+              <option>Licensing &amp; Compliance</option>
+            </optgroup>
+            <optgroup label="Admin">
+              <option>Office &amp; Admin</option>
+              <option>Other</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="field span2">
+          <label>Description *</label>
+          <input type="text" id="exp-description" placeholder="e.g. Weekly groceries from Safeway, Paper towels and soap...">
+        </div>
+        <div class="field">
+          <label>Vendor / Store</label>
+          <input type="text" id="exp-vendor" placeholder="e.g. Walmart, Costco, Safeway">
+        </div>
+        <div class="field">
+          <label>Payment Method</label>
+          <select id="exp-method">
+            <option value="">— Select —</option>
+            <option>Cash</option>
+            <option>Debit Card</option>
+            <option>Check</option>
+            <option>Bank Transfer</option>
+            <option>Credit Card</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Paid By</label>
+          <input type="text" id="exp-paid-by" placeholder="Staff name">
+        </div>
+        <div class="field">
+          <label>Receipt / Ref Number</label>
+          <input type="text" id="exp-receipt" placeholder="Optional">
+        </div>
+        <div class="field span2">
+          <label>Notes</label>
+          <textarea id="exp-notes" rows="2" placeholder="Any additional details..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-expense')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveExpense()">Save Expense</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 <script>
  const SUPABASE_URL = 'https://gkmvglzjrsneqkrlvohp.supabase.co';
@@ -2479,7 +2935,7 @@ document.getElementById('login-password').addEventListener('keydown', e => { if 
 // ══════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════
-const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Payments Tracker', contacts: 'Quick Contacts' };
+const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Financials — Income & Expenses', staffdocs: 'Staff Documents', contacts: 'Quick Contacts' };
 
 async function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -2494,7 +2950,8 @@ async function showPage(name) {
   if (name === 'analytics') renderAnalytics();
   if (name === 'residents') renderResidentTable();
   if (name === 'incidents') { await populateResidentFilter(); renderAllIncidents(); }
-  if (name === 'payments') { await populateResidentFilter(); renderPaymentsPage(); }
+  if (name === 'payments') { await populateResidentFilter(); renderPaymentsPage(); renderExpensesPanel(); }
+  if (name === 'staffdocs') { initStaffDocsPage(); }
 }
 
 // ══════════════════════════════════
@@ -4922,9 +5379,21 @@ async function renderPaymentsPage() {
   const monthTotal = (allPayments||[]).filter(p => p.pay_date && p.pay_date.startsWith(thisMonth)).reduce((s,p) => s + parseFloat(p.amount||0), 0);
   const uniquePayers = new Set((allPayments||[]).map(p => p.resident_id)).size;
   document.getElementById('pay-stat-total').textContent = '$' + total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-  document.getElementById('pay-stat-month').textContent = '$' + monthTotal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const payMonthEl = document.getElementById('pay-stat-month');
+  if (payMonthEl) payMonthEl.textContent = '$' + monthTotal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   document.getElementById('pay-stat-residents').textContent = uniquePayers;
-  document.getElementById('pay-stat-count').textContent = (allPayments||[]).length;
+  const payCountEl = document.getElementById('pay-stat-count');
+  if (payCountEl) payCountEl.textContent = (allPayments||[]).length;
+  // Net this month = income this month minus expenses this month
+  const { data: allExpForNet } = await db.from('expenses').select('amount, exp_date');
+  const expMonthTotal = (allExpForNet||[]).filter(e => e.exp_date && e.exp_date.startsWith(thisMonth)).reduce((s,e) => s + parseFloat(e.amount||0), 0);
+  const netMonth = monthTotal - expMonthTotal;
+  const netEl = document.getElementById('pay-stat-net-month');
+  if (netEl) {
+    netEl.textContent = (netMonth < 0 ? '-$' : '$') + Math.abs(netMonth).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    netEl.style.color = netMonth < 0 ? 'var(--danger)' : 'var(--text)';
+  }
+  renderExpensesPanel();
   const container = document.getElementById('payments-list');
   if (!payments.length) {
     container.innerHTML = `<div class="empty-state"><div style="font-size:48px;margin-bottom:12px;">💳</div><h4>No Payments Recorded</h4><p>Record the first payment using the button above.</p></div>`;
@@ -5147,6 +5616,1021 @@ function numberToWords(n) {
 
   if (cents === 0) return dollarPart + ' and Zero Cents';
   return dollarPart + ' and ' + centPart;
+}
+
+// ══════════════════════════════════
+// FINANCIAL REPORTS — SHARED HELPERS
+// ══════════════════════════════════
+function buildReportHeader(title, subtitle) {
+  const now = new Date();
+  const printedAt = now.toLocaleDateString('en-US', { timeZone:'America/Los_Angeles', month:'long', day:'numeric', year:'numeric' });
+  return `
+    <div class="rpt-header">
+      <img src="harmony_living_house_logo.png" alt="Logo">
+      <div class="rpt-org">Harmony Living House Adult Family LLC</div>
+      <div class="rpt-addr">120 Newaukum Village Dr &nbsp;·&nbsp; Chehalis, WA 98532 &nbsp;·&nbsp; Licensed Adult Family Home — Washington State</div>
+      <div class="rpt-title">${title}</div>
+      ${subtitle ? `<div class="rpt-subtitle">${subtitle}</div>` : ''}
+      <div class="rpt-printed">Printed: ${printedAt} &nbsp;·&nbsp; WAC 388-76 / RCW 70.128 Compliant Financial Record</div>
+    </div>`;
+}
+
+function reportBaseStyles() {
+  return `<style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Times New Roman',Times,serif; background:#fff; color:#000; padding:36px 48px; width:816px; margin:0 auto; font-size:11.5px; }
+    .rpt-header { text-align:center; border-bottom:2.5px solid #b8860b; padding-bottom:14px; margin-bottom:18px; }
+    .rpt-header img { width:72px; height:72px; object-fit:contain; display:block; margin:0 auto 8px; }
+    .rpt-org { font-size:15px; font-weight:bold; text-transform:uppercase; letter-spacing:0.04em; }
+    .rpt-addr { font-size:10px; color:#555; margin-top:2px; }
+    .rpt-title { font-size:16px; font-weight:bold; text-decoration:underline; text-transform:uppercase; letter-spacing:0.06em; margin:8px 0 3px; }
+    .rpt-subtitle { font-size:12px; color:#444; margin-bottom:3px; }
+    .rpt-printed { font-size:9.5px; color:#888; font-style:italic; }
+    .rpt-meta { display:flex; justify-content:space-between; font-size:11px; margin-bottom:12px; padding:6px 0; border-bottom:1px solid #ccc; }
+    table { width:100%; border-collapse:collapse; margin-bottom:14px; }
+    th { background:#b8860b; color:#fff; padding:6px 8px; font-size:10.5px; font-weight:bold; text-align:left; border:1px solid #8a6408; }
+    td { padding:5px 8px; font-size:11px; border:1px solid #ccc; vertical-align:top; }
+    tr:nth-child(even) td { background:#fdfaf3; }
+    .total-row td { font-weight:bold; background:#f0ead8 !important; border-top:2px solid #b8860b; font-size:11.5px; }
+    .section-hdr { font-size:12px; font-weight:bold; background:#1a1a1a; color:#fff; padding:5px 8px; margin:14px 0 6px; letter-spacing:0.04em; text-transform:uppercase; }
+    .summary-box { border:1.5px solid #b8860b; border-radius:4px; padding:10px 14px; margin:12px 0; }
+    .summary-row { display:flex; justify-content:space-between; font-size:11.5px; padding:4px 0; border-bottom:0.5px solid #e0d8c8; }
+    .summary-row:last-child { border-bottom:none; font-weight:bold; font-size:13px; }
+    .summary-label { color:#444; }
+    .summary-val { font-weight:bold; }
+    .net-positive { color:#1e7e34; }
+    .net-negative { color:#c0392b; }
+    .footer-note { margin-top:18px; font-size:9.5px; color:#777; border-top:0.5px solid #ccc; padding-top:10px; line-height:1.6; }
+    .sig-block { display:flex; justify-content:space-between; margin-top:28px; }
+    .sig-item { text-align:center; }
+    .sig-line { border-bottom:1px solid #000; width:200px; display:inline-block; margin-bottom:3px; }
+    .sig-label { font-size:9.5px; color:#555; }
+    @media print { body { padding:24px 36px; } @page { size:letter; margin:0.5in; } }
+  </style>`;
+}
+
+function openReportWindow(html, title) {
+  const win = window.open('', '_blank', 'width=900,height=1100');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>${reportBaseStyles()}</head><body>${html}</body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => {
+    win.print();
+    win.addEventListener('afterprint', () => { win.close(); window.focus(); });
+  }, 700);
+}
+
+async function exportReportAsPDF(html, filename) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'letter' });
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:816px;background:#fff;font-family:Times New Roman,serif;';
+  container.innerHTML = html;
+  document.body.appendChild(container);
+  doc.html(container, {
+    callback: (d) => {
+      document.body.removeChild(container);
+      d.save(filename);
+      setTimeout(() => window.focus(), 300);
+    },
+    x: 36, y: 20, width: 540, windowWidth: 816
+  });
+}
+
+function getDateRangeLabel(records, dateField) {
+  const dates = records.map(r => r[dateField]).filter(Boolean).sort();
+  if (!dates.length) return 'All Dates';
+  if (dates[0] === dates[dates.length-1]) return fmtDate(dates[0]);
+  return fmtDate(dates[0]) + ' — ' + fmtDate(dates[dates.length-1]);
+}
+
+// ── INCOME REGISTER (print) ──
+async function printIncomeReport() {
+  const residents = await getResidents();
+  const { data: allPayments } = await db.from('payments').select('*').order('pay_date', { ascending: true });
+  const payments = allPayments || [];
+  const total = payments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
+  const dateRange = getDateRangeLabel(payments, 'pay_date');
+  const now = new Date();
+  const period = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+  // Group by resident
+  const byResident = {};
+  payments.forEach(p => {
+    const rName = (residents.find(r=>r.id===p.resident_id)||{}).name || 'Unknown';
+    if (!byResident[rName]) byResident[rName] = [];
+    byResident[rName].push(p);
+  });
+
+  let rows = payments.map((p,i) => {
+    const rName = (residents.find(r=>r.id===p.resident_id)||{}).name || 'Unknown';
+    const amt = parseFloat(p.amount||0);
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${fmtDate(p.pay_date)}</td>
+      <td>${rName}</td>
+      <td>${p.method||'—'}</td>
+      <td>${p.period||'—'}</td>
+      <td>${p.notes||'—'}</td>
+      <td>${p.received_by||'—'}</td>
+      <td>${p.receipt_num||'—'}</td>
+      <td style="text-align:right;font-weight:bold;">$${parseFloat(p.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `
+    ${buildReportHeader('Income Register — Payments Received', `Date Range: ${dateRange}`)}
+    <div class="rpt-meta">
+      <span><strong>Facility:</strong> Harmony Living House Adult Family LLC &nbsp;·&nbsp; License No: On File</span>
+      <span><strong>Report Generated:</strong> ${period}</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>Date</th><th>Resident</th><th>Method</th><th>Period</th><th>Description</th><th>Received By</th><th>Receipt No.</th><th style="text-align:right;">Amount</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr class="total-row">
+        <td colspan="8" style="text-align:right;font-weight:bold;">TOTAL INCOME RECEIVED</td>
+        <td style="text-align:right;">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      </tr></tfoot>
+    </table>
+    <div class="summary-box">
+      <div class="section-hdr" style="margin:0 0 8px;">Income Summary by Resident</div>
+      ${Object.entries(byResident).map(([name,pList])=>{
+        const sub = pList.reduce((s,p)=>s+parseFloat(p.amount||0),0);
+        return `<div class="summary-row"><span class="summary-label">${name} (${pList.length} payment${pList.length!==1?'s':''})</span><span class="summary-val">$${sub.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`;
+      }).join('')}
+      <div class="summary-row"><span class="summary-label">GRAND TOTAL</span><span class="summary-val net-positive">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+    </div>
+    <div class="sig-block">
+      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Provider / Administrator Signature</div></div>
+      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Date</div></div>
+    </div>
+    <div class="footer-note">
+      This Income Register is maintained in accordance with RCW 70.128.130(15) and WAC 388-76, which require adult family homes to maintain accurate financial records demonstrating financial solvency. This document may be requested by the Washington State DSHS/ALTSA during inspection. Retain this record for a minimum of 5 years. &nbsp;·&nbsp; Harmony Living House Adult Family LLC &nbsp;·&nbsp; 120 Newaukum Village Dr, Chehalis, WA 98532
+    </div>`;
+  openReportWindow(html, 'Income Register — Harmony Living House');
+}
+
+async function exportIncomeReportPDF() {
+  const residents = await getResidents();
+  const { data: allPayments } = await db.from('payments').select('*').order('pay_date', { ascending: true });
+  const payments = allPayments || [];
+  const total = payments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
+  const dateRange = getDateRangeLabel(payments, 'pay_date');
+  const now = new Date();
+  const period = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+  const byResident = {};
+  payments.forEach(p => {
+    const rName = (residents.find(r=>r.id===p.resident_id)||{}).name || 'Unknown';
+    if (!byResident[rName]) byResident[rName] = [];
+    byResident[rName].push(p);
+  });
+
+  let rows = payments.map((p,i) => {
+    const rName = (residents.find(r=>r.id===p.resident_id)||{}).name || 'Unknown';
+    return `<tr>
+      <td>${i+1}</td><td>${fmtDate(p.pay_date)}</td><td>${rName}</td>
+      <td>${p.method||'—'}</td><td>${p.period||'—'}</td>
+      <td>${p.received_by||'—'}</td><td>${p.receipt_num||'—'}</td>
+      <td style="text-align:right;font-weight:bold;">$${parseFloat(p.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `
+    ${buildReportHeader('Income Register — Payments Received', `Date Range: ${dateRange}`)}
+    <div class="rpt-meta"><span><strong>Facility:</strong> Harmony Living House Adult Family LLC</span><span><strong>Generated:</strong> ${period}</span></div>
+    <table>
+      <thead><tr><th>#</th><th>Date</th><th>Resident</th><th>Method</th><th>Period</th><th>Received By</th><th>Receipt No.</th><th>Amount</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr class="total-row"><td colspan="7" style="text-align:right;">TOTAL INCOME</td><td style="text-align:right;">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr></tfoot>
+    </table>
+    <div class="summary-box">
+      ${Object.entries(byResident).map(([name,pList])=>{
+        const sub=pList.reduce((s,p)=>s+parseFloat(p.amount||0),0);
+        return `<div class="summary-row"><span>${name} (${pList.length})</span><span>$${sub.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`;
+      }).join('')}
+      <div class="summary-row"><span><strong>TOTAL</strong></span><span class="net-positive"><strong>$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></span></div>
+    </div>
+    <div class="footer-note">Maintained per RCW 70.128.130(15) &amp; WAC 388-76. Retain 5+ years. Harmony Living House Adult Family LLC · 120 Newaukum Village Dr, Chehalis, WA 98532</div>`;
+
+  await exportReportAsPDF(html, `IncomeRegister_HarmonyLivingHouse_${new Date().toISOString().split('T')[0]}.pdf`);
+}
+
+// ── EXPENSE REGISTER (print) ──
+async function printExpenseReport() {
+  const { data: allExpenses } = await db.from('expenses').select('*').order('exp_date', { ascending: true });
+  const expenses = allExpenses || [];
+  const total = expenses.reduce((s,e) => s + parseFloat(e.amount||0), 0);
+  const dateRange = getDateRangeLabel(expenses, 'exp_date');
+  const now = new Date();
+  const period = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+
+  // Group by category
+  const byCat = {};
+  expenses.forEach(e => {
+    if (!byCat[e.category]) byCat[e.category] = [];
+    byCat[e.category].push(e);
+  });
+
+  let rows = expenses.map((e,i) => {
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${fmtDate(e.exp_date)}</td>
+      <td>${e.category}</td>
+      <td>${e.description}</td>
+      <td>${e.vendor||'—'}</td>
+      <td>${e.method||'—'}</td>
+      <td>${e.paid_by||'—'}</td>
+      <td>${e.receipt_ref||'—'}</td>
+      <td style="text-align:right;font-weight:bold;">$${parseFloat(e.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `
+    ${buildReportHeader('Expense Register — Facility Operating Costs', `Date Range: ${dateRange}`)}
+    <div class="rpt-meta">
+      <span><strong>Facility:</strong> Harmony Living House Adult Family LLC &nbsp;·&nbsp; License No: On File</span>
+      <span><strong>Report Generated:</strong> ${period}</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>Date</th><th>Category</th><th>Description</th><th>Vendor</th><th>Method</th><th>Paid By</th><th>Ref No.</th><th style="text-align:right;">Amount</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr class="total-row">
+        <td colspan="8" style="text-align:right;font-weight:bold;">TOTAL EXPENSES</td>
+        <td style="text-align:right;">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      </tr></tfoot>
+    </table>
+    <div class="summary-box">
+      <div class="section-hdr" style="margin:0 0 8px;">Expenses by Category</div>
+      ${Object.entries(byCat).sort((a,b)=>{
+        const sa=a[1].reduce((s,e)=>s+parseFloat(e.amount||0),0);
+        const sb=b[1].reduce((s,e)=>s+parseFloat(e.amount||0),0);
+        return sb-sa;
+      }).map(([cat,eList])=>{
+        const sub=eList.reduce((s,e)=>s+parseFloat(e.amount||0),0);
+        return `<div class="summary-row"><span class="summary-label">${cat} (${eList.length} item${eList.length!==1?'s':''})</span><span class="summary-val">$${sub.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`;
+      }).join('')}
+      <div class="summary-row"><span class="summary-label">TOTAL EXPENSES</span><span class="summary-val net-negative">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+    </div>
+    <div class="sig-block">
+      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Provider / Administrator Signature</div></div>
+      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Date</div></div>
+    </div>
+    <div class="footer-note">
+      This Expense Register is maintained in accordance with RCW 70.128.130(15) and WAC 388-76, which require adult family homes to keep accurate records of operating expenses to demonstrate financial solvency. This document may be requested by Washington State DSHS/ALTSA. Retain for a minimum of 5 years. &nbsp;·&nbsp; Harmony Living House Adult Family LLC &nbsp;·&nbsp; 120 Newaukum Village Dr, Chehalis, WA 98532
+    </div>`;
+  openReportWindow(html, 'Expense Register — Harmony Living House');
+}
+
+async function exportExpenseReportPDF() {
+  const { data: allExpenses } = await db.from('expenses').select('*').order('exp_date', { ascending: true });
+  const expenses = allExpenses || [];
+  const total = expenses.reduce((s,e) => s + parseFloat(e.amount||0), 0);
+  const dateRange = getDateRangeLabel(expenses, 'exp_date');
+  const byCat = {};
+  expenses.forEach(e => {
+    if (!byCat[e.category]) byCat[e.category] = [];
+    byCat[e.category].push(e);
+  });
+
+  let rows = expenses.map((e,i) => `<tr>
+    <td>${i+1}</td><td>${fmtDate(e.exp_date)}</td><td>${e.category}</td>
+    <td>${e.description}</td><td>${e.vendor||'—'}</td><td>${e.method||'—'}</td>
+    <td>${e.paid_by||'—'}</td><td>${e.receipt_ref||'—'}</td>
+    <td style="text-align:right;">$${parseFloat(e.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+  </tr>`).join('');
+
+  const html = `
+    ${buildReportHeader('Expense Register — Facility Operating Costs', `Date Range: ${dateRange}`)}
+    <div class="rpt-meta"><span><strong>Facility:</strong> Harmony Living House Adult Family LLC</span><span><strong>Generated:</strong> ${new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})}</span></div>
+    <table>
+      <thead><tr><th>#</th><th>Date</th><th>Category</th><th>Description</th><th>Vendor</th><th>Method</th><th>Paid By</th><th>Ref</th><th>Amount</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr class="total-row"><td colspan="8" style="text-align:right;">TOTAL EXPENSES</td><td style="text-align:right;">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr></tfoot>
+    </table>
+    <div class="summary-box">
+      ${Object.entries(byCat).map(([cat,eList])=>{
+        const sub=eList.reduce((s,e)=>s+parseFloat(e.amount||0),0);
+        return `<div class="summary-row"><span>${cat} (${eList.length})</span><span>$${sub.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`;
+      }).join('')}
+      <div class="summary-row"><span><strong>TOTAL</strong></span><span class="net-negative"><strong>$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></span></div>
+    </div>
+    <div class="footer-note">Maintained per RCW 70.128.130(15) &amp; WAC 388-76. Retain 5+ years. Harmony Living House Adult Family LLC · 120 Newaukum Village Dr, Chehalis, WA 98532</div>`;
+
+  await exportReportAsPDF(html, `ExpenseRegister_HarmonyLivingHouse_${new Date().toISOString().split('T')[0]}.pdf`);
+}
+
+// ── PROFIT & LOSS SUMMARY PDF ──
+async function exportFinancialSummaryPDF() {
+  const residents = await getResidents();
+  const { data: allPayments } = await db.from('payments').select('*').order('pay_date', { ascending: true });
+  const { data: allExpenses } = await db.from('expenses').select('*').order('exp_date', { ascending: true });
+  const payments = allPayments || [];
+  const expenses = allExpenses || [];
+
+  const now = new Date();
+  const thisYear = now.getFullYear();
+  const period = `Fiscal Year ${thisYear} (January – ${now.toLocaleDateString('en-US',{month:'long'})} ${thisYear})`;
+
+  // Monthly breakdown
+  const months = Array.from({length:12},(_,i)=>i);
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  const monthlyRows = months.map(m => {
+    const mStr = `${thisYear}-${String(m+1).padStart(2,'0')}`;
+    const inc = payments.filter(p=>p.pay_date&&p.pay_date.startsWith(mStr)).reduce((s,p)=>s+parseFloat(p.amount||0),0);
+    const exp = expenses.filter(e=>e.exp_date&&e.exp_date.startsWith(mStr)).reduce((s,e)=>s+parseFloat(e.amount||0),0);
+    const net = inc - exp;
+    const netCls = net >= 0 ? 'net-positive' : 'net-negative';
+    const hasTx = inc > 0 || exp > 0;
+    return `<tr${!hasTx?' style="opacity:0.4;"':''}>
+      <td style="font-weight:bold;">${monthNames[m]} ${thisYear}</td>
+      <td style="text-align:right;color:#1e7e34;">$${inc.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td style="text-align:right;color:#c0392b;">$${exp.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td style="text-align:right;font-weight:bold;" class="${netCls}">${net<0?'-$':'$'}${Math.abs(net).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+    </tr>`;
+  }).join('');
+
+  const totalInc = payments.reduce((s,p)=>s+parseFloat(p.amount||0),0);
+  const totalExp = expenses.reduce((s,e)=>s+parseFloat(e.amount||0),0);
+  const netTotal = totalInc - totalExp;
+  const netCls = netTotal >= 0 ? 'net-positive' : 'net-negative';
+
+  // Category breakdown for expenses
+  const byCat = {};
+  expenses.forEach(e => {
+    if (!byCat[e.category]) byCat[e.category] = 0;
+    byCat[e.category] += parseFloat(e.amount||0);
+  });
+
+  // Income by resident
+  const byRes = {};
+  payments.forEach(p => {
+    const rName = (residents.find(r=>r.id===p.resident_id)||{}).name||'Unknown';
+    if (!byRes[rName]) byRes[rName] = 0;
+    byRes[rName] += parseFloat(p.amount||0);
+  });
+
+  const html = `
+    ${buildReportHeader('Financial Summary — Profit & Loss Statement', period)}
+    <div class="rpt-meta">
+      <span><strong>Facility:</strong> Harmony Living House Adult Family LLC &nbsp;·&nbsp; Chehalis, WA 98532</span>
+      <span><strong>Prepared:</strong> ${now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span>
+    </div>
+
+    <div class="section-hdr">Monthly Profit &amp; Loss Breakdown — ${thisYear}</div>
+    <table>
+      <thead><tr>
+        <th>Month</th>
+        <th style="text-align:right;">Income</th>
+        <th style="text-align:right;">Expenses</th>
+        <th style="text-align:right;">Net</th>
+      </tr></thead>
+      <tbody>${monthlyRows}</tbody>
+      <tfoot><tr class="total-row">
+        <td style="font-weight:bold;">YEAR TOTAL</td>
+        <td style="text-align:right;color:#1e7e34;">$${totalInc.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+        <td style="text-align:right;color:#c0392b;">$${totalExp.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+        <td style="text-align:right;" class="${netCls}">${netTotal<0?'-$':'$'}${Math.abs(netTotal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      </tr></tfoot>
+    </table>
+
+    <div style="display:flex;gap:16px;margin-bottom:14px;">
+      <div class="summary-box" style="flex:1;">
+        <div class="section-hdr" style="margin:0 0 8px;">Income by Resident</div>
+        ${Object.entries(byRes).sort((a,b)=>b[1]-a[1]).map(([name,amt])=>
+          `<div class="summary-row"><span class="summary-label">${name}</span><span class="summary-val net-positive">$${amt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`
+        ).join('')}
+        <div class="summary-row"><span class="summary-label">TOTAL INCOME</span><span class="summary-val net-positive">$${totalInc.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+      </div>
+      <div class="summary-box" style="flex:1;">
+        <div class="section-hdr" style="margin:0 0 8px;">Expenses by Category</div>
+        ${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>
+          `<div class="summary-row"><span class="summary-label">${cat}</span><span class="summary-val net-negative">$${amt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`
+        ).join('')}
+        <div class="summary-row"><span class="summary-label">TOTAL EXPENSES</span><span class="summary-val net-negative">$${totalExp.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+      </div>
+    </div>
+
+    <div class="summary-box" style="background:#f8f4e8;border:2px solid #b8860b;">
+      <div class="summary-row"><span class="summary-label">Total Income Received</span><span class="summary-val net-positive">$${totalInc.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+      <div class="summary-row"><span class="summary-label">Total Expenses Paid</span><span class="summary-val net-negative">($${totalExp.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})})</span></div>
+      <div class="summary-row"><span class="summary-label">NET INCOME (Profit / Loss)</span><span class="summary-val ${netCls}" style="font-size:15px;">${netTotal<0?'-$':'$'}${Math.abs(netTotal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+    </div>
+
+    <div class="sig-block">
+      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Provider / Administrator Signature</div></div>
+      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Certified By</div></div>
+      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Date</div></div>
+    </div>
+    <div class="footer-note">
+      This Profit &amp; Loss Statement is prepared in accordance with RCW 70.128.130(15) demonstrating financial solvency of Harmony Living House Adult Family LLC. Washington State DSHS/ALTSA may request this document during inspection or upon good cause. Retain all supporting records for a minimum of 5 years per WAC 388-76. This statement does not constitute a certified audit. For tax purposes, consult a licensed CPA.
+    </div>`;
+
+  await exportReportAsPDF(html, `ProfitLoss_HarmonyLivingHouse_${thisYear}_${new Date().toISOString().split('T')[0]}.pdf`);
+}
+
+// ══════════════════════════════════
+// EXPENSES
+// ══════════════════════════════════
+function openAddExpense() {
+  document.getElementById('expense-modal-title').textContent = 'Add Expense';
+  document.getElementById('exp-edit-id').value = '';
+  document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('exp-amount').value = '';
+  document.getElementById('exp-category').value = '';
+  document.getElementById('exp-description').value = '';
+  document.getElementById('exp-vendor').value = '';
+  document.getElementById('exp-method').value = '';
+  document.getElementById('exp-paid-by').value = currentUser ? currentUser.name : '';
+  document.getElementById('exp-receipt').value = '';
+  document.getElementById('exp-notes').value = '';
+  openModal('modal-expense');
+}
+
+async function editExpense(id) {
+  const { data: e } = await db.from('expenses').select('*').eq('id', id).single();
+  if (!e) return;
+  document.getElementById('expense-modal-title').textContent = 'Edit Expense';
+  document.getElementById('exp-edit-id').value = id;
+  document.getElementById('exp-date').value = e.exp_date || '';
+  document.getElementById('exp-amount').value = e.amount || '';
+  document.getElementById('exp-category').value = e.category || '';
+  document.getElementById('exp-description').value = e.description || '';
+  document.getElementById('exp-vendor').value = e.vendor || '';
+  document.getElementById('exp-method').value = e.method || '';
+  document.getElementById('exp-paid-by').value = e.paid_by || '';
+  document.getElementById('exp-receipt').value = e.receipt_ref || '';
+  document.getElementById('exp-notes').value = e.notes || '';
+  openModal('modal-expense');
+}
+
+async function saveExpense() {
+  const date = document.getElementById('exp-date').value;
+  const amount = document.getElementById('exp-amount').value;
+  const category = document.getElementById('exp-category').value;
+  const description = document.getElementById('exp-description').value.trim();
+  if (!date || !amount || !category || !description) {
+    toast('Please fill in Date, Amount, Category and Description');
+    return;
+  }
+  const editId = document.getElementById('exp-edit-id').value;
+  const expense = {
+    id: editId || uid(),
+    exp_date: date,
+    amount: parseFloat(amount).toFixed(2),
+    category,
+    description,
+    vendor: document.getElementById('exp-vendor').value.trim(),
+    method: document.getElementById('exp-method').value,
+    paid_by: document.getElementById('exp-paid-by').value.trim(),
+    receipt_ref: document.getElementById('exp-receipt').value.trim(),
+    notes: document.getElementById('exp-notes').value.trim(),
+    created_at: new Date().toISOString()
+  };
+  const { error } = await db.from('expenses').upsert(expense);
+  if (error) { toast('Error saving expense: ' + error.message); return; }
+  closeModal('modal-expense');
+  toast(editId ? 'Expense updated' : 'Expense saved');
+  renderExpensesPanel();
+  renderPaymentsPage();
+}
+
+async function deleteExpense(id) {
+  if (!confirm('Delete this expense record? This cannot be undone.')) return;
+  await db.from('expenses').delete().eq('id', id);
+  renderExpensesPanel();
+  renderPaymentsPage();
+  toast('Expense deleted');
+}
+
+const EXP_CATEGORY_ICONS = {
+  'Food & Groceries': '🛒',
+  'Household Supplies': '🧹',
+  'Personal Care Supplies': '🧴',
+  'Medications & Medical': '💊',
+  'Medical Equipment': '🩺',
+  'Staff Wages': '👤',
+  'Staff Training': '📚',
+  'Utilities': '💡',
+  'Maintenance & Repairs': '🔧',
+  'Transportation': '🚗',
+  'Insurance': '🛡️',
+  'Licensing & Compliance': '📋',
+  'Office & Admin': '🗂️',
+  'Other': '📦',
+};
+
+async function renderExpensesPanel() {
+  const q = (document.getElementById('exp-search')?.value || '').toLowerCase();
+  const dateF = document.getElementById('exp-date-filter')?.value;
+  const catF = document.getElementById('exp-cat-filter')?.value;
+
+  const { data: allExpenses } = await db.from('expenses').select('*').order('exp_date', { ascending: false });
+  let expenses = allExpenses || [];
+
+  // Update global totals used by renderPaymentsPage stats
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const totalExp = expenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+  const monthExp = expenses.filter(e => e.exp_date && e.exp_date.startsWith(thisMonth)).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+
+  const expStatEl = document.getElementById('pay-stat-expenses');
+  if (expStatEl) expStatEl.textContent = '$' + totalExp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const expMonthEl = document.getElementById('exp-stat-month');
+  if (expMonthEl) expMonthEl.textContent = '$' + monthExp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const expCountEl = document.getElementById('exp-stat-count');
+
+  // Apply filters
+  if (q) expenses = expenses.filter(e => JSON.stringify(e).toLowerCase().includes(q));
+  if (dateF) expenses = expenses.filter(e => e.exp_date === dateF);
+  if (catF) expenses = expenses.filter(e => e.category === catF);
+
+  if (expCountEl) expCountEl.textContent = expenses.length;
+
+  const container = document.getElementById('expenses-list');
+  if (!container) return;
+
+  if (!expenses.length) {
+    container.innerHTML = `<div class="empty-state"><div style="font-size:40px;margin-bottom:10px;">🧾</div><h4>No Expenses Recorded</h4><p>Add facility expenses using the button above.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = expenses.map(e => {
+    const amt = parseFloat(e.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const icon = EXP_CATEGORY_ICONS[e.category] || '📦';
+    return `<div class="note-card" style="cursor:default;border-left:3px solid var(--danger);">
+      <div class="note-card-header">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:22px;">${icon}</span>
+          <div>
+            <div class="note-date" style="display:flex;align-items:center;gap:10px;">
+              <span>${e.description}</span>
+              <span style="font-size:16px;font-weight:700;color:var(--danger);">-$${amt}</span>
+            </div>
+            <div class="note-staff">
+              ${fmtDate(e.exp_date)} &nbsp;·&nbsp;
+              <span style="background:var(--danger-light);color:var(--danger);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;">${e.category}</span>
+              ${e.vendor ? '&nbsp;·&nbsp; ' + e.vendor : ''}
+              ${e.method ? '&nbsp;·&nbsp; ' + e.method : ''}
+            </div>
+          </div>
+        </div>
+        <div class="note-actions">
+          <button class="btn btn-secondary btn-sm" onclick="editExpense('${e.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')">Delete</button>
+        </div>
+      </div>
+      ${e.notes ? `<div class="note-preview" style="margin-top:6px;">${e.notes}</div>` : ''}
+      ${e.paid_by ? `<div class="note-preview" style="font-size:12px;color:var(--text3);">Paid by: ${e.paid_by}${e.receipt_ref ? ' · Ref: ' + e.receipt_ref : ''}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════
+// STAFF DOCUMENTS PAGE
+// ══════════════════════════════════
+
+const ORI_CHECKLIST_ITEMS = [
+  { section: true, text: '1.  THE CARE STRUCTURE OF OUR AFH, (MED LOCK UP, EMERGENCY KIT, ETC)' },
+  { section: true, text: '2.  TRAINEE TO UNDERSTAND THE CLASSIFICATION OF RESIDENTS WE CARE FOR' },
+  { section: true, text: '3.  FIRE AND LIFE SAFETY TRAINING' },
+  { item: true, text: 'A. Emergency communications ( including phone system, and emergency contacts)' },
+  { item: true, text: 'B. Evacuation Plan location and location of fire alarms, fire extinguishers.' },
+  { item: true, text: 'C. Ways to handle resident injuries and falls or other accidents.' },
+  { item: true, text: 'D. Potential Risks to residents or staff by: aggressive behavior, mental health break' },
+  { item: true, text: 'E. The location of home policies and procedures' },
+  { item: true, text: 'F. New Trainee has participated in 1 fire drill' },
+  { item: true, text: 'G. How and when to contact Hospice, and handling Hospice patient emergency.' },
+  { section: true, text: '4. Communication Skills and Information, Including:' },
+  { item: true, text: 'A. Trainee can demonstrate methods for supporting effective communications among resident/guardians, staff, and family members.' },
+  { item: true, text: 'B. Trainee can demonstrate the ability to use verbal and non-verbal communication' },
+  { item: true, text: 'C. Trainee knows where and when to do written communications, or documentation required by the job, such as' },
+  { item: true, text: 'D. Expectations about the privacy of the Residents and no communication about the residents or the operations of the AFH outside of the workplace' },
+  { item: true, text: 'E. Whom to contact about problems and concerns.' },
+  { item: true, text: 'F. Trainee able to demonstrate where to locate the Patient Care Plan and how to use it to care for the Resident\'s Needs.' },
+  { section: true, text: '5. Training Requirements for our Adult Family Home' },
+  { item: true, text: 'A. Handling money left by families' },
+  { item: true, text: 'B. Mandated Reporting' },
+  { item: true, text: 'C. Fall Prevention' },
+  { section: true, text: '6. Universal Precautions and Infection Control, Including:' },
+  { item: true, text: 'A. Proper hand washing techniques' },
+  { item: true, text: 'B. Protection of blood and other body fluids form exposure to others' },
+  { item: true, text: 'C. Appropriate disposal of sharps and contaminated/hazardous articles' },
+  { item: true, text: 'D. Reporting exposure to contaminated articles, blood, or other body fluids' },
+  { item: true, text: 'E. What staff should do if they are ill?' },
+  { section: true, text: '7. Resident Rights, Including:' },
+  { item: true, text: 'A. The residents right to confidentiality of their information from others' },
+  { item: true, text: 'B. The resident\'s right to participate in making decisions about care, and to refuse care' },
+  { item: true, text: 'C. Staff\'s duty to protect and promote the rights of each resident, and to assist the resident to exercise his or her rights' },
+  { item: true, text: 'D. How and to whom staff should report any concerns they may have about a resident\'s decision concerning that resident\'s care.' },
+  { item: true, text: 'E. Staff on duty clearly understands how to do mandated reporting and clearly understands what abuse looks like, abandonment, neglect, or exploitation.' },
+  { item: true, text: 'F. Staff knows how to contact support for residents such as Ombudsmen' },
+  { item: true, text: 'G. Staff can show where the complaint lines, hot lines, and resident grievance procedures can be located.' },
+  { section: true, text: '8. Medication Administration, Documentation' },
+  { item: true, text: 'A. Staff knows where the medication records are and how they are used' },
+  { item: true, text: 'B. Delegation training in place and the purpose of Delegation training' },
+  { item: true, text: 'C. Staff knows how to report missed doses of medications' },
+  { item: true, text: 'D. Staff knows how to note Dr. Orders' },
+  { item: true, text: 'E. Staff knows how to receive a Dr. Order' },
+  { item: true, text: 'F. Staff knows how to order a new medication or refill a medication from Pharmacy' },
+  { item: true, text: 'G. Staff understands how to waste outdated or discontinued medications' },
+  { item: true, text: 'H. Staff understands how to document and report patients concerns or symptoms related to medications.' },
+  { section: true, text: '9. Training and requirement to stay employed at our AFH' },
+  { item: true, text: 'A. Yearly renewal of you DOH registration or License' },
+  { item: true, text: 'B. Yearly 12 hours of Continuing Education' },
+  { item: true, text: 'C. Every 2 years CPR and First Aid' },
+  { item: true, text: 'D. TB Testing or screening' },
+  { item: true, text: 'E. Core classes, Fundamentals or 72-hour training, dementia, mental health, Delegation, HIV or other core classes for specific work as Resident manager or other specific training needed such as Diabetic care.' },
+  { section: true, text: '10. Skin care and Equipment Orientation' },
+  { item: true, text: 'A. Demonstrates ability to use Hoyer and other specialty equipment' },
+  { item: true, text: 'B. Demonstrates knowledge of cleaning and caring for equipment' },
+  { item: true, text: 'C. Demonstrates ability to report repair concerns of equipment' },
+  { item: true, text: 'D. Demonstrates ability to use electric beds and in room equipment' },
+  { item: true, text: 'E. Able to position resident off of bony areas to protect skin' },
+  { item: true, text: 'F. Understands how to document and report skin issues and concerns' },
+  { section: true, text: '11. Staff file set up ( things that need to be processed and in staff file)' },
+  { item: true, text: 'A. Application on file with 3 checked references' },
+  { item: true, text: 'B. Background Check' },
+  { item: true, text: 'C. SS Card and Picture ID' },
+  { item: true, text: 'D. I 9 filled out' },
+  { item: true, text: 'E. W-2 or 1099 self-employed status' },
+  { item: true, text: 'F. CPR card current and verified' },
+  { item: true, text: 'G. All Educational Certifications as outlined in 9 E' },
+  { item: true, text: 'H. DOH Current verification' },
+  { item: true, text: 'I. TB 2 step verification or booster TB Test' },
+];
+
+function initStaffDocsPage() {
+  buildOrientationChecklist();
+  loadOrientationDraft();
+  loadCredentialsDraft();
+}
+
+function switchStaffDocTab(tab) {
+  ['orientation','credentials'].forEach(t => {
+    document.getElementById('staffdoc-tab-' + t).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('sdtab-' + t).classList.toggle('active', t === tab);
+  });
+}
+
+function buildOrientationChecklist() {
+  const tbody = document.getElementById('ori-checklist-tbody');
+  if (!tbody || tbody.children.length > 0) return;
+  ORI_CHECKLIST_ITEMS.forEach((item, idx) => {
+    const tr = document.createElement('tr');
+    if (item.section) {
+      tr.innerHTML = `
+        <td style="border:1px solid #ccc;padding:6px 8px;text-align:center;background:#d0d0d0;">
+          <input type="checkbox" id="ori-chk-${idx}" style="width:16px;height:16px;accent-color:#b8860b;cursor:pointer;">
+        </td>
+        <td style="border:1px solid #ccc;padding:8px 10px;background:#d8d8d8;font-weight:700;font-size:13px;">${item.text}</td>`;
+    } else {
+      tr.innerHTML = `
+        <td style="border:1px solid #ccc;padding:6px 8px;text-align:center;background:#fff;">
+          <input type="checkbox" id="ori-chk-${idx}" style="width:16px;height:16px;accent-color:#b8860b;cursor:pointer;">
+        </td>
+        <td style="border:1px solid #ccc;padding:7px 10px;font-size:13px;">${item.text}</td>`;
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+// ── DRAFT SAVE/LOAD ──
+function saveOrientationDraft() {
+  const checks = ORI_CHECKLIST_ITEMS.map((_,i) => {
+    const el = document.getElementById('ori-chk-' + i);
+    return el ? el.checked : false;
+  });
+  const data = {
+    name: document.getElementById('ori-trainee-name').value,
+    hireDate: document.getElementById('ori-hire-date').value,
+    date1: document.getElementById('ori-date1').value,
+    date2: document.getElementById('ori-date2').value,
+    date3: document.getElementById('ori-date3').value,
+    trainerSig: document.getElementById('ori-trainer-sig').value,
+    traineeSig: document.getElementById('ori-trainee-sig').value,
+    hours: document.getElementById('ori-hours').value,
+    lastDay: document.getElementById('ori-last-day').value,
+    notes: document.getElementById('ori-notes').value,
+    checks,
+  };
+  localStorage.setItem('hlh_ori_draft', JSON.stringify(data));
+  toast('✅ Orientation draft saved');
+}
+
+function loadOrientationDraft() {
+  const raw = localStorage.getItem('hlh_ori_draft');
+  if (!raw) return;
+  try {
+    const d = JSON.parse(raw);
+    document.getElementById('ori-trainee-name').value = d.name || '';
+    document.getElementById('ori-hire-date').value = d.hireDate || '';
+    document.getElementById('ori-date1').value = d.date1 || '';
+    document.getElementById('ori-date2').value = d.date2 || '';
+    document.getElementById('ori-date3').value = d.date3 || '';
+    document.getElementById('ori-trainer-sig').value = d.trainerSig || '';
+    document.getElementById('ori-trainee-sig').value = d.traineeSig || '';
+    document.getElementById('ori-hours').value = d.hours || '';
+    document.getElementById('ori-last-day').value = d.lastDay || '';
+    document.getElementById('ori-notes').value = d.notes || '';
+    if (d.checks) {
+      d.checks.forEach((v, i) => {
+        const el = document.getElementById('ori-chk-' + i);
+        if (el) el.checked = v;
+      });
+    }
+  } catch {}
+}
+
+function clearOrientationForm() {
+  if (!confirm('Clear all orientation form data?')) return;
+  localStorage.removeItem('hlh_ori_draft');
+  ['ori-trainee-name','ori-hire-date','ori-date1','ori-date2','ori-date3','ori-trainer-sig','ori-trainee-sig','ori-hours','ori-last-day','ori-notes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ORI_CHECKLIST_ITEMS.forEach((_,i) => {
+    const el = document.getElementById('ori-chk-' + i);
+    if (el) el.checked = false;
+  });
+  toast('Form cleared');
+}
+
+function saveCredentialsDraft() {
+  const ids = ['cred-staff-name','cred-dob','cred-hire-date','cred-ori-date1','cred-ori-date2','cred-ori-date3',
+    'cred-fingerprint','cred-tb-step1','cred-tb-step2','cred-tb-xray','cred-na-training',
+    'cred-70hr-core','cred-70hr-pop','cred-ori-5hr','cred-nurse-core','cred-nurse-diabetes',
+    'cred-spec-dementia','cred-spec-mh','cred-spec-dd',
+    'cred-bg-exp1','cred-bg-exp2','cred-bg-exp3','cred-bg-exp4',
+    'cred-cpr-exp1','cred-cpr-exp2','cred-cpr-exp3','cred-cpr-exp4',
+    'cred-doh-exp1','cred-doh-exp2','cred-doh-exp3','cred-doh-exp4',
+    'cred-nar-exp1','cred-nar-exp2','cred-nar-exp3','cred-nar-exp4',
+    'cred-nac-exp1','cred-nac-exp2','cred-nac-exp3','cred-nac-exp4',
+    'cred-hcac-exp1','cred-hcac-exp2','cred-hcac-exp3','cred-hcac-exp4',
+    'cred-food-exp1','cred-food-exp2','cred-food-exp3','cred-food-exp4',
+    'cred-ce-from1','cred-ce-from2','cred-ce-from3','cred-ce-from4',
+    'cred-ce-to1','cred-ce-to2','cred-ce-to3','cred-ce-to4','cred-last-day'];
+  const data = {};
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) data[id] = el.value;
+  });
+  data['cred-hcac-yes'] = document.getElementById('cred-hcac-yes')?.checked;
+  data['cred-hcac-no'] = document.getElementById('cred-hcac-no')?.checked;
+  localStorage.setItem('hlh_cred_draft', JSON.stringify(data));
+  toast('✅ Credentials draft saved');
+}
+
+function loadCredentialsDraft() {
+  const raw = localStorage.getItem('hlh_cred_draft');
+  if (!raw) return;
+  try {
+    const d = JSON.parse(raw);
+    Object.entries(d).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = val;
+      else el.value = val || '';
+    });
+  } catch {}
+}
+
+function clearCredentialsForm() {
+  if (!confirm('Clear all credentials form data?')) return;
+  localStorage.removeItem('hlh_cred_draft');
+  document.querySelectorAll('[id^="cred-"]').forEach(el => {
+    if (el.type === 'checkbox') el.checked = false;
+    else el.value = '';
+  });
+  toast('Form cleared');
+}
+
+// ── ORIENTATION PRINT / PDF ──
+function buildOrientationHTML() {
+  const fmtD = (v) => v ? new Date(v + 'T00:00:00').toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) : '';
+  const checks = ORI_CHECKLIST_ITEMS.map((_,i) => {
+    const el = document.getElementById('ori-chk-' + i);
+    return el ? el.checked : false;
+  });
+
+  let tableRows = ORI_CHECKLIST_ITEMS.map((item, idx) => {
+    const chk = checks[idx] ? '&#9745;' : '&#9744;';
+    if (item.section) {
+      return `<tr>
+        <td style="border:1px solid #999;padding:5px 6px;text-align:center;background:#d0d0d0;font-size:13px;">${chk}</td>
+        <td style="border:1px solid #999;padding:7px 10px;background:#d0d0d0;font-weight:bold;font-size:12px;">${item.text}</td>
+      </tr>`;
+    }
+    return `<tr>
+      <td style="border:1px solid #999;padding:5px 6px;text-align:center;font-size:14px;">${chk}</td>
+      <td style="border:1px solid #999;padding:6px 10px;font-size:11.5px;">${item.text}</td>
+    </tr>`;
+  }).join('');
+
+  const oriDates = [
+    document.getElementById('ori-date1').value,
+    document.getElementById('ori-date2').value,
+    document.getElementById('ori-date3').value,
+  ].filter(Boolean).map(fmtD).join(', &nbsp; ');
+
+  const notesVal = document.getElementById('ori-notes').value || '';
+  const noteLines = notesVal ? notesVal.split('\n').join('<br>') : '';
+
+  return `
+    <div style="text-align:center;margin-bottom:14px;">
+      <img src="harmony_living_house_logo.png" alt="Logo" style="width:80px;height:80px;object-fit:contain;display:block;margin:0 auto 6px;">
+      <div style="font-size:18px;font-weight:bold;text-transform:uppercase;letter-spacing:0.04em;">Harmony Living House Adult Family LLC</div>
+      <div style="font-size:13px;">120 Newaukum Village Dr</div>
+      <div style="font-size:13px;margin-bottom:14px;">Chehalis, WA 98532</div>
+    </div>
+
+    <div style="margin-bottom:10px;font-size:12.5px;line-height:2.1;">
+      <div>Trainee Name: <span style="display:inline-block;border-bottom:1px solid #000;min-width:280px;padding:0 4px;">${document.getElementById('ori-trainee-name').value}</span></div>
+      <div>Trainee Date of Hire: <span style="display:inline-block;border-bottom:1px solid #000;min-width:130px;padding:0 4px;">${fmtD(document.getElementById('ori-hire-date').value)}</span> &nbsp;&nbsp; Trainee Orientation Date (s): <span style="display:inline-block;border-bottom:1px solid #000;min-width:240px;padding:0 4px;">${oriDates}</span></div>
+      <div>Signature of Trainer: <span style="display:inline-block;border-bottom:1px solid #000;min-width:220px;padding:0 4px;">${document.getElementById('ori-trainer-sig').value}</span></div>
+      <div>Signature of Trainee: <span style="display:inline-block;border-bottom:1px solid #000;min-width:220px;padding:0 4px;">${document.getElementById('ori-trainee-sig').value}</span></div>
+      <div>No. of Hours of Training: <span style="display:inline-block;border-bottom:1px solid #000;min-width:140px;padding:0 4px;">${document.getElementById('ori-hours').value}</span></div>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
+      <thead>
+        <tr>
+          <th style="width:80px;background:#000;color:#fff;padding:7px 8px;border:1px solid #333;text-align:center;font-size:11px;">Check<br>When<br>complete</th>
+          <th style="background:#000;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;">The Following Topics Have Been Covered In This Orientation</th>
+        </tr>
+      </thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+
+    <div style="font-size:12.5px;margin-bottom:10px;font-weight:bold;">LAST DAY OF WORK: <span style="display:inline-block;border-bottom:1px solid #000;min-width:160px;padding:0 4px;font-weight:normal;">${fmtD(document.getElementById('ori-last-day').value)}</span></div>
+
+    <div style="font-size:12.5px;margin-bottom:6px;font-weight:bold;">Notes or requests for this Trainee:</div>
+    <div style="min-height:80px;border-bottom:1px solid #000;padding:4px 0;font-size:12px;line-height:1.8;">${noteLines}</div>
+    <div style="border-bottom:1px solid #000;margin-top:8px;min-height:20px;"></div>
+    <div style="border-bottom:1px solid #000;margin-top:8px;min-height:20px;"></div>
+  `;
+}
+
+function printOrientationForm() {
+  const html = buildOrientationHTML();
+  const win = window.open('', '_blank', 'width=900,height:1200');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Staff Orientation Checklist</title>
+  <style>* { box-sizing:border-box; margin:0; padding:0; } body { font-family:'Times New Roman',Times,serif; background:#fff; color:#000; padding:36px 48px; width:816px; margin:0 auto; }
+  @media print { body { padding:24px 36px; } @page { size:letter; margin:0.5in; } }</style>
+  </head><body>${html}</body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); win.addEventListener('afterprint', () => { win.close(); window.focus(); }); }, 700);
+}
+
+async function exportOrientationPDF() {
+  const html = buildOrientationHTML();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'letter' });
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:816px;background:#fff;font-family:Times New Roman,serif;font-size:12px;';
+  container.innerHTML = html;
+  document.body.appendChild(container);
+  const name = (document.getElementById('ori-trainee-name').value || 'Staff').replace(/\s+/g,'_');
+  doc.html(container, {
+    callback: (d) => { document.body.removeChild(container); d.save(`OrientationChecklist_${name}_${new Date().toISOString().split('T')[0]}.pdf`); setTimeout(() => window.focus(), 300); },
+    x:36, y:20, width:540, windowWidth:816
+  });
+}
+
+// ── CREDENTIALS PRINT / PDF ──
+function buildCredentialsHTML() {
+  const fmtD = (id) => {
+    const el = document.getElementById(id);
+    if (!el || !el.value) return '';
+    return new Date(el.value + 'T00:00:00').toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'});
+  };
+  const val = (id) => { const el = document.getElementById(id); return el ? (el.value||'') : ''; };
+  const chkd = (id) => { const el = document.getElementById(id); return el && el.checked; };
+
+  const hcacYes = chkd('cred-hcac-yes') ? '&#9745;' : '&#9744;';
+  const hcacNo = chkd('cred-hcac-no') ? '&#9745;' : '&#9744;';
+
+  const oriDates = ['cred-ori-date1','cred-ori-date2','cred-ori-date3'].map(fmtD).filter(Boolean).join(', &nbsp;');
+
+  const t1rows = [
+    ['Fingerprint Background Check Result', 'cred-fingerprint'],
+    ['TB Test: &nbsp;&nbsp; <strong>Step 1</strong>', 'cred-tb-step1'],
+    ['<span style="padding-left:48px;"><strong>Step 2</strong></span>', 'cred-tb-step2'],
+    ['Chest X-Ray or TB Annual Questionnaire', 'cred-tb-xray'],
+    ['Nursing Assistant Training', 'cred-na-training'],
+    ['70 Hours Basic Training: &nbsp;&nbsp; <strong>Core Basic</strong>', 'cred-70hr-core'],
+    ['<span style="padding-left:48px;"><strong>Population Specific</strong></span>', 'cred-70hr-pop'],
+    [null, null], // HCA-C row handled separately
+    ['Orientation and Training (5 Hours)', 'cred-ori-5hr'],
+    ['Nurse Delegation Core Training', 'cred-nurse-core'],
+    ['Nurse Delegation: Special Focus on Diabetes', 'cred-nurse-diabetes'],
+    ['Specialty Training: &nbsp;&nbsp; <strong>Dementia</strong>', 'cred-spec-dementia'],
+    ['<span style="padding-left:48px;"><strong>Mental Health</strong></span>', 'cred-spec-mh'],
+    ['<span style="padding-left:48px;"><strong>Developmental Disability</strong></span>', 'cred-spec-dd'],
+  ];
+
+  let section1Rows = '';
+  t1rows.forEach((row, idx) => {
+    if (row[0] === null) {
+      // HCA-C exempt row
+      section1Rows += `<tr><td style="border:1px solid #999;padding:6px 10px;font-size:11.5px;">Exempt From HCA-C (Employment Verification) &nbsp;&nbsp; ${hcacYes} YES &nbsp; ${hcacNo} NO</td><td style="border:1px solid #999;padding:4px 8px;"></td></tr>`;
+    } else {
+      section1Rows += `<tr><td style="border:1px solid #999;padding:6px 10px;font-size:11.5px;">${row[0]}</td><td style="border:1px solid #999;padding:6px 10px;font-size:11.5px;text-align:center;">${fmtD(row[1])}</td></tr>`;
+    }
+  });
+
+  const exp2rows = [
+    ['Name and DOB Background Check Result <span style="font-size:10px;">(Valid 2 Years)</span>', ['cred-bg-exp1','cred-bg-exp2','cred-bg-exp3','cred-bg-exp4']],
+    ['CPR/First Aid <span style="font-size:10px;">(Usually Valid for 2 Yrs)</span>', ['cred-cpr-exp1','cred-cpr-exp2','cred-cpr-exp3','cred-cpr-exp4']],
+    ['Department of Health: <span style="font-size:10px;">Expires on Bday</span>', ['cred-doh-exp1','cred-doh-exp2','cred-doh-exp3','cred-doh-exp4']],
+    ['<span style="padding-left:48px;">NAR</span>', ['cred-nar-exp1','cred-nar-exp2','cred-nar-exp3','cred-nar-exp4']],
+    ['<span style="padding-left:48px;">NAC</span>', ['cred-nac-exp1','cred-nac-exp2','cred-nac-exp3','cred-nac-exp4']],
+    ['<span style="padding-left:48px;">HCA-C</span>', ['cred-hcac-exp1','cred-hcac-exp2','cred-hcac-exp3','cred-hcac-exp4']],
+    ['Food Safety/Food Worker\'s Permit', ['cred-food-exp1','cred-food-exp2','cred-food-exp3','cred-food-exp4']],
+  ];
+
+  let section2Rows = exp2rows.map(([label, ids]) =>
+    `<tr><td style="border:1px solid #999;padding:6px 10px;font-size:11.5px;">${label}</td>${ids.map(id=>`<td style="border:1px solid #999;padding:5px 8px;font-size:11px;text-align:center;">${fmtD(id)}</td>`).join('')}</tr>`
+  ).join('');
+
+  // CE rows with blue background
+  section2Rows += `
+    <tr style="background:#d0e8f8;"><td style="border:1px solid #999;padding:6px 10px;font-size:11.5px;font-weight:bold;" colspan="5">Continuing Education</td></tr>
+    <tr style="background:#d0e8f8;"><td style="border:1px solid #999;padding:6px 10px;font-size:11.5px;">From Birthday</td>${['cred-ce-from1','cred-ce-from2','cred-ce-from3','cred-ce-from4'].map(id=>`<td style="border:1px solid #999;padding:5px 8px;font-size:11px;text-align:center;background:#d0e8f8;">${fmtD(id)}</td>`).join('')}</tr>
+    <tr style="background:#d0e8f8;"><td style="border:1px solid #999;padding:6px 10px;font-size:11.5px;">To Birthday</td>${['cred-ce-to1','cred-ce-to2','cred-ce-to3','cred-ce-to4'].map(id=>`<td style="border:1px solid #999;padding:5px 8px;font-size:11px;text-align:center;background:#d0e8f8;">${fmtD(id)}</td>`).join('')}</tr>
+  `;
+
+  return `
+    <div style="text-align:center;margin-bottom:16px;">
+      <img src="harmony_living_house_logo.png" alt="Logo" style="width:80px;height:80px;object-fit:contain;display:block;margin:0 auto 6px;">
+      <div style="font-size:18px;font-weight:bold;text-transform:uppercase;letter-spacing:0.04em;">Harmony Living House Adult Family LLC</div>
+      <div style="font-size:13px;">120 Newaukum Village Dr</div>
+      <div style="font-size:13px;margin-bottom:12px;">Chehalis, WA 98532</div>
+      <div style="font-size:15px;font-weight:bold;margin-bottom:14px;">Caregiver Credentials Checklist</div>
+    </div>
+
+    <div style="font-size:12.5px;line-height:2.1;margin-bottom:14px;">
+      <div>Staff Name: <span style="display:inline-block;border-bottom:1px solid #000;min-width:220px;padding:0 4px;">${val('cred-staff-name')}</span> &nbsp;&nbsp;&nbsp; DOB: <span style="display:inline-block;border-bottom:1px solid #000;min-width:140px;padding:0 4px;">${fmtD('cred-dob')}</span></div>
+      <div>Hire Date: <span style="display:inline-block;border-bottom:1px solid #000;min-width:140px;padding:0 4px;">${fmtD('cred-hire-date')}</span> &nbsp;&nbsp;&nbsp; Orientation Date/s: <span style="display:inline-block;border-bottom:1px solid #000;min-width:240px;padding:0 4px;">${oriDates}</span></div>
+    </div>
+
+    <table style="width:100%;border-collapse:collapse;margin-bottom:14px;">
+      <thead>
+        <tr>
+          <th style="background:#000;color:#fff;padding:7px 10px;border:1px solid #333;text-align:left;font-size:11px;width:65%;"></th>
+          <th style="background:#000;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11px;">Date of Completion</th>
+        </tr>
+      </thead>
+      <tbody>${section1Rows}</tbody>
+    </table>
+
+    <table style="width:100%;border-collapse:collapse;margin-bottom:14px;">
+      <thead>
+        <tr>
+          <th style="background:#000;color:#fff;padding:7px 10px;border:1px solid #333;text-align:left;font-size:11px;"></th>
+          <th style="background:#000;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11px;">EXPIRES</th>
+          <th style="background:#000;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11px;">EXPIRES</th>
+          <th style="background:#000;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11px;">EXPIRES</th>
+          <th style="background:#000;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11px;">EXPIRES</th>
+        </tr>
+      </thead>
+      <tbody>${section2Rows}</tbody>
+    </table>
+
+    <div style="font-size:12.5px;font-weight:bold;margin-top:10px;">Last Day of Employment: <span style="display:inline-block;border-bottom:1px solid #000;min-width:180px;padding:0 4px;font-weight:normal;">${fmtD('cred-last-day')}</span></div>
+  `;
+}
+
+function printCredentialsForm() {
+  const html = buildCredentialsHTML();
+  const win = window.open('', '_blank', 'width:900,height=1200');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Caregiver Credentials Checklist</title>
+  <style>* { box-sizing:border-box; margin:0; padding:0; } body { font-family:'Times New Roman',Times,serif; background:#fff; color:#000; padding:36px 48px; width:816px; margin:0 auto; }
+  @media print { body { padding:24px 36px; } @page { size:letter; margin:0.5in; } }</style>
+  </head><body>${html}</body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); win.addEventListener('afterprint', () => { win.close(); window.focus(); }); }, 700);
+}
+
+async function exportCredentialsPDF() {
+  const html = buildCredentialsHTML();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'letter' });
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:816px;background:#fff;font-family:Times New Roman,serif;font-size:12px;';
+  container.innerHTML = html;
+  document.body.appendChild(container);
+  const name = (document.getElementById('cred-staff-name').value || 'Staff').replace(/\s+/g,'_');
+  doc.html(container, {
+    callback: (d) => { document.body.removeChild(container); d.save(`CredentialsChecklist_${name}_${new Date().toISOString().split('T')[0]}.pdf`); setTimeout(() => window.focus(), 300); },
+    x:36, y:20, width:540, windowWidth:816
+  });
 }
 
 // ══════════════════════════════════
