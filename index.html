@@ -917,6 +917,10 @@
           <div class="card">
             <div class="card-header">
               <h3>All Progress Notes</h3>
+              <button class="btn btn-primary btn-sm" onclick="openAddNoteGlobal()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Progress Note
+              </button>
             </div>
             <div class="card-body">
               <div class="search-bar">
@@ -1194,6 +1198,10 @@
           <div class="card">
             <div class="card-header">
               <h3>All Incident Reports</h3>
+              <button class="btn btn-sm" onclick="openAddIncidentGlobal()" style="background:var(--danger-light);color:var(--danger);font-weight:600;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:13px;display:inline-flex;align-items:center;gap:6px;">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Add Incident Report
+              </button>
             </div>
             <div class="card-body">
               <div class="search-bar">
@@ -1303,6 +1311,12 @@
                   <label style="font-weight:700;color:var(--text);">Notes or Requests for This Trainee</label>
                   <textarea id="ori-notes" rows="4" placeholder="Any notes or requests..."></textarea>
                 </div>
+              </div>
+
+              <!-- Bottom action bar -->
+              <div style="margin-top:28px;padding-top:20px;border-top:2px solid var(--accent-light);display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+                <button onclick="saveOrientationToSupabase()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;">💾 Save Checklist</button>
+                <button onclick="openSavedOrientationsList()" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;">📋 View Saved Checklists</button>
               </div>
 
             </div>
@@ -1489,6 +1503,12 @@
               <div class="field" style="max-width:260px;">
                 <label style="font-weight:700;color:var(--text);">Last Day of Employment</label>
                 <input type="date" id="cred-last-day">
+              </div>
+
+              <!-- Bottom action bar -->
+              <div style="margin-top:28px;padding-top:20px;border-top:2px solid #e8f0fe;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+                <button onclick="saveCredentialsToSupabase()" style="background:#2563eb;color:#fff;border:none;border-radius:8px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;">💾 Save Checklist</button>
+                <button onclick="openSavedCredentialsList()" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;">📋 View Saved Checklists</button>
               </div>
 
               <!-- Saved Credentials List -->
@@ -1718,6 +1738,12 @@
   <input type="hidden" id="note-edit-id">
 
   <div class="form-grid">
+    <div class="field span2" id="note-resident-field" style="display:none;">
+      <label>Resident *</label>
+      <select id="note-resident-id">
+        <option value="">— Select Resident —</option>
+      </select>
+    </div>
     <div class="field">
   <label>Date of Note *</label>
   <input type="date" id="note-date">
@@ -1946,6 +1972,12 @@
     <div class="modal-body">
       <input type="hidden" id="ir-edit-id">
       <div class="form-grid">
+        <div class="field span2" id="ir-resident-field" style="display:none;">
+          <label>Resident *</label>
+          <select id="ir-resident-id">
+            <option value="">— Select Resident —</option>
+          </select>
+        </div>
         <div class="field span2">
           <label>Name of Resident/Staff Involved *</label>
           <input type="text" id="ir-name" placeholder="Full name">
@@ -3246,7 +3278,7 @@ async function renderProfileNotes() {
           <div class="note-staff">By ${n.created_by} &middot; ${flagBadge}</div>
         </div>
         <div class="note-actions" onclick="event.stopPropagation()">
-          <button class="btn btn-secondary btn-sm" onclick="editNote('${n.id}')">Edit</button>
+          <button class="btn btn-secondary btn-sm" onclick="editNote('${n.id}', true)">Edit</button>
           <button class="btn btn-danger btn-sm" onclick="deleteNote('${n.id}')">Delete</button>
         </div>
       </div>
@@ -3267,10 +3299,33 @@ function openAddNote() {
   document.getElementById('note-flag').value = 'routine';
   document.getElementById('note-shift').value = '';
   document.getElementById('note-behavior-notes').value = '';
+  document.getElementById('note-resident-field').style.display = 'none';
   openModal('modal-note');
 }
 
-async function editNote(id) {
+async function openAddNoteGlobal() {
+  document.getElementById('note-modal-title').textContent = 'Add Progress Note';
+  document.getElementById('note-edit-id').value = '';
+  document.getElementById('note-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('note-time').value = new Date().toTimeString().slice(0,5);
+  document.getElementById('note-staff').value = currentUser.name;
+  document.getElementById('note-flag').value = 'routine';
+  document.getElementById('note-shift').value = '';
+  document.getElementById('note-behavior-notes').value = '';
+  const resField = document.getElementById('note-resident-field');
+  resField.style.display = 'block';
+  const sel = document.getElementById('note-resident-id');
+  sel.innerHTML = '<option value="">— Select Resident —</option>';
+  const residents = await getResidents();
+  residents.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id; opt.textContent = r.name;
+    sel.appendChild(opt);
+  });
+  openModal('modal-note');
+}
+
+async function editNote(id, fromGlobal) {
   const allNotes = await getNotes();
   const note = allNotes.find(n => n.id === id);
   if (!note) return;
@@ -3282,6 +3337,21 @@ async function editNote(id) {
   document.getElementById('note-shift').value = note.shift || '';
   document.getElementById('note-flag').value = note.flag || 'routine';
   document.getElementById('note-behavior-notes').value = note.behavior_notes || '';
+  const resField = document.getElementById('note-resident-field');
+  if (fromGlobal) {
+    resField.style.display = 'block';
+    const sel = document.getElementById('note-resident-id');
+    sel.innerHTML = '<option value="">— Select Resident —</option>';
+    const residents = await getResidents();
+    residents.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = r.id; opt.textContent = r.name;
+      if (r.id === note.resident_id) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  } else {
+    resField.style.display = 'none';
+  }
   closeModal('modal-view-note');
   openModal('modal-note');
 }
@@ -3291,9 +3361,13 @@ async function saveNote() {
   const staffName = document.getElementById('note-staff').value.trim();
   if (!noteDate || !staffName) { toast('Please fill in Date and Staff Name'); return; }
   const editId = document.getElementById('note-edit-id').value;
+  const residentField = document.getElementById('note-resident-field');
+  const isGlobal = residentField && residentField.style.display !== 'none';
+  const selectedResidentId = isGlobal ? document.getElementById('note-resident-id').value : currentResidentId;
+  if (isGlobal && !selectedResidentId) { toast('Please select a resident'); return; }
   const noteData = {
     id: editId || uid(),
-    resident_id: currentResidentId,
+    resident_id: selectedResidentId,
     note_date: noteDate,
     note_time: document.getElementById('note-time').value,
     created_by: staffName,
@@ -3348,9 +3422,10 @@ async function viewNote(id) {
     </div>
   `;
 
+  const isOnNotesPage = document.getElementById('page-notes').classList.contains('active');
   document.getElementById('note-view-footer').innerHTML = `
     <button class="btn btn-secondary" onclick="closeModal('modal-view-note')">Close</button>
-    <button class="btn btn-secondary" onclick="editNote('${id}')">Edit</button>
+    <button class="btn btn-secondary" onclick="editNote('${id}', ${isOnNotesPage})">Edit</button>
     <button class="btn btn-danger" onclick="deleteNote('${id}')">Delete</button>
   `;
   openModal('modal-view-note');
@@ -3634,14 +3709,17 @@ async function renderAllIncidents() {
     const res = residents.find(x => x.id === r.resident_id);
     const natures = [r.nature_injury&&'Injury', r.nature_missing&&'Missing', r.nature_death&&'Death', r.nature_fire&&'Fire/Disaster', r.nature_fall&&'Fall'].filter(Boolean).join(', ') || 'Unspecified';
     const preview = (r.description || '—').slice(0, 120);
-    return `<div class="note-card" onclick="openProfileAndViewIncident('${r.resident_id}','${r.id}')">
+    return `<div class="note-card">
       <div class="note-card-header">
-        <div>
+        <div style="cursor:pointer;flex:1;" onclick="openProfileAndViewIncident('${r.resident_id}','${r.id}')">
           <div class="note-date">${res ? `<span style="cursor:pointer;color:var(--text);text-decoration:underline dotted;">${res.name}</span> &middot; ` : ''}${fmtDate(r.incident_date)}</div>
           <div class="note-staff">Nature: ${natures} · Prepared by ${r.prepared_by}</div>
         </div>
+        <div class="note-actions" onclick="event.stopPropagation()">
+          <button class="btn btn-secondary btn-sm" onclick="editIncidentReport('${r.id}', true)">Edit</button>
+        </div>
       </div>
-      <div class="note-preview">${preview}${preview.length >= 120 ? '…' : ''}</div>
+      <div class="note-preview" style="cursor:pointer;" onclick="openProfileAndViewIncident('${r.resident_id}','${r.id}')">${preview}${preview.length >= 120 ? '…' : ''}</div>
     </div>`;
   }).join('');
 }
@@ -3811,6 +3889,7 @@ let viewingIncidentId = null;
 function openAddIncidentReport() {
   document.getElementById('incident-modal-title').textContent = 'Add Incident Report';
   document.getElementById('ir-edit-id').value = '';
+  document.getElementById('ir-resident-field').style.display = 'none';
   resetBodyMap();
   // Reset all fields
   ['ir-name','ir-location','ir-description','ir-emergency',
@@ -3841,9 +3920,61 @@ function openAddIncidentReport() {
   openModal('modal-incident');
 }
 
-async function editIncidentReport(id) {
-  const reports = await getIncidentReports(currentResidentId);
-  const r = reports.find(x => x.id === id);
+async function openAddIncidentGlobal() {
+  const resField = document.getElementById('ir-resident-field');
+  resField.style.display = 'block';
+  const sel = document.getElementById('ir-resident-id');
+  sel.innerHTML = '<option value="">— Select Resident —</option>';
+  const residents = await getResidents();
+  residents.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id; opt.textContent = r.name;
+    sel.appendChild(opt);
+  });
+  sel.onchange = () => {
+    const res = residents.find(r => r.id === sel.value);
+    if (res) document.getElementById('ir-name').value = res.name;
+  };
+  document.getElementById('incident-modal-title').textContent = 'Add Incident Report';
+  document.getElementById('ir-edit-id').value = '';
+  resetBodyMap();
+  ['ir-name','ir-location','ir-description','ir-emergency',
+   'ir-w1-name','ir-w1-phone','ir-w2-name','ir-w2-phone',
+   'ir-e1-name','ir-e1-phone','ir-e2-name','ir-e2-phone',
+   'ir-physician-name','ir-hospital-name','ir-notif-other',
+   'ir-prevention','ir-prepared-by','ir-i-other'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['ir-dob','ir-physician-date','ir-physician-time','ir-hospital-date','ir-hospital-time'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('ir-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ir-time').value = new Date().toTimeString().slice(0,5);
+  document.getElementById('ir-prepared-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ir-prepared-by').value = currentUser.name;
+  document.getElementById('ir-sex').value = '';
+  ['ir-n-injury','ir-n-missing','ir-n-death','ir-n-fire','ir-n-fall',
+   'ir-i-laceration','ir-i-hematoma','ir-i-abrasion','ir-i-burn','ir-i-non-apparent',
+   'ir-notif-hcp','ir-notif-cm','ir-notif-rr','ir-notif-nok','ir-notif-le','ir-notif-dshs'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = false;
+  });
+  document.querySelectorAll('input[name="ir-physician"]').forEach(r => r.checked = false);
+  document.querySelectorAll('input[name="ir-hospital"]').forEach(r => r.checked = false);
+  openModal('modal-incident');
+}
+
+async function editIncidentReport(id, fromGlobal) {
+  let r;
+  if (fromGlobal) {
+    const { data } = await db.from('incident_reports').select('*').eq('id', id).single();
+    r = data;
+  } else {
+    const reports = await getIncidentReports(currentResidentId);
+    r = reports.find(x => x.id === id);
+  }
   if (!r) return;
   document.getElementById('incident-modal-title').textContent = 'Edit Incident Report';
   document.getElementById('ir-edit-id').value = id;
@@ -3894,6 +4025,21 @@ async function editIncidentReport(id) {
   document.getElementById('ir-prevention').value = r.prevention_action || '';
   document.getElementById('ir-prepared-by').value = r.prepared_by || '';
   document.getElementById('ir-prepared-date').value = r.prepared_date || '';
+  const irResField = document.getElementById('ir-resident-field');
+  if (fromGlobal) {
+    irResField.style.display = 'block';
+    const sel = document.getElementById('ir-resident-id');
+    sel.innerHTML = '<option value="">— Select Resident —</option>';
+    const residents = await getResidents();
+    residents.forEach(res => {
+      const opt = document.createElement('option');
+      opt.value = res.id; opt.textContent = res.name;
+      if (res.id === r.resident_id) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  } else {
+    irResField.style.display = 'none';
+  }
   closeModal('modal-view-incident');
   openModal('modal-incident');
 }
@@ -3907,9 +4053,13 @@ async function saveIncidentReportForm() {
   const physicianNo = document.getElementById('ir-physician-no').checked;
   const hospitalYes = document.getElementById('ir-hospital-yes').checked;
   const hospitalNo = document.getElementById('ir-hospital-no').checked;
+  const irResField = document.getElementById('ir-resident-field');
+  const isGlobalIR = irResField && irResField.style.display !== 'none';
+  const irResidentId = isGlobalIR ? document.getElementById('ir-resident-id').value : currentResidentId;
+  if (isGlobalIR && !irResidentId) { toast('Please select a resident'); return; }
   const report = {
     id: editId || uid(),
-    resident_id: currentResidentId,
+    resident_id: irResidentId,
     resident_name: name,
     dob: document.getElementById('ir-dob').value,
     sex: document.getElementById('ir-sex').value,
@@ -6511,8 +6661,13 @@ function openSavedOrientationsList() {
   const wrap = document.getElementById('saved-orientations-list-wrap');
   if (!wrap) return;
   const isHidden = wrap.style.display === 'none' || wrap.style.display === '';
-  if (isHidden) { wrap.style.display = 'block'; loadSavedOrientations(); }
-  else { wrap.style.display = 'none'; }
+  if (isHidden) {
+    wrap.style.display = 'block';
+    loadSavedOrientations();
+    setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+  } else {
+    wrap.style.display = 'none';
+  }
 }
 
 async function loadOrientationRecord(id) {
@@ -6617,8 +6772,13 @@ function openSavedCredentialsList() {
   const wrap = document.getElementById('saved-credentials-list-wrap');
   if (!wrap) return;
   const isHidden = wrap.style.display === 'none' || wrap.style.display === '';
-  if (isHidden) { wrap.style.display = 'block'; loadSavedCredentials(); }
-  else { wrap.style.display = 'none'; }
+  if (isHidden) {
+    wrap.style.display = 'block';
+    loadSavedCredentials();
+    setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+  } else {
+    wrap.style.display = 'none';
+  }
 }
 
 async function loadCredentialsRecord(id) {
