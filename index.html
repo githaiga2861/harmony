@@ -1118,13 +1118,9 @@
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                     Print Income Register
                   </button>
-                  <button onclick="exportIncomeReportPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
-                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    PDF Income Report
-                  </button>
-                  <button onclick="exportFinancialSummaryPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
-                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
-                    P&amp;L Summary PDF
+                  <button onclick="printPLSummary()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    Print P&amp;L Summary
                   </button>
                 </div>
               </div>
@@ -1160,10 +1156,6 @@
                   <button onclick="printExpenseReport()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                     Print Expense Register
-                  </button>
-                  <button onclick="exportExpenseReportPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
-                    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    PDF Expense Report
                   </button>
                 </div>
               </div>
@@ -1239,7 +1231,8 @@
               <div style="display:flex;gap:8px;">
                 <button onclick="printOrientationForm()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🖨️ Print</button>
                 <button onclick="exportOrientationPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⬇️ PDF</button>
-                <button onclick="saveOrientationDraft()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save Draft</button>
+                <button onclick="saveOrientationToSupabase()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save</button>
+                <button onclick="openSavedOrientationsList()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📋 View Saved</button>
                 <button onclick="clearOrientationForm()" style="background:rgba(255,0,0,0.15);color:#ffaaaa;border:1px solid rgba(255,100,100,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Clear</button>
               </div>
             </div>
@@ -1312,6 +1305,12 @@
               </div>
 
             </div>
+
+            <!-- Saved Orientations List -->
+            <div id="saved-orientations-list-wrap" style="display:none;margin-top:28px;">
+              <div style="font-size:13px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--accent-light);">Saved Orientation Checklists</div>
+              <div id="saved-orientations-list"></div>
+            </div>
           </div>
         </div>
 
@@ -1326,7 +1325,8 @@
               <div style="display:flex;gap:8px;">
                 <button onclick="printCredentialsForm()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🖨️ Print</button>
                 <button onclick="exportCredentialsPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⬇️ PDF</button>
-                <button onclick="saveCredentialsDraft()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save Draft</button>
+                <button onclick="saveCredentialsToSupabase()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save</button>
+                <button onclick="openSavedCredentialsList()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📋 View Saved</button>
                 <button onclick="clearCredentialsForm()" style="background:rgba(255,0,0,0.15);color:#ffaaaa;border:1px solid rgba(255,100,100,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Clear</button>
               </div>
             </div>
@@ -1488,6 +1488,12 @@
               <div class="field" style="max-width:260px;">
                 <label style="font-weight:700;color:var(--text);">Last Day of Employment</label>
                 <input type="date" id="cred-last-day">
+              </div>
+
+              <!-- Saved Credentials List -->
+              <div id="saved-credentials-list-wrap" style="display:none;margin-top:28px;">
+                <div style="font-size:13px;font-weight:700;color:#1a73e8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #e8f0fe;">Saved Credentials Checklists</div>
+                <div id="saved-credentials-list"></div>
               </div>
 
             </div>
@@ -5463,9 +5469,8 @@ async function savePayment() {
   };
   await db.from('payments').upsert(payment);
   closeModal('modal-payment');
-  toast('Payment recorded');
+  toast('✅ Payment saved — click 🖨️ Receipt to print');
   renderPaymentsPage();
-  await printReceipt(payment.id);
 }
 
 async function deletePayment(id) {
@@ -5713,112 +5718,41 @@ async function printIncomeReport() {
   const dateRange = getDateRangeLabel(payments, 'pay_date');
   const now = new Date();
   const period = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
-
-  // Group by resident
   const byResident = {};
   payments.forEach(p => {
     const rName = (residents.find(r=>r.id===p.resident_id)||{}).name || 'Unknown';
     if (!byResident[rName]) byResident[rName] = [];
     byResident[rName].push(p);
   });
-
-  let rows = payments.map((p,i) => {
-    const rName = (residents.find(r=>r.id===p.resident_id)||{}).name || 'Unknown';
-    const amt = parseFloat(p.amount||0);
-    return `<tr>
-      <td>${i+1}</td>
-      <td>${fmtDate(p.pay_date)}</td>
-      <td>${rName}</td>
-      <td>${p.method||'—'}</td>
-      <td>${p.period||'—'}</td>
-      <td>${p.notes||'—'}</td>
-      <td>${p.received_by||'—'}</td>
-      <td>${p.receipt_num||'—'}</td>
-      <td style="text-align:right;font-weight:bold;">$${parseFloat(p.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-    </tr>`;
-  }).join('');
-
-  const html = `
-    ${buildReportHeader('Income Register — Payments Received', `Date Range: ${dateRange}`)}
-    <div class="rpt-meta">
-      <span><strong>Facility:</strong> Harmony Living House Adult Family LLC &nbsp;·&nbsp; License No: On File</span>
-      <span><strong>Report Generated:</strong> ${period}</span>
-    </div>
-    <table>
-      <thead><tr>
-        <th>#</th><th>Date</th><th>Resident</th><th>Method</th><th>Period</th><th>Description</th><th>Received By</th><th>Receipt No.</th><th style="text-align:right;">Amount</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-      <tfoot><tr class="total-row">
-        <td colspan="8" style="text-align:right;font-weight:bold;">TOTAL INCOME RECEIVED</td>
-        <td style="text-align:right;">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-      </tr></tfoot>
-    </table>
-    <div class="summary-box">
-      <div class="section-hdr" style="margin:0 0 8px;">Income Summary by Resident</div>
-      ${Object.entries(byResident).map(([name,pList])=>{
-        const sub = pList.reduce((s,p)=>s+parseFloat(p.amount||0),0);
-        return `<div class="summary-row"><span class="summary-label">${name} (${pList.length} payment${pList.length!==1?'s':''})</span><span class="summary-val">$${sub.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`;
-      }).join('')}
-      <div class="summary-row"><span class="summary-label">GRAND TOTAL</span><span class="summary-val net-positive">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
-    </div>
-    <div class="sig-block">
-      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Provider / Administrator Signature</div></div>
-      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Date</div></div>
-    </div>
-    <div class="footer-note">
-      This Income Register is maintained in accordance with RCW 70.128.130(15) and WAC 388-76, which require adult family homes to maintain accurate financial records demonstrating financial solvency. This document may be requested by the Washington State DSHS/ALTSA during inspection. Retain this record for a minimum of 5 years. &nbsp;·&nbsp; Harmony Living House Adult Family LLC &nbsp;·&nbsp; 120 Newaukum Village Dr, Chehalis, WA 98532
-    </div>`;
-  openReportWindow(html, 'Income Register — Harmony Living House');
-}
-
-async function exportIncomeReportPDF() {
-  const residents = await getResidents();
-  const { data: allPayments } = await db.from('payments').select('*').order('pay_date', { ascending: true });
-  const payments = allPayments || [];
-  const total = payments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
-  const dateRange = getDateRangeLabel(payments, 'pay_date');
-  const now = new Date();
-  const period = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
-
-  const byResident = {};
-  payments.forEach(p => {
-    const rName = (residents.find(r=>r.id===p.resident_id)||{}).name || 'Unknown';
-    if (!byResident[rName]) byResident[rName] = [];
-    byResident[rName].push(p);
-  });
-
   let rows = payments.map((p,i) => {
     const rName = (residents.find(r=>r.id===p.resident_id)||{}).name || 'Unknown';
     return `<tr>
       <td>${i+1}</td><td>${fmtDate(p.pay_date)}</td><td>${rName}</td>
       <td>${p.method||'—'}</td><td>${p.period||'—'}</td>
-      <td>${p.received_by||'—'}</td><td>${p.receipt_num||'—'}</td>
+      <td>${p.notes||'—'}</td><td>${p.received_by||'—'}</td><td>${p.receipt_num||'—'}</td>
       <td style="text-align:right;font-weight:bold;">$${parseFloat(p.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
     </tr>`;
   }).join('');
-
   const html = `
     ${buildReportHeader('Income Register — Payments Received', `Date Range: ${dateRange}`)}
     <div class="rpt-meta"><span><strong>Facility:</strong> Harmony Living House Adult Family LLC</span><span><strong>Generated:</strong> ${period}</span></div>
     <table>
-      <thead><tr><th>#</th><th>Date</th><th>Resident</th><th>Method</th><th>Period</th><th>Received By</th><th>Receipt No.</th><th>Amount</th></tr></thead>
+      <thead><tr><th>#</th><th>Date</th><th>Resident</th><th>Method</th><th>Period</th><th>Description</th><th>Received By</th><th>Receipt No.</th><th>Amount</th></tr></thead>
       <tbody>${rows}</tbody>
-      <tfoot><tr class="total-row"><td colspan="7" style="text-align:right;">TOTAL INCOME</td><td style="text-align:right;">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr></tfoot>
+      <tfoot><tr class="total-row"><td colspan="8" style="text-align:right;">TOTAL INCOME RECEIVED</td><td style="text-align:right;">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr></tfoot>
     </table>
     <div class="summary-box">
+      <div class="section-hdr" style="margin:0 0 8px;">Income by Resident</div>
       ${Object.entries(byResident).map(([name,pList])=>{
         const sub=pList.reduce((s,p)=>s+parseFloat(p.amount||0),0);
-        return `<div class="summary-row"><span>${name} (${pList.length})</span><span>$${sub.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`;
+        return `<div class="summary-row"><span>${name} (${pList.length})</span><span class="net-positive">$${sub.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`;
       }).join('')}
-      <div class="summary-row"><span><strong>TOTAL</strong></span><span class="net-positive"><strong>$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></span></div>
+      <div class="summary-row"><span><strong>GRAND TOTAL</strong></span><span class="net-positive"><strong>$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></span></div>
     </div>
     <div class="footer-note">Maintained per RCW 70.128.130(15) &amp; WAC 388-76. Retain 5+ years. Harmony Living House Adult Family LLC · 120 Newaukum Village Dr, Chehalis, WA 98532</div>`;
-
-  await exportReportAsPDF(html, `IncomeRegister_HarmonyLivingHouse_${new Date().toISOString().split('T')[0]}.pdf`);
+  openReportWindow(html, 'Income Register — Harmony Living House');
 }
 
-// ── EXPENSE REGISTER (print) ──
 async function printExpenseReport() {
   const { data: allExpenses } = await db.from('expenses').select('*').order('exp_date', { ascending: true });
   const expenses = allExpenses || [];
@@ -5826,212 +5760,89 @@ async function printExpenseReport() {
   const dateRange = getDateRangeLabel(expenses, 'exp_date');
   const now = new Date();
   const period = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
-
-  // Group by category
   const byCat = {};
   expenses.forEach(e => {
     if (!byCat[e.category]) byCat[e.category] = [];
     byCat[e.category].push(e);
   });
-
-  let rows = expenses.map((e,i) => {
-    return `<tr>
-      <td>${i+1}</td>
-      <td>${fmtDate(e.exp_date)}</td>
-      <td>${e.category}</td>
-      <td>${e.description}</td>
-      <td>${e.vendor||'—'}</td>
-      <td>${e.method||'—'}</td>
-      <td>${e.paid_by||'—'}</td>
-      <td>${e.receipt_ref||'—'}</td>
-      <td style="text-align:right;font-weight:bold;">$${parseFloat(e.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-    </tr>`;
-  }).join('');
-
-  const html = `
-    ${buildReportHeader('Expense Register — Facility Operating Costs', `Date Range: ${dateRange}`)}
-    <div class="rpt-meta">
-      <span><strong>Facility:</strong> Harmony Living House Adult Family LLC &nbsp;·&nbsp; License No: On File</span>
-      <span><strong>Report Generated:</strong> ${period}</span>
-    </div>
-    <table>
-      <thead><tr>
-        <th>#</th><th>Date</th><th>Category</th><th>Description</th><th>Vendor</th><th>Method</th><th>Paid By</th><th>Ref No.</th><th style="text-align:right;">Amount</th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-      <tfoot><tr class="total-row">
-        <td colspan="8" style="text-align:right;font-weight:bold;">TOTAL EXPENSES</td>
-        <td style="text-align:right;">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-      </tr></tfoot>
-    </table>
-    <div class="summary-box">
-      <div class="section-hdr" style="margin:0 0 8px;">Expenses by Category</div>
-      ${Object.entries(byCat).sort((a,b)=>{
-        const sa=a[1].reduce((s,e)=>s+parseFloat(e.amount||0),0);
-        const sb=b[1].reduce((s,e)=>s+parseFloat(e.amount||0),0);
-        return sb-sa;
-      }).map(([cat,eList])=>{
-        const sub=eList.reduce((s,e)=>s+parseFloat(e.amount||0),0);
-        return `<div class="summary-row"><span class="summary-label">${cat} (${eList.length} item${eList.length!==1?'s':''})</span><span class="summary-val">$${sub.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`;
-      }).join('')}
-      <div class="summary-row"><span class="summary-label">TOTAL EXPENSES</span><span class="summary-val net-negative">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
-    </div>
-    <div class="sig-block">
-      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Provider / Administrator Signature</div></div>
-      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Date</div></div>
-    </div>
-    <div class="footer-note">
-      This Expense Register is maintained in accordance with RCW 70.128.130(15) and WAC 388-76, which require adult family homes to keep accurate records of operating expenses to demonstrate financial solvency. This document may be requested by Washington State DSHS/ALTSA. Retain for a minimum of 5 years. &nbsp;·&nbsp; Harmony Living House Adult Family LLC &nbsp;·&nbsp; 120 Newaukum Village Dr, Chehalis, WA 98532
-    </div>`;
-  openReportWindow(html, 'Expense Register — Harmony Living House');
-}
-
-async function exportExpenseReportPDF() {
-  const { data: allExpenses } = await db.from('expenses').select('*').order('exp_date', { ascending: true });
-  const expenses = allExpenses || [];
-  const total = expenses.reduce((s,e) => s + parseFloat(e.amount||0), 0);
-  const dateRange = getDateRangeLabel(expenses, 'exp_date');
-  const byCat = {};
-  expenses.forEach(e => {
-    if (!byCat[e.category]) byCat[e.category] = [];
-    byCat[e.category].push(e);
-  });
-
   let rows = expenses.map((e,i) => `<tr>
     <td>${i+1}</td><td>${fmtDate(e.exp_date)}</td><td>${e.category}</td>
     <td>${e.description}</td><td>${e.vendor||'—'}</td><td>${e.method||'—'}</td>
     <td>${e.paid_by||'—'}</td><td>${e.receipt_ref||'—'}</td>
-    <td style="text-align:right;">$${parseFloat(e.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+    <td style="text-align:right;font-weight:bold;">$${parseFloat(e.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
   </tr>`).join('');
-
   const html = `
     ${buildReportHeader('Expense Register — Facility Operating Costs', `Date Range: ${dateRange}`)}
-    <div class="rpt-meta"><span><strong>Facility:</strong> Harmony Living House Adult Family LLC</span><span><strong>Generated:</strong> ${new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})}</span></div>
+    <div class="rpt-meta"><span><strong>Facility:</strong> Harmony Living House Adult Family LLC</span><span><strong>Generated:</strong> ${period}</span></div>
     <table>
-      <thead><tr><th>#</th><th>Date</th><th>Category</th><th>Description</th><th>Vendor</th><th>Method</th><th>Paid By</th><th>Ref</th><th>Amount</th></tr></thead>
+      <thead><tr><th>#</th><th>Date</th><th>Category</th><th>Description</th><th>Vendor</th><th>Method</th><th>Paid By</th><th>Ref No.</th><th>Amount</th></tr></thead>
       <tbody>${rows}</tbody>
       <tfoot><tr class="total-row"><td colspan="8" style="text-align:right;">TOTAL EXPENSES</td><td style="text-align:right;">$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr></tfoot>
     </table>
     <div class="summary-box">
-      ${Object.entries(byCat).map(([cat,eList])=>{
+      <div class="section-hdr" style="margin:0 0 8px;">Expenses by Category</div>
+      ${Object.entries(byCat).sort((a,b)=>b[1].reduce((s,e)=>s+parseFloat(e.amount||0),0)-a[1].reduce((s,e)=>s+parseFloat(e.amount||0),0)).map(([cat,eList])=>{
         const sub=eList.reduce((s,e)=>s+parseFloat(e.amount||0),0);
-        return `<div class="summary-row"><span>${cat} (${eList.length})</span><span>$${sub.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`;
+        return `<div class="summary-row"><span>${cat} (${eList.length})</span><span class="net-negative">$${sub.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`;
       }).join('')}
-      <div class="summary-row"><span><strong>TOTAL</strong></span><span class="net-negative"><strong>$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></span></div>
+      <div class="summary-row"><span><strong>TOTAL EXPENSES</strong></span><span class="net-negative"><strong>$${total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></span></div>
     </div>
     <div class="footer-note">Maintained per RCW 70.128.130(15) &amp; WAC 388-76. Retain 5+ years. Harmony Living House Adult Family LLC · 120 Newaukum Village Dr, Chehalis, WA 98532</div>`;
-
-  await exportReportAsPDF(html, `ExpenseRegister_HarmonyLivingHouse_${new Date().toISOString().split('T')[0]}.pdf`);
+  openReportWindow(html, 'Expense Register — Harmony Living House');
 }
 
-// ── PROFIT & LOSS SUMMARY PDF ──
-async function exportFinancialSummaryPDF() {
+async function printPLSummary() {
   const residents = await getResidents();
   const { data: allPayments } = await db.from('payments').select('*').order('pay_date', { ascending: true });
   const { data: allExpenses } = await db.from('expenses').select('*').order('exp_date', { ascending: true });
   const payments = allPayments || [];
   const expenses = allExpenses || [];
-
   const now = new Date();
   const thisYear = now.getFullYear();
   const period = `Fiscal Year ${thisYear} (January – ${now.toLocaleDateString('en-US',{month:'long'})} ${thisYear})`;
-
-  // Monthly breakdown
   const months = Array.from({length:12},(_,i)=>i);
   const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
   const monthlyRows = months.map(m => {
     const mStr = `${thisYear}-${String(m+1).padStart(2,'0')}`;
     const inc = payments.filter(p=>p.pay_date&&p.pay_date.startsWith(mStr)).reduce((s,p)=>s+parseFloat(p.amount||0),0);
     const exp = expenses.filter(e=>e.exp_date&&e.exp_date.startsWith(mStr)).reduce((s,e)=>s+parseFloat(e.amount||0),0);
     const net = inc - exp;
-    const netCls = net >= 0 ? 'net-positive' : 'net-negative';
     const hasTx = inc > 0 || exp > 0;
     return `<tr${!hasTx?' style="opacity:0.4;"':''}>
       <td style="font-weight:bold;">${monthNames[m]} ${thisYear}</td>
       <td style="text-align:right;color:#1e7e34;">$${inc.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
       <td style="text-align:right;color:#c0392b;">$${exp.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-      <td style="text-align:right;font-weight:bold;" class="${netCls}">${net<0?'-$':'$'}${Math.abs(net).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      <td style="text-align:right;font-weight:bold;color:${net>=0?'#1e7e34':'#c0392b'}">${net<0?'-$':'$'}${Math.abs(net).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
     </tr>`;
   }).join('');
-
   const totalInc = payments.reduce((s,p)=>s+parseFloat(p.amount||0),0);
   const totalExp = expenses.reduce((s,e)=>s+parseFloat(e.amount||0),0);
   const netTotal = totalInc - totalExp;
-  const netCls = netTotal >= 0 ? 'net-positive' : 'net-negative';
-
-  // Category breakdown for expenses
   const byCat = {};
-  expenses.forEach(e => {
-    if (!byCat[e.category]) byCat[e.category] = 0;
-    byCat[e.category] += parseFloat(e.amount||0);
-  });
-
-  // Income by resident
+  expenses.forEach(e => { if (!byCat[e.category]) byCat[e.category]=0; byCat[e.category]+=parseFloat(e.amount||0); });
   const byRes = {};
-  payments.forEach(p => {
-    const rName = (residents.find(r=>r.id===p.resident_id)||{}).name||'Unknown';
-    if (!byRes[rName]) byRes[rName] = 0;
-    byRes[rName] += parseFloat(p.amount||0);
-  });
-
+  payments.forEach(p => { const n=(residents.find(r=>r.id===p.resident_id)||{}).name||'Unknown'; if(!byRes[n])byRes[n]=0; byRes[n]+=parseFloat(p.amount||0); });
   const html = `
     ${buildReportHeader('Financial Summary — Profit & Loss Statement', period)}
-    <div class="rpt-meta">
-      <span><strong>Facility:</strong> Harmony Living House Adult Family LLC &nbsp;·&nbsp; Chehalis, WA 98532</span>
-      <span><strong>Prepared:</strong> ${now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span>
-    </div>
-
-    <div class="section-hdr">Monthly Profit &amp; Loss Breakdown — ${thisYear}</div>
+    <div class="rpt-meta"><span><strong>Facility:</strong> Harmony Living House Adult Family LLC</span><span><strong>Prepared:</strong> ${now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})}</span></div>
+    <div class="section-hdr">Monthly Profit &amp; Loss — ${thisYear}</div>
     <table>
-      <thead><tr>
-        <th>Month</th>
-        <th style="text-align:right;">Income</th>
-        <th style="text-align:right;">Expenses</th>
-        <th style="text-align:right;">Net</th>
-      </tr></thead>
+      <thead><tr><th>Month</th><th style="text-align:right;">Income</th><th style="text-align:right;">Expenses</th><th style="text-align:right;">Net</th></tr></thead>
       <tbody>${monthlyRows}</tbody>
       <tfoot><tr class="total-row">
-        <td style="font-weight:bold;">YEAR TOTAL</td>
+        <td>YEAR TOTAL</td>
         <td style="text-align:right;color:#1e7e34;">$${totalInc.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
         <td style="text-align:right;color:#c0392b;">$${totalExp.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-        <td style="text-align:right;" class="${netCls}">${netTotal<0?'-$':'$'}${Math.abs(netTotal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+        <td style="text-align:right;color:${netTotal>=0?'#1e7e34':'#c0392b'}">${netTotal<0?'-$':'$'}${Math.abs(netTotal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
       </tr></tfoot>
     </table>
-
-    <div style="display:flex;gap:16px;margin-bottom:14px;">
-      <div class="summary-box" style="flex:1;">
-        <div class="section-hdr" style="margin:0 0 8px;">Income by Resident</div>
-        ${Object.entries(byRes).sort((a,b)=>b[1]-a[1]).map(([name,amt])=>
-          `<div class="summary-row"><span class="summary-label">${name}</span><span class="summary-val net-positive">$${amt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`
-        ).join('')}
-        <div class="summary-row"><span class="summary-label">TOTAL INCOME</span><span class="summary-val net-positive">$${totalInc.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
-      </div>
-      <div class="summary-box" style="flex:1;">
-        <div class="section-hdr" style="margin:0 0 8px;">Expenses by Category</div>
-        ${Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cat,amt])=>
-          `<div class="summary-row"><span class="summary-label">${cat}</span><span class="summary-val net-negative">$${amt.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>`
-        ).join('')}
-        <div class="summary-row"><span class="summary-label">TOTAL EXPENSES</span><span class="summary-val net-negative">$${totalExp.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
-      </div>
-    </div>
-
     <div class="summary-box" style="background:#f8f4e8;border:2px solid #b8860b;">
-      <div class="summary-row"><span class="summary-label">Total Income Received</span><span class="summary-val net-positive">$${totalInc.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
-      <div class="summary-row"><span class="summary-label">Total Expenses Paid</span><span class="summary-val net-negative">($${totalExp.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})})</span></div>
-      <div class="summary-row"><span class="summary-label">NET INCOME (Profit / Loss)</span><span class="summary-val ${netCls}" style="font-size:15px;">${netTotal<0?'-$':'$'}${Math.abs(netTotal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+      <div class="summary-row"><span>Total Income</span><span class="net-positive">$${totalInc.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span></div>
+      <div class="summary-row"><span>Total Expenses</span><span class="net-negative">($${totalExp.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})})</span></div>
+      <div class="summary-row"><span><strong>NET INCOME</strong></span><span style="color:${netTotal>=0?'#1e7e34':'#c0392b'};font-size:15px;"><strong>${netTotal<0?'-$':'$'}${Math.abs(netTotal).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</strong></span></div>
     </div>
-
-    <div class="sig-block">
-      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Provider / Administrator Signature</div></div>
-      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Certified By</div></div>
-      <div class="sig-item"><div class="sig-line"></div><div class="sig-label">Date</div></div>
-    </div>
-    <div class="footer-note">
-      This Profit &amp; Loss Statement is prepared in accordance with RCW 70.128.130(15) demonstrating financial solvency of Harmony Living House Adult Family LLC. Washington State DSHS/ALTSA may request this document during inspection or upon good cause. Retain all supporting records for a minimum of 5 years per WAC 388-76. This statement does not constitute a certified audit. For tax purposes, consult a licensed CPA.
-    </div>`;
-
-  await exportReportAsPDF(html, `ProfitLoss_HarmonyLivingHouse_${thisYear}_${new Date().toISOString().split('T')[0]}.pdf`);
+    <div class="footer-note">Prepared per RCW 70.128.130(15) &amp; WAC 388-76. Harmony Living House Adult Family LLC · 120 Newaukum Village Dr, Chehalis, WA 98532</div>`;
+  openReportWindow(html, 'P&L Summary — Harmony Living House');
 }
 
 // ══════════════════════════════════
@@ -6487,19 +6298,16 @@ function printOrientationForm() {
   setTimeout(() => { win.print(); win.addEventListener('afterprint', () => { win.close(); window.focus(); }); }, 700);
 }
 
-async function exportOrientationPDF() {
+function exportOrientationPDF() {
   const html = buildOrientationHTML();
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit:'pt', format:'letter' });
-  const container = document.createElement('div');
-  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:816px;background:#fff;font-family:Times New Roman,serif;font-size:12px;';
-  container.innerHTML = html;
-  document.body.appendChild(container);
-  const name = (document.getElementById('ori-trainee-name').value || 'Staff').replace(/\s+/g,'_');
-  doc.html(container, {
-    callback: (d) => { document.body.removeChild(container); d.save(`OrientationChecklist_${name}_${new Date().toISOString().split('T')[0]}.pdf`); setTimeout(() => window.focus(), 300); },
-    x:36, y:20, width:540, windowWidth:816
-  });
+  const win = window.open('', '_blank', 'width=900,height=1200');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Staff Orientation Checklist</title>
+  <style>* { box-sizing:border-box; margin:0; padding:0; } body { font-family:'Times New Roman',Times,serif; background:#fff; color:#000; padding:36px 48px; width:816px; margin:0 auto; }
+  @media print { body { padding:24px 36px; } @page { size:letter; margin:0.5in; } }</style>
+  </head><body>${html}</body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); win.addEventListener('afterprint', () => { win.close(); window.focus(); }); }, 700);
 }
 
 // ── CREDENTIALS PRINT / PDF ──
@@ -6618,19 +6426,221 @@ function printCredentialsForm() {
   setTimeout(() => { win.print(); win.addEventListener('afterprint', () => { win.close(); window.focus(); }); }, 700);
 }
 
-async function exportCredentialsPDF() {
+function exportCredentialsPDF() {
   const html = buildCredentialsHTML();
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit:'pt', format:'letter' });
-  const container = document.createElement('div');
-  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:816px;background:#fff;font-family:Times New Roman,serif;font-size:12px;';
-  container.innerHTML = html;
-  document.body.appendChild(container);
-  const name = (document.getElementById('cred-staff-name').value || 'Staff').replace(/\s+/g,'_');
-  doc.html(container, {
-    callback: (d) => { document.body.removeChild(container); d.save(`CredentialsChecklist_${name}_${new Date().toISOString().split('T')[0]}.pdf`); setTimeout(() => window.focus(), 300); },
-    x:36, y:20, width:540, windowWidth:816
+  const win = window.open('', '_blank', 'width=900,height=1200');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Caregiver Credentials Checklist</title>
+  <style>* { box-sizing:border-box; margin:0; padding:0; } body { font-family:'Times New Roman',Times,serif; background:#fff; color:#000; padding:36px 48px; width:816px; margin:0 auto; }
+  @media print { body { padding:24px 36px; } @page { size:letter; margin:0.5in; } }</style>
+  </head><body>${html}</body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); win.addEventListener('afterprint', () => { win.close(); window.focus(); }); }, 700);
+}
+
+// ══════════════════════════════════
+// STAFF DOCS — SUPABASE SAVE / LIST
+// ══════════════════════════════════
+
+async function saveOrientationToSupabase() {
+  const name = document.getElementById('ori-trainee-name').value.trim();
+  if (!name) { toast('Please enter the trainee name before saving'); return; }
+  const checks = ORI_CHECKLIST_ITEMS.map((_,i) => {
+    const el = document.getElementById('ori-chk-' + i);
+    return el ? el.checked : false;
   });
+  const record = {
+    id: uid(),
+    trainee_name: name,
+    hire_date: document.getElementById('ori-hire-date').value,
+    ori_date1: document.getElementById('ori-date1').value,
+    ori_date2: document.getElementById('ori-date2').value,
+    ori_date3: document.getElementById('ori-date3').value,
+    trainer_sig: document.getElementById('ori-trainer-sig').value,
+    trainee_sig: document.getElementById('ori-trainee-sig').value,
+    hours: document.getElementById('ori-hours').value,
+    last_day: document.getElementById('ori-last-day').value,
+    notes: document.getElementById('ori-notes').value,
+    checks: JSON.stringify(checks),
+    created_at: new Date().toISOString(),
+    created_by: currentUser ? currentUser.name : ''
+  };
+  const { error } = await db.from('staff_orientations').insert(record);
+  if (error) { toast('Error saving: ' + error.message); return; }
+  toast('✅ Orientation checklist saved!');
+  loadSavedOrientations();
+}
+
+async function loadSavedOrientations() {
+  const wrap = document.getElementById('saved-orientations-list-wrap');
+  const container = document.getElementById('saved-orientations-list');
+  if (!wrap || !container) return;
+  const { data, error } = await db.from('staff_orientations').select('*').order('created_at', { ascending: false });
+  if (error) { toast('Error loading: ' + error.message); return; }
+  wrap.style.display = 'block';
+  if (!data || !data.length) {
+    container.innerHTML = '<div style="color:var(--text3);font-style:italic;font-size:13px;padding:10px 0;">No saved checklists yet.</div>';
+    return;
+  }
+  container.innerHTML = data.map(r => `
+    <div style="border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <div style="font-weight:700;font-size:14px;color:var(--accent);">${r.trainee_name}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:3px;">
+          Hire Date: ${r.hire_date ? fmtDate(r.hire_date) : '—'} &nbsp;·&nbsp;
+          Saved: ${fmtDate(r.created_at?.split('T')[0])} &nbsp;·&nbsp;
+          By: ${r.created_by || '—'}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button class="btn btn-secondary btn-sm" onclick="loadOrientationRecord('${r.id}')">✏️ Edit / View</button>
+        <button class="btn btn-secondary btn-sm" onclick="printOrientationRecord('${r.id}')">🖨️ Print</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSavedOrientation('${r.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openSavedOrientationsList() {
+  const wrap = document.getElementById('saved-orientations-list-wrap');
+  if (!wrap) return;
+  const isHidden = wrap.style.display === 'none' || wrap.style.display === '';
+  if (isHidden) { wrap.style.display = 'block'; loadSavedOrientations(); }
+  else { wrap.style.display = 'none'; }
+}
+
+async function loadOrientationRecord(id) {
+  const { data: r } = await db.from('staff_orientations').select('*').eq('id', id).single();
+  if (!r) return;
+  document.getElementById('ori-trainee-name').value = r.trainee_name || '';
+  document.getElementById('ori-hire-date').value = r.hire_date || '';
+  document.getElementById('ori-date1').value = r.ori_date1 || '';
+  document.getElementById('ori-date2').value = r.ori_date2 || '';
+  document.getElementById('ori-date3').value = r.ori_date3 || '';
+  document.getElementById('ori-trainer-sig').value = r.trainer_sig || '';
+  document.getElementById('ori-trainee-sig').value = r.trainee_sig || '';
+  document.getElementById('ori-hours').value = r.hours || '';
+  document.getElementById('ori-last-day').value = r.last_day || '';
+  document.getElementById('ori-notes').value = r.notes || '';
+  try {
+    const checks = JSON.parse(r.checks || '[]');
+    checks.forEach((v, i) => { const el = document.getElementById('ori-chk-' + i); if (el) el.checked = v; });
+  } catch {}
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('Record loaded — edit and save again to update');
+}
+
+async function printOrientationRecord(id) {
+  const { data: r } = await db.from('staff_orientations').select('*').eq('id', id).single();
+  if (!r) return;
+  // Load into form, build HTML, then print
+  await loadOrientationRecord(id);
+  setTimeout(() => { printOrientationForm(); }, 300);
+}
+
+async function deleteSavedOrientation(id) {
+  if (!confirm('Delete this saved orientation checklist?')) return;
+  await db.from('staff_orientations').delete().eq('id', id);
+  toast('Deleted');
+  loadSavedOrientations();
+}
+
+async function saveCredentialsToSupabase() {
+  const name = document.getElementById('cred-staff-name').value.trim();
+  if (!name) { toast('Please enter the staff name before saving'); return; }
+  const ids = ['cred-staff-name','cred-dob','cred-hire-date','cred-ori-date1','cred-ori-date2','cred-ori-date3',
+    'cred-fingerprint','cred-tb-step1','cred-tb-step2','cred-tb-xray','cred-na-training',
+    'cred-70hr-core','cred-70hr-pop','cred-ori-5hr','cred-nurse-core','cred-nurse-diabetes',
+    'cred-spec-dementia','cred-spec-mh','cred-spec-dd',
+    'cred-bg-exp1','cred-bg-exp2','cred-bg-exp3','cred-bg-exp4',
+    'cred-cpr-exp1','cred-cpr-exp2','cred-cpr-exp3','cred-cpr-exp4',
+    'cred-doh-exp1','cred-doh-exp2','cred-doh-exp3','cred-doh-exp4',
+    'cred-nar-exp1','cred-nar-exp2','cred-nar-exp3','cred-nar-exp4',
+    'cred-nac-exp1','cred-nac-exp2','cred-nac-exp3','cred-nac-exp4',
+    'cred-hcac-exp1','cred-hcac-exp2','cred-hcac-exp3','cred-hcac-exp4',
+    'cred-food-exp1','cred-food-exp2','cred-food-exp3','cred-food-exp4',
+    'cred-ce-from1','cred-ce-from2','cred-ce-from3','cred-ce-from4',
+    'cred-ce-to1','cred-ce-to2','cred-ce-to3','cred-ce-to4','cred-last-day'];
+  const fieldData = {};
+  ids.forEach(id => { const el = document.getElementById(id); if (el) fieldData[id] = el.value; });
+  fieldData['cred-hcac-yes'] = document.getElementById('cred-hcac-yes')?.checked;
+  fieldData['cred-hcac-no'] = document.getElementById('cred-hcac-no')?.checked;
+  const record = {
+    id: uid(),
+    staff_name: name,
+    field_data: JSON.stringify(fieldData),
+    created_at: new Date().toISOString(),
+    created_by: currentUser ? currentUser.name : ''
+  };
+  const { error } = await db.from('staff_credentials').insert(record);
+  if (error) { toast('Error saving: ' + error.message); return; }
+  toast('✅ Credentials checklist saved!');
+  loadSavedCredentials();
+}
+
+async function loadSavedCredentials() {
+  const wrap = document.getElementById('saved-credentials-list-wrap');
+  const container = document.getElementById('saved-credentials-list');
+  if (!wrap || !container) return;
+  const { data, error } = await db.from('staff_credentials').select('*').order('created_at', { ascending: false });
+  if (error) { toast('Error loading: ' + error.message); return; }
+  wrap.style.display = 'block';
+  if (!data || !data.length) {
+    container.innerHTML = '<div style="color:var(--text3);font-style:italic;font-size:13px;padding:10px 0;">No saved credentials checklists yet.</div>';
+    return;
+  }
+  container.innerHTML = data.map(r => `
+    <div style="border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <div style="font-weight:700;font-size:14px;color:#1a73e8;">${r.staff_name}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:3px;">
+          Saved: ${fmtDate(r.created_at?.split('T')[0])} &nbsp;·&nbsp;
+          By: ${r.created_by || '—'}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button class="btn btn-secondary btn-sm" onclick="loadCredentialsRecord('${r.id}')">✏️ Edit / View</button>
+        <button class="btn btn-secondary btn-sm" onclick="printCredentialsRecord('${r.id}')">🖨️ Print</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSavedCredentials('${r.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openSavedCredentialsList() {
+  const wrap = document.getElementById('saved-credentials-list-wrap');
+  if (!wrap) return;
+  const isHidden = wrap.style.display === 'none' || wrap.style.display === '';
+  if (isHidden) { wrap.style.display = 'block'; loadSavedCredentials(); }
+  else { wrap.style.display = 'none'; }
+}
+
+async function loadCredentialsRecord(id) {
+  const { data: r } = await db.from('staff_credentials').select('*').eq('id', id).single();
+  if (!r) return;
+  try {
+    const d = JSON.parse(r.field_data || '{}');
+    Object.entries(d).forEach(([fid, val]) => {
+      const el = document.getElementById(fid);
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = val;
+      else el.value = val || '';
+    });
+  } catch {}
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('Record loaded — edit and save again to update');
+}
+
+async function printCredentialsRecord(id) {
+  await loadCredentialsRecord(id);
+  setTimeout(() => { printCredentialsForm(); }, 300);
+}
+
+async function deleteSavedCredentials(id) {
+  if (!confirm('Delete this saved credentials checklist?')) return;
+  await db.from('staff_credentials').delete().eq('id', id);
+  toast('Deleted');
+  loadSavedCredentials();
 }
 
 // ══════════════════════════════════
