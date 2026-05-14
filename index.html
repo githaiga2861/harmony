@@ -2920,6 +2920,10 @@ function checkSession() {
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
       initApp();
+      const lastPage = localStorage.getItem('hlh_last_page');
+      if (lastPage && lastPage !== 'profile') {
+        showPage(lastPage);
+      }
     } catch {}
   }
 }
@@ -2944,6 +2948,7 @@ document.getElementById('login-password').addEventListener('keydown', e => { if 
 const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Financials — Income & Expenses', staffdocs: 'Staff Documents', contacts: 'Quick Contacts' };
 
 async function showPage(name) {
+  if (name !== 'profile') localStorage.setItem('hlh_last_page', name);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const pg = document.getElementById('page-' + name);
