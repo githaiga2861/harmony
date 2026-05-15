@@ -1119,7 +1119,10 @@
                   </button>
                 </div>
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                  <button onclick="printIncomeReport()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
+                  <button onclick="openSalaryConfig()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
+                    ⚙️ Staff Salary Setup
+                  </button>
+                  <button onclick="printExpenseReport()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                     Print Income Register
                   </button>
@@ -1182,6 +1185,9 @@
                     <option>Insurance</option>
                     <option>Other</option>
                   </select>
+                </div>
+                <!-- Wage balance alert strip -->
+                <div id="wage-balance-strip" style="display:none;margin-top:10px;"></div>
                 </div>
                 <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">
                   <span id="exp-stat-count">0</span> expense(s) &nbsp;·&nbsp; This month: <span id="exp-stat-month">$0</span>
@@ -2757,6 +2763,95 @@
   </div>
 </div>
 
+<!-- MODAL: Staff Salary Configuration -->
+<div class="modal-overlay" id="modal-salary-config">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <h3>⚙️ Staff Salary Setup</h3>
+      <button class="btn-close" onclick="closeModal('modal-salary-config')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6;">
+        Set the expected wage for each staff member per pay period. The system will track how much has been paid and alert you of any outstanding balances automatically.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+        <!-- James -->
+        <div style="padding:16px 18px;border-bottom:1px solid var(--border);background:#f8faff;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <div style="width:38px;height:38px;border-radius:50%;background:#e8f0fe;border:2px solid #1a73e8;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#1a73e8;flex-shrink:0;">J</div>
+            <div style="font-weight:700;font-size:15px;color:#1a2332;">James</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="field" style="margin:0;">
+              <label style="font-size:11px;">Expected Amount Per Period ($)</label>
+              <input type="number" id="salary-james-amount" placeholder="e.g. 800.00" step="0.01" min="0">
+            </div>
+            <div class="field" style="margin:0;">
+              <label style="font-size:11px;">Pay Frequency</label>
+              <select id="salary-james-freq">
+                <option value="monthly">Monthly</option>
+                <option value="biweekly">Bi-weekly</option>
+                <option value="weekly">Weekly</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <!-- Alvan -->
+        <div style="padding:16px 18px;border-bottom:1px solid var(--border);background:#fdf8ff;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <div style="width:38px;height:38px;border-radius:50%;background:#f3e8fd;border:2px solid #7c3aed;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#7c3aed;flex-shrink:0;">A</div>
+            <div style="font-weight:700;font-size:15px;color:#1a2332;">Alvan</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="field" style="margin:0;">
+              <label style="font-size:11px;">Expected Amount Per Period ($)</label>
+              <input type="number" id="salary-alvan-amount" placeholder="e.g. 800.00" step="0.01" min="0">
+            </div>
+            <div class="field" style="margin:0;">
+              <label style="font-size:11px;">Pay Frequency</label>
+              <select id="salary-alvan-freq">
+                <option value="monthly">Monthly</option>
+                <option value="biweekly">Bi-weekly</option>
+                <option value="weekly">Weekly</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <!-- Joseph -->
+        <div style="padding:16px 18px;background:#f6fff8;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <div style="width:38px;height:38px;border-radius:50%;background:#e6f4ea;border:2px solid #1e7e34;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#1e7e34;flex-shrink:0;">J</div>
+            <div style="font-weight:700;font-size:15px;color:#1a2332;">Joseph</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="field" style="margin:0;">
+              <label style="font-size:11px;">Expected Amount Per Period ($)</label>
+              <input type="number" id="salary-joseph-amount" placeholder="e.g. 800.00" step="0.01" min="0">
+            </div>
+            <div class="field" style="margin:0;">
+              <label style="font-size:11px;">Pay Frequency</label>
+              <select id="salary-joseph-freq">
+                <option value="monthly">Monthly</option>
+                <option value="biweekly">Bi-weekly</option>
+                <option value="weekly">Weekly</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:11.5px;color:var(--text3);margin-top:14px;line-height:1.6;">
+        💡 These figures are used only for balance tracking and alerts. Only amounts actually recorded as paid count as expenses.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-salary-config')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSalaryConfig()">Save Salary Settings</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Add/Edit Expense -->
 <div class="modal-overlay" id="modal-expense">
   <div class="modal">
@@ -2864,13 +2959,15 @@
         <!-- ── STAFF WAGE FIELDS ── -->
         <div id="exp-wage-fields" class="span2" style="display:none;grid-column:span 2;">
           <!-- Divider banner -->
-          <div style="background:linear-gradient(90deg,#1a1a1a,#b8860b);border-radius:8px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+          <div style="background:linear-gradient(90deg,#1a1a1a,#b8860b);border-radius:8px;padding:10px 16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;">
             <span style="font-size:20px;">👤</span>
             <div>
               <div style="color:#fff;font-weight:700;font-size:13px;letter-spacing:0.04em;">Staff Wage Payment</div>
               <div style="color:rgba(255,255,255,0.6);font-size:11px;">This wage record will appear separately under Staff Wages in the expense register</div>
             </div>
           </div>
+          <!-- Live balance panel — shown after staff selected -->
+          <div id="wage-balance-panel" style="display:none;margin-bottom:14px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);"></div>
           <div class="form-grid">
             <div class="field span2">
               <label>Staff Member Receiving Wage *</label>
@@ -6155,11 +6252,16 @@ function openAddExpense() {
   document.getElementById('exp-wage-notes').value = '';
   setExpenseType('general');
 
-  // Wire up "Other" staff toggle
+  // Wire up "Other" staff toggle + balance panel
   const staffSel = document.getElementById('exp-wage-staff');
   staffSel.onchange = () => {
     document.getElementById('exp-wage-other-wrap').style.display = staffSel.value === 'Other' ? 'block' : 'none';
+    renderWageBalancePanel(staffSel.value);
   };
+  // Also re-render panel when period dates change
+  document.getElementById('exp-wage-period-start').onchange = () => renderWageBalancePanel(document.getElementById('exp-wage-staff').value);
+  document.getElementById('exp-wage-period-end').onchange = () => renderWageBalancePanel(document.getElementById('exp-wage-staff').value);
+  document.getElementById('wage-balance-panel').style.display = 'none';
   // Prevent auto-calc override when user manually types amount
   const amtWage = document.getElementById('exp-amount');
   amtWage.oninput = () => { amtWage.dataset.manualOverride = '1'; };
@@ -6329,6 +6431,7 @@ async function renderExpensesPanel() {
 
   const expCountEl = document.getElementById('exp-stat-count');
   if (expCountEl) expCountEl.textContent = expenses.length;
+  renderWageBalanceStrip();
 
   const container = document.getElementById('expenses-list');
   if (!container) return;
@@ -7095,6 +7198,285 @@ async function deleteSavedCredentials(id) {
   await db.from('staff_credentials').delete().eq('id', id);
   toast('Deleted');
   loadSavedCredentials();
+}
+
+// ══════════════════════════════════
+// STAFF SALARY CONFIG & BALANCE
+// ══════════════════════════════════
+
+const SALARY_CONFIG_KEY = 'hlh_salary_config';
+const KNOWN_STAFF = ['James', 'Alvan', 'Joseph'];
+
+const STAFF_COLORS = {
+  'James':  { bg:'#e8f0fe', border:'#1a73e8', text:'#1a73e8' },
+  'Alvan':  { bg:'#f3e8fd', border:'#7c3aed', text:'#7c3aed' },
+  'Joseph': { bg:'#e6f4ea', border:'#1e7e34', text:'#1e7e34' },
+};
+
+function getSalaryConfig() {
+  try { return JSON.parse(localStorage.getItem(SALARY_CONFIG_KEY)) || {}; } catch { return {}; }
+}
+
+function openSalaryConfig() {
+  const cfg = getSalaryConfig();
+  KNOWN_STAFF.forEach(name => {
+    const key = name.toLowerCase();
+    const amtEl = document.getElementById('salary-' + key + '-amount');
+    const freqEl = document.getElementById('salary-' + key + '-freq');
+    if (amtEl) amtEl.value = cfg[key]?.amount || '';
+    if (freqEl) freqEl.value = cfg[key]?.freq || 'monthly';
+  });
+  openModal('modal-salary-config');
+}
+
+function saveSalaryConfig() {
+  const cfg = {};
+  KNOWN_STAFF.forEach(name => {
+    const key = name.toLowerCase();
+    const amount = parseFloat(document.getElementById('salary-' + key + '-amount')?.value || 0);
+    const freq = document.getElementById('salary-' + key + '-freq')?.value || 'monthly';
+    if (amount > 0) cfg[key] = { amount, freq, name };
+  });
+  localStorage.setItem(SALARY_CONFIG_KEY, JSON.stringify(cfg));
+  closeModal('modal-salary-config');
+  toast('✅ Salary settings saved');
+  renderExpensesPanel();
+}
+
+// Returns all wage payments for a staff member, optionally filtered by overlap with a period
+async function getWagePayments(staffName, periodStart, periodEnd) {
+  const { data } = await db.from('expenses')
+    .select('*')
+    .eq('expense_type', 'wage')
+    .eq('wage_staff', staffName)
+    .order('wage_period_start', { ascending: true });
+  if (!data) return [];
+  if (!periodStart || !periodEnd) return data;
+  // Return payments whose period overlaps with the requested window
+  return data.filter(p => {
+    if (!p.wage_period_start || !p.wage_period_end) return false;
+    return p.wage_period_start <= periodEnd && p.wage_period_end >= periodStart;
+  });
+}
+
+// Compute outstanding balance for a staff member across ALL time
+// Returns array of { period, expected, paid, balance } objects
+async function computeStaffBalance(staffName) {
+  const cfg = getSalaryConfig();
+  const key = staffName.toLowerCase();
+  const staffCfg = cfg[key];
+  if (!staffCfg || !staffCfg.amount) return null;
+
+  const { data: allPayments } = await db.from('expenses')
+    .select('*')
+    .eq('expense_type', 'wage')
+    .eq('wage_staff', staffName)
+    .order('wage_period_start', { ascending: true });
+
+  if (!allPayments || !allPayments.length) return { staffCfg, payments: [], totalExpected: 0, totalPaid: 0, totalOwed: 0 };
+
+  // Group payments by period label
+  const byPeriod = {};
+  allPayments.forEach(p => {
+    const key = (p.wage_period_start || '') + '_' + (p.wage_period_end || '');
+    if (!byPeriod[key]) byPeriod[key] = { start: p.wage_period_start, end: p.wage_period_end, payments: [] };
+    byPeriod[key].payments.push(p);
+  });
+
+  const periods = Object.values(byPeriod).map(pg => {
+    const paid = pg.payments.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+    const expected = staffCfg.amount;
+    return { start: pg.start, end: pg.end, expected, paid, balance: expected - paid, payments: pg.payments };
+  });
+
+  const totalPaid = periods.reduce((s, p) => s + p.paid, 0);
+  const totalExpected = periods.reduce((s, p) => s + p.expected, 0);
+  const totalOwed = periods.reduce((s, p) => s + Math.max(0, p.balance), 0);
+
+  return { staffCfg, periods, totalPaid, totalExpected, totalOwed };
+}
+
+async function renderWageBalancePanel(staffName) {
+  const panel = document.getElementById('wage-balance-panel');
+  if (!panel) return;
+  if (!staffName || staffName === '' || staffName === 'Other') {
+    panel.style.display = 'none';
+    return;
+  }
+
+  const cfg = getSalaryConfig();
+  const key = staffName.toLowerCase();
+  const staffCfg = cfg[key];
+  const colors = STAFF_COLORS[staffName] || { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568' };
+
+  // Get selected period from form
+  const periodStart = document.getElementById('exp-wage-period-start')?.value;
+  const periodEnd = document.getElementById('exp-wage-period-end')?.value;
+
+  // Fetch all wage payments for this staff
+  const { data: allPayments } = await db.from('expenses')
+    .select('*')
+    .eq('expense_type', 'wage')
+    .eq('wage_staff', staffName)
+    .order('wage_period_start', { ascending: true });
+
+  const payments = allPayments || [];
+
+  // ── Compute overall balance across all past periods ──
+  let overallOwed = 0;
+  let overdueRows = '';
+  if (staffCfg && staffCfg.amount) {
+    const byPeriod = {};
+    payments.forEach(p => {
+      const pk = (p.wage_period_start||'') + '_' + (p.wage_period_end||'');
+      if (!byPeriod[pk]) byPeriod[pk] = { start: p.wage_period_start, end: p.wage_period_end, paid: 0 };
+      byPeriod[pk].paid += parseFloat(p.amount || 0);
+    });
+    Object.values(byPeriod).forEach(pg => {
+      const bal = staffCfg.amount - pg.paid;
+      if (bal > 0.005) {
+        overallOwed += bal;
+        overdueRows += `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px;border-bottom:1px solid rgba(0,0,0,0.06);">
+          <span style="color:#555;">${fmtDate(pg.start)} – ${fmtDate(pg.end)}</span>
+          <span style="display:flex;gap:10px;">
+            <span style="color:#888;">Paid: <strong>$${pg.paid.toFixed(2)}</strong></span>
+            <span style="color:#c0392b;font-weight:700;">Still owed: $${bal.toFixed(2)}</span>
+          </span>
+        </div>`;
+      }
+    });
+  }
+
+  // ── Compute for the currently selected period in the form ──
+  let currentPeriodHtml = '';
+  if (periodStart && periodEnd && staffCfg && staffCfg.amount) {
+    const periodPayments = payments.filter(p =>
+      p.wage_period_start && p.wage_period_end &&
+      p.wage_period_start <= periodEnd && p.wage_period_end >= periodStart
+    );
+    const paidThisPeriod = periodPayments.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+    const remainingThisPeriod = staffCfg.amount - paidThisPeriod;
+    const pct = Math.min(100, Math.round((paidThisPeriod / staffCfg.amount) * 100));
+    const barColor = pct >= 100 ? '#1e7e34' : pct >= 50 ? '#d68910' : '#c0392b';
+
+    currentPeriodHtml = `
+      <div style="padding:10px 14px;background:#fffdf5;border-bottom:1px solid rgba(0,0,0,0.07);">
+        <div style="font-size:11px;font-weight:700;color:#8a6408;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Selected Period: ${fmtDate(periodStart)} – ${fmtDate(periodEnd)}</div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;">
+          <span>Expected: <strong>$${staffCfg.amount.toFixed(2)}</strong></span>
+          <span>Paid so far: <strong style="color:#1e7e34;">$${paidThisPeriod.toFixed(2)}</strong></span>
+          <span style="color:${remainingThisPeriod > 0.005 ? '#c0392b' : '#1e7e34'};font-weight:700;">${remainingThisPeriod > 0.005 ? 'Still owed: $' + remainingThisPeriod.toFixed(2) : '✅ Fully paid'}</span>
+        </div>
+        <div style="background:#e0e0e0;border-radius:20px;height:7px;overflow:hidden;">
+          <div style="width:${pct}%;background:${barColor};height:100%;border-radius:20px;transition:width 0.3s;"></div>
+        </div>
+        <div style="font-size:10.5px;color:#999;margin-top:3px;text-align:right;">${pct}% paid</div>
+      </div>`;
+  } else if (!staffCfg || !staffCfg.amount) {
+    currentPeriodHtml = `<div style="padding:10px 14px;background:#fff8e1;font-size:12px;color:#8a6408;border-bottom:1px solid rgba(0,0,0,0.07);">
+      ⚠️ No salary configured for ${staffName}. <button onclick="closeModal('modal-expense');openSalaryConfig()" style="background:none;border:none;cursor:pointer;color:var(--accent);font-weight:700;font-family:inherit;font-size:12px;">Set up salary →</button>
+    </div>`;
+  }
+
+  // ── Outstanding from past periods ──
+  let overdueHtml = '';
+  if (overallOwed > 0.005) {
+    overdueHtml = `
+      <div style="padding:10px 14px;background:#fdf0ef;">
+        <div style="font-size:11px;font-weight:700;color:#c0392b;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">⚠️ Outstanding from Past Periods — Total Owed: $${overallOwed.toFixed(2)}</div>
+        ${overdueRows}
+      </div>`;
+  } else if (payments.length > 0 && staffCfg?.amount) {
+    overdueHtml = `<div style="padding:8px 14px;background:#e6f4ea;font-size:12px;color:#1e7e34;font-weight:600;">✅ No outstanding balance from previous periods</div>`;
+  }
+
+  panel.innerHTML = `
+    <div style="padding:9px 14px;background:${colors.bg};border-bottom:1px solid ${colors.border}20;display:flex;align-items:center;gap:8px;">
+      <div style="width:28px;height:28px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:${colors.text};">${staffName.charAt(0)}</div>
+      <div style="font-weight:700;font-size:13px;color:${colors.text};">${staffName} — Wage Balance Tracker</div>
+      ${staffCfg?.amount ? `<span style="margin-left:auto;font-size:12px;color:${colors.text};opacity:0.8;">Expected per period: $${staffCfg.amount.toFixed(2)}</span>` : ''}
+    </div>
+    ${currentPeriodHtml}
+    ${overdueHtml}`;
+  panel.style.display = 'block';
+}
+
+// Show wage balance strip on the expenses panel (always visible when on payments page)
+async function renderWageBalanceStrip() {
+  const strip = document.getElementById('wage-balance-strip');
+  if (!strip) return;
+  const cfg = getSalaryConfig();
+  if (!Object.keys(cfg).length) { strip.style.display = 'none'; return; }
+
+  let hasAlerts = false;
+  let cards = '';
+
+  for (const staffName of KNOWN_STAFF) {
+    const key = staffName.toLowerCase();
+    const staffCfg = cfg[key];
+    if (!staffCfg || !staffCfg.amount) continue;
+    const colors = STAFF_COLORS[staffName] || { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568' };
+
+    const { data: allPayments } = await db.from('expenses')
+      .select('amount, wage_period_start, wage_period_end')
+      .eq('expense_type', 'wage')
+      .eq('wage_staff', staffName);
+
+    const payments = allPayments || [];
+
+    // Current month period
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+
+    // Payments overlapping current month
+    const thisMonthPayments = payments.filter(p =>
+      p.wage_period_start && p.wage_period_end &&
+      p.wage_period_start <= monthEnd && p.wage_period_end >= monthStart
+    );
+    const paidThisMonth = thisMonthPayments.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+    const monthBalance = staffCfg.amount - paidThisMonth;
+
+    // Total outstanding across all periods
+    const byPeriod = {};
+    payments.forEach(p => {
+      const pk = (p.wage_period_start||'') + '_' + (p.wage_period_end||'');
+      if (!byPeriod[pk]) byPeriod[pk] = { paid: 0 };
+      byPeriod[pk].paid += parseFloat(p.amount || 0);
+    });
+    let totalOwed = 0;
+    Object.values(byPeriod).forEach(pg => { totalOwed += Math.max(0, staffCfg.amount - pg.paid); });
+
+    if (monthBalance > 0.005 || totalOwed > 0.005) hasAlerts = true;
+
+    const pct = Math.min(100, Math.round((paidThisMonth / staffCfg.amount) * 100));
+    const barColor = pct >= 100 ? '#1e7e34' : pct >= 50 ? '#d68910' : '#c0392b';
+    const isFullyPaid = monthBalance <= 0.005;
+
+    cards += `
+      <div style="background:#fff;border:1.5px solid ${colors.border};border-radius:8px;padding:10px 13px;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+          <div style="width:30px;height:30px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:${colors.text};flex-shrink:0;">${staffName.charAt(0)}</div>
+          <div style="font-weight:700;font-size:13px;color:#1a2332;">${staffName}</div>
+          ${isFullyPaid ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;">✅ Paid</span>` : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;">Owes $${monthBalance.toFixed(2)}</span>`}
+        </div>
+        <div style="font-size:11px;color:#888;margin-bottom:4px;">This month: $${paidThisMonth.toFixed(2)} / $${staffCfg.amount.toFixed(2)}</div>
+        <div style="background:#e8e8e8;border-radius:20px;height:5px;overflow:hidden;margin-bottom:4px;">
+          <div style="width:${pct}%;background:${barColor};height:100%;border-radius:20px;"></div>
+        </div>
+        ${totalOwed > 0.005 ? `<div style="font-size:11px;color:#c0392b;font-weight:700;">Total owed (all time): $${totalOwed.toFixed(2)}</div>` : ''}
+      </div>`;
+  }
+
+  if (!cards) { strip.style.display = 'none'; return; }
+
+  strip.innerHTML = `
+    <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;">👤 Staff Wage Balances — This Month</div>
+      <button onclick="openSalaryConfig()" style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;">Edit Setup ⚙️</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">${cards}</div>`;
+  strip.style.display = 'block';
 }
 
 // ══════════════════════════════════
