@@ -6402,11 +6402,7 @@ const EXP_CATEGORY_ICONS = {
   'Other': '📦',
 };
 
-const STAFF_COLORS = {
-  'James': { bg: '#e8f0fe', border: '#1a73e8', text: '#1a73e8', dot: '#1a73e8' },
-  'Alvan': { bg: '#f3e8fd', border: '#7c3aed', text: '#7c3aed', dot: '#7c3aed' },
-  'Joseph': { bg: '#e6f4ea', border: '#1e7e34', text: '#1e7e34', dot: '#1e7e34' },
-};
+// STAFF_COLORS defined in salary config section below
 
 async function renderExpensesPanel() {
   const q = (document.getElementById('exp-search')?.value || '').toLowerCase();
@@ -7208,9 +7204,9 @@ const SALARY_CONFIG_KEY = 'hlh_salary_config';
 const KNOWN_STAFF = ['James', 'Alvan', 'Joseph'];
 
 const STAFF_COLORS = {
-  'James':  { bg:'#e8f0fe', border:'#1a73e8', text:'#1a73e8' },
-  'Alvan':  { bg:'#f3e8fd', border:'#7c3aed', text:'#7c3aed' },
-  'Joseph': { bg:'#e6f4ea', border:'#1e7e34', text:'#1e7e34' },
+  'James':  { bg:'#e8f0fe', border:'#1a73e8', text:'#1a73e8', dot:'#1a73e8' },
+  'Alvan':  { bg:'#f3e8fd', border:'#7c3aed', text:'#7c3aed', dot:'#7c3aed' },
+  'Joseph': { bg:'#e6f4ea', border:'#1e7e34', text:'#1e7e34', dot:'#1e7e34' },
 };
 
 function getSalaryConfig() {
