@@ -327,6 +327,55 @@
   .empty-state h4 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
   .empty-state p { font-size: 14px; color: var(--text3); }
 
+  /* ── VOICE TO NOTE ── */
+  .voice-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: 8px; border: 1.5px solid var(--border);
+    background: var(--surface); color: var(--text2);
+    font-family: inherit; font-size: 12.5px; font-weight: 700;
+    cursor: pointer; transition: all 0.18s; user-select: none;
+    position: relative; overflow: hidden;
+  }
+  .voice-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .voice-btn.recording {
+    background: #fdf0ef; border-color: #c0392b; color: #c0392b;
+    animation: voicePulse 1.2s ease-in-out infinite;
+  }
+  .voice-btn.recording .voice-mic-icon { animation: micBounce 0.6s ease-in-out infinite alternate; }
+  .voice-btn.unsupported { opacity: 0.5; cursor: not-allowed; border-style: dashed; }
+  @keyframes voicePulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(192,57,43,0.25); }
+    50% { box-shadow: 0 0 0 6px rgba(192,57,43,0); }
+  }
+  @keyframes micBounce {
+    from { transform: scale(1); }
+    to { transform: scale(1.25); }
+  }
+  .voice-wave {
+    display: none; align-items: center; gap: 2px; height: 14px;
+  }
+  .voice-btn.recording .voice-wave { display: flex; }
+  .voice-btn.recording .voice-label { display: none; }
+  .voice-wave span {
+    display: block; width: 3px; background: #c0392b; border-radius: 2px;
+    animation: waveBar 0.8s ease-in-out infinite alternate;
+  }
+  .voice-wave span:nth-child(1) { height: 4px; animation-delay: 0s; }
+  .voice-wave span:nth-child(2) { height: 10px; animation-delay: 0.15s; }
+  .voice-wave span:nth-child(3) { height: 14px; animation-delay: 0.3s; }
+  .voice-wave span:nth-child(4) { height: 8px; animation-delay: 0.45s; }
+  .voice-wave span:nth-child(5) { height: 5px; animation-delay: 0.6s; }
+  @keyframes waveBar {
+    from { transform: scaleY(0.4); opacity: 0.7; }
+    to { transform: scaleY(1); opacity: 1; }
+  }
+  .voice-interim {
+    font-size: 12px; color: var(--text3); font-style: italic;
+    margin-top: 5px; min-height: 18px; line-height: 1.5;
+    padding: 0 2px; display: none;
+  }
+  .voice-interim.visible { display: block; }
+
   /* ── TOAST ── */
   #toast {
     position: fixed; bottom: 24px; right: 24px; z-index: 999;
@@ -1780,10 +1829,20 @@
       </select>
     </div>
     <div class="field span2">
-      <label>Progress Notes</label>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <label style="margin:0;">Progress Notes</label>
+        <button type="button" class="voice-btn" id="voice-btn-notes" onclick="toggleVoice('note-behavior-notes','voice-btn-notes','voice-interim-notes')">
+          <span class="voice-mic-icon" style="font-size:14px;">🎙️</span>
+          <span class="voice-label">Voice to Note</span>
+          <span class="voice-wave">
+            <span></span><span></span><span></span><span></span><span></span>
+          </span>
+        </button>
+      </div>
       <textarea id="note-behavior-notes" rows="10" 
         placeholder="Document resident's progress here — behaviour, incidents, medications, mood, activities, follow-up actions, and any other observations during this shift...">
       </textarea>
+      <div class="voice-interim" id="voice-interim-notes"></div>
     </div>
   </div>
 </div>
@@ -2026,8 +2085,18 @@
           <input type="text" id="ir-location" placeholder="e.g. Bedroom, Kitchen, Living Room">
         </div>
         <div class="field span2">
-          <label>Description of Incident (use specific behavioral terms and include actions taken by providers/staff)</label>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <label style="margin:0;">Description of Incident <span style="font-weight:400;font-size:11px;color:var(--text3);">(use specific behavioral terms and include actions taken by providers/staff)</span></label>
+            <button type="button" class="voice-btn" id="voice-btn-incident" onclick="toggleVoice('ir-description','voice-btn-incident','voice-interim-incident')">
+              <span class="voice-mic-icon" style="font-size:14px;">🎙️</span>
+              <span class="voice-label">Voice to Note</span>
+              <span class="voice-wave">
+                <span></span><span></span><span></span><span></span><span></span>
+              </span>
+            </button>
+          </div>
           <textarea id="ir-description" rows="6" placeholder="Describe the incident in detail..."></textarea>
+          <div class="voice-interim" id="voice-interim-incident"></div>
         </div>
       </div>
 
@@ -7474,6 +7543,242 @@ async function renderWageBalanceStrip() {
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">${cards}</div>`;
   strip.style.display = 'block';
 }
+
+// ══════════════════════════════════
+// VOICE TO NOTE ENGINE
+// ══════════════════════════════════
+(function() {
+  // ── Feature detection ──
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+  let activeRecognition = null;
+  let activeBtn = null;
+  let activeInterimEl = null;
+  let activeTextareaId = null;
+  let micPermissionGranted = false;
+
+  // ── Mark buttons as unsupported if API unavailable ──
+  function markUnsupported(btnId) {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.classList.add('unsupported');
+    btn.title = 'Voice input not supported in this browser. Please type your notes.';
+    btn.onclick = () => showVoiceUnsupportedToast();
+  }
+
+  function showVoiceUnsupportedToast() {
+    toast('🎙️ Voice input isn\'t supported in this browser. Please type your notes directly.');
+  }
+
+  if (!SpeechRecognition) {
+    // Defer marking until modals open since buttons may not exist yet
+    const observer = new MutationObserver(() => {
+      ['voice-btn-notes','voice-btn-incident'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && !el.classList.contains('unsupported')) markUnsupported(id);
+      });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.toggleVoice = () => showVoiceUnsupportedToast();
+    return;
+  }
+
+  // ── Stop any active recording ──
+  function stopRecording() {
+    if (activeRecognition) {
+      try { activeRecognition.stop(); } catch(e) {}
+      activeRecognition = null;
+    }
+    if (activeBtn) {
+      activeBtn.classList.remove('recording');
+    }
+    if (activeInterimEl) {
+      activeInterimEl.classList.remove('visible');
+      activeInterimEl.textContent = '';
+    }
+    activeBtn = null;
+    activeInterimEl = null;
+    activeTextareaId = null;
+  }
+
+  // ── Main toggle function ──
+  window.toggleVoice = async function(textareaId, btnId, interimId) {
+    const btn = document.getElementById(btnId);
+    const textarea = document.getElementById(textareaId);
+    const interimEl = document.getElementById(interimId);
+
+    if (!btn || !textarea) return;
+
+    // If already recording this field — stop
+    if (activeTextareaId === textareaId && activeRecognition) {
+      stopRecording();
+      toast('🎙️ Recording stopped.');
+      return;
+    }
+
+    // If recording a different field — stop that first
+    if (activeRecognition) stopRecording();
+
+    // ── Request microphone permission explicitly first ──
+    if (!micPermissionGranted) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(t => t.stop()); // We only needed the permission check
+        micPermissionGranted = true;
+      } catch (err) {
+        // Permission denied or no mic
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          showMicDeniedPrompt(textareaId);
+        } else if (err.name === 'NotFoundError') {
+          toast('🎙️ No microphone found. Please type your notes instead.');
+        } else {
+          toast('🎙️ Microphone unavailable. Please type your notes instead.');
+        }
+        return;
+      }
+    }
+
+    // ── Start recognition ──
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1;
+
+    activeRecognition = recognition;
+    activeBtn = btn;
+    activeInterimEl = interimEl;
+    activeTextareaId = textareaId;
+
+    let finalTranscript = textarea.value;
+    // Add a space if textarea already has content and doesn't end in space/newline
+    if (finalTranscript && !/[\s\n]$/.test(finalTranscript)) {
+      finalTranscript += ' ';
+    }
+
+    btn.classList.add('recording');
+    if (interimEl) {
+      interimEl.textContent = 'Listening…';
+      interimEl.classList.add('visible');
+    }
+    toast('🎙️ Recording… Speak now. Click the button again to stop.');
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      let newFinal = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          newFinal += t + ' ';
+        } else {
+          interim += t;
+        }
+      }
+      if (newFinal) {
+        finalTranscript += newFinal;
+        textarea.value = finalTranscript;
+        // Auto-resize if textarea has scrollHeight
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+      }
+      if (interimEl) {
+        interimEl.textContent = interim ? '…' + interim : 'Listening…';
+      }
+    };
+
+    recognition.onerror = (event) => {
+      const errMap = {
+        'network':        '🌐 Network error — voice recognition needs internet. Please type your notes.',
+        'not-allowed':    '🎙️ Microphone permission denied. Please allow microphone access and try again.',
+        'no-speech':      '🎙️ No speech detected. Tap again to try, or type your notes.',
+        'audio-capture':  '🎙️ No microphone found. Please type your notes.',
+        'service-not-available': '🌐 Voice service unavailable right now. Please type your notes.',
+        'aborted':        null, // User stopped intentionally — no toast needed
+      };
+      stopRecording();
+      const msg = errMap[event.error];
+      if (msg) {
+        toast(msg);
+        // For network/service errors, offer the type fallback prompt
+        if (event.error === 'network' || event.error === 'service-not-available') {
+          setTimeout(() => showTypeFallbackPrompt(textareaId), 1200);
+        }
+      }
+    };
+
+    recognition.onend = () => {
+      // Only clean up UI — don't overwrite transcript
+      if (activeTextareaId === textareaId) {
+        stopRecording();
+      }
+    };
+
+    try {
+      recognition.start();
+    } catch(e) {
+      stopRecording();
+      toast('🎙️ Could not start voice recording. Please type your notes.');
+    }
+  };
+
+  // ── Mic denied prompt ──
+  function showMicDeniedPrompt(textareaId) {
+    const existing = document.getElementById('voice-denied-prompt');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'voice-denied-prompt';
+    overlay.style.cssText = `position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);`;
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:16px;padding:32px 28px;max-width:400px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,0.25);text-align:center;">
+        <div style="font-size:40px;margin-bottom:12px;">🎙️</div>
+        <div style="font-size:16px;font-weight:700;color:#1a2332;margin-bottom:10px;">Microphone Access Denied</div>
+        <div style="font-size:13px;color:#4a5568;line-height:1.7;margin-bottom:22px;">
+          Voice-to-note needs microphone access to work.<br><br>
+          To enable it: click the 🔒 or 🎙️ icon in your browser's address bar → allow microphone → refresh the page.<br><br>
+          <strong>For now, you can type your notes directly in the text field.</strong>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center;">
+          <button onclick="document.getElementById('voice-denied-prompt').remove();document.getElementById('${textareaId}').focus();"
+            style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+            ✏️ I'll type instead
+          </button>
+          <button onclick="document.getElementById('voice-denied-prompt').remove();"
+            style="background:var(--surface2);color:var(--text2);border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+            Dismiss
+          </button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  }
+
+  // ── Network/service fallback prompt ──
+  function showTypeFallbackPrompt(textareaId) {
+    const textarea = document.getElementById(textareaId);
+    if (!textarea) return;
+    // Just focus the textarea — the toast already explained the issue
+    textarea.focus();
+    // Add a soft glow to draw attention to the field
+    textarea.style.transition = 'box-shadow 0.3s';
+    textarea.style.boxShadow = '0 0 0 3px rgba(184,134,11,0.4)';
+    setTimeout(() => { textarea.style.boxShadow = ''; }, 2500);
+  }
+
+  // ── Stop recording when modals close ──
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-overlay') || e.target.classList.contains('btn-close')) {
+      if (activeRecognition) {
+        stopRecording();
+      }
+    }
+  });
+
+  // ── Stop recording on page hide (tab switch etc) ──
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && activeRecognition) stopRecording();
+  });
+
+})();
 
 // ══════════════════════════════════
 // INIT
