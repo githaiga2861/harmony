@@ -1249,7 +1249,7 @@
         </div>
 
         <!-- ALL INCIDENTS -->
-        <div class="page" id="page-incidents" style="padding-top:0;">
+        <div class="page" id="page-incidents">
           <div class="card">
             <div class="card-header">
               <h3>All Incident Reports</h3>
@@ -3250,7 +3250,7 @@ async function showPage(name) {
   if (name === 'notes') { await populateResidentFilter(); renderAllNotes(); }
   if (name === 'analytics') renderAnalytics();
   if (name === 'residents') renderResidentTable();
-  if (name === 'incidents') { await populateResidentFilter(); renderAllIncidents(); }
+  if (name === 'incidents') { await populateResidentFilter(); renderAllIncidents(); document.querySelector('.main').scrollTo({ top: 0, behavior: 'instant' }); window.scrollTo({ top: 0, behavior: 'instant' }); }
   if (name === 'payments') { await populateResidentFilter(); renderPaymentsPage(); renderExpensesPanel(); }
   if (name === 'staffdocs') { initStaffDocsPage(); }
 }
@@ -3948,6 +3948,7 @@ async function renderAllNotes() {
 // ══════════════════════════════════
 async function renderAllIncidents() {
   window.scrollTo({ top: 0, behavior: 'instant' });
+  document.querySelector('.main').scrollTo({ top: 0, behavior: 'instant' });
   const q = (document.getElementById('incidents-search')?.value || '').toLowerCase();
   const dateF = document.getElementById('incidents-date-filter')?.value;
   const resF = document.getElementById('incidents-resident-filter')?.value;
