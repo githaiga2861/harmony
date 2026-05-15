@@ -1168,10 +1168,7 @@
                   </button>
                 </div>
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                  <button onclick="openSalaryConfig()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
-                    ⚙️ Staff Salary Setup
-                  </button>
-                  <button onclick="printExpenseReport()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
+                  <button onclick="printIncomeReport()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                     Print Income Register
                   </button>
@@ -1210,6 +1207,9 @@
                   </button>
                 </div>
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button onclick="openSalaryConfig()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
+                    ⚙️ Staff Salary Setup
+                  </button>
                   <button onclick="printExpenseReport()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                     Print Expense Register
@@ -1249,7 +1249,7 @@
         </div>
 
         <!-- ALL INCIDENTS -->
-        <div class="page" id="page-incidents">
+        <div class="page" id="page-incidents" style="padding-top:0;">
           <div class="card">
             <div class="card-header">
               <h3>All Incident Reports</h3>
@@ -1298,6 +1298,7 @@
                 <button onclick="saveOrientationToSupabase()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save</button>
                 <button onclick="openSavedOrientationsList()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📋 View Saved</button>
                 <button onclick="clearOrientationForm()" style="background:rgba(255,0,0,0.15);color:#ffaaaa;border:1px solid rgba(255,100,100,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Clear</button>
+                <button onclick="viewSavedStaffDocs()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 View Saved</button>
               </div>
             </div>
             <div class="card-body" style="padding:24px 28px;">
@@ -1398,6 +1399,7 @@
                 <button onclick="saveCredentialsToSupabase()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save</button>
                 <button onclick="openSavedCredentialsList()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📋 View Saved</button>
                 <button onclick="clearCredentialsForm()" style="background:rgba(255,0,0,0.15);color:#ffaaaa;border:1px solid rgba(255,100,100,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Clear</button>
+                <button onclick="viewSavedStaffDocs()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 View Saved</button>
               </div>
             </div>
             <div class="card-body" style="padding:24px 28px;">
@@ -3250,7 +3252,7 @@ async function showPage(name) {
   if (name === 'notes') { await populateResidentFilter(); renderAllNotes(); }
   if (name === 'analytics') renderAnalytics();
   if (name === 'residents') renderResidentTable();
-  if (name === 'incidents') { await populateResidentFilter(); renderAllIncidents(); }
+  if (name === 'incidents') { await populateResidentFilter(); renderAllIncidents(); window.scrollTo({ top: 0 }); }
   if (name === 'payments') { await populateResidentFilter(); renderPaymentsPage(); renderExpensesPanel(); }
   if (name === 'staffdocs') { initStaffDocsPage(); }
 }
@@ -6691,6 +6693,7 @@ function initStaffDocsPage() {
   buildOrientationChecklist();
   loadOrientationDraft();
   loadCredentialsDraft();
+  renderSavedStaffDocs();
 }
 
 function switchStaffDocTab(tab) {
@@ -6742,6 +6745,8 @@ function saveOrientationDraft() {
     checks,
   };
   localStorage.setItem('hlh_ori_draft', JSON.stringify(data));
+  // Also persist to saved records list
+  saveToStaffDocsList('orientation', data);
   toast('✅ Orientation draft saved');
 }
 
@@ -6805,6 +6810,7 @@ function saveCredentialsDraft() {
   data['cred-hcac-yes'] = document.getElementById('cred-hcac-yes')?.checked;
   data['cred-hcac-no'] = document.getElementById('cred-hcac-no')?.checked;
   localStorage.setItem('hlh_cred_draft', JSON.stringify(data));
+  saveToStaffDocsList('credentials', data);
   toast('✅ Credentials draft saved');
 }
 
@@ -7038,16 +7044,19 @@ function printCredentialsForm() {
   setTimeout(() => { win.print(); win.addEventListener('afterprint', () => { win.close(); window.focus(); }); }, 700);
 }
 
-function exportCredentialsPDF() {
+async function exportCredentialsPDF() {
   const html = buildCredentialsHTML();
-  const win = window.open('', '_blank', 'width=900,height=1200');
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Caregiver Credentials Checklist</title>
-  <style>* { box-sizing:border-box; margin:0; padding:0; } body { font-family:'Times New Roman',Times,serif; background:#fff; color:#000; padding:36px 48px; width:816px; margin:0 auto; }
-  @media print { body { padding:24px 36px; } @page { size:letter; margin:0.5in; } }</style>
-  </head><body>${html}</body></html>`);
-  win.document.close();
-  win.focus();
-  setTimeout(() => { win.print(); win.addEventListener('afterprint', () => { win.close(); window.focus(); }); }, 700);
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'letter' });
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:816px;background:#fff;font-family:Times New Roman,serif;font-size:12px;';
+  container.innerHTML = html;
+  document.body.appendChild(container);
+  const name = (document.getElementById('cred-staff-name').value || 'Staff').replace(/\s+/g,'_');
+  doc.html(container, {
+    callback: (d) => { document.body.removeChild(container); d.save(`CredentialsChecklist_${name}_${new Date().toISOString().split('T')[0]}.pdf`); setTimeout(() => window.focus(), 300); },
+    x:36, y:20, width:540, windowWidth:816
+  });
 }
 
 // ══════════════════════════════════
@@ -7466,81 +7475,222 @@ async function renderWageBalancePanel(staffName) {
   panel.style.display = 'block';
 }
 
-// Show wage balance strip on the expenses panel (always visible when on payments page)
+// ── Frequency helpers ──
+function getFrequencyLabel(freq) {
+  return { monthly:'Monthly', biweekly:'Bi-weekly', weekly:'Weekly' }[freq] || 'Monthly';
+}
+
+// Returns the current period window for a given frequency
+function getCurrentPeriodForFreq(freq) {
+  const now = new Date();
+  let start, end;
+  if (freq === 'weekly') {
+    // Week starts Monday
+    const day = now.getDay(); // 0=Sun
+    const diffToMon = (day === 0) ? -6 : 1 - day;
+    start = new Date(now); start.setDate(now.getDate() + diffToMon); start.setHours(0,0,0,0);
+    end = new Date(start); end.setDate(start.getDate() + 6);
+  } else if (freq === 'biweekly') {
+    // Bi-weekly anchored to Jan 1 of current year
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+    const daysSince = Math.floor((now - yearStart) / 86400000);
+    const periodNum = Math.floor(daysSince / 14);
+    start = new Date(yearStart); start.setDate(1 + periodNum * 14);
+    end = new Date(start); end.setDate(start.getDate() + 13);
+  } else {
+    // Monthly
+    start = new Date(now.getFullYear(), now.getMonth(), 1);
+    end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  }
+  return {
+    start: start.toISOString().split('T')[0],
+    end:   end.toISOString().split('T')[0]
+  };
+}
+
+// Generate all expected periods from the earliest payment date up to today
+function generateExpectedPeriods(freq, earliestDateStr) {
+  const periods = [];
+  const now = new Date(); now.setHours(0,0,0,0);
+  if (!earliestDateStr) return periods;
+
+  let cursor = new Date(earliestDateStr + 'T00:00:00');
+  // Snap cursor back to the start of the period that contains earliestDate
+  if (freq === 'weekly') {
+    const day = cursor.getDay();
+    const diffToMon = (day === 0) ? -6 : 1 - day;
+    cursor.setDate(cursor.getDate() + diffToMon);
+  } else if (freq === 'biweekly') {
+    const yearStart = new Date(cursor.getFullYear(), 0, 1);
+    const daysSince = Math.floor((cursor - yearStart) / 86400000);
+    const periodNum = Math.floor(daysSince / 14);
+    cursor = new Date(yearStart); cursor.setDate(1 + periodNum * 14);
+  } else {
+    cursor = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+  }
+
+  let safety = 0;
+  while (cursor <= now && safety < 500) {
+    safety++;
+    let periodEnd;
+    if (freq === 'weekly') {
+      periodEnd = new Date(cursor); periodEnd.setDate(cursor.getDate() + 6);
+    } else if (freq === 'biweekly') {
+      periodEnd = new Date(cursor); periodEnd.setDate(cursor.getDate() + 13);
+    } else {
+      periodEnd = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0);
+    }
+    const pEnd = periodEnd > now ? now : periodEnd;
+    periods.push({
+      start: cursor.toISOString().split('T')[0],
+      end:   pEnd.toISOString().split('T')[0],
+      fullEnd: periodEnd.toISOString().split('T')[0],
+      isPast: periodEnd < now
+    });
+    // Advance cursor
+    const next = new Date(periodEnd); next.setDate(next.getDate() + 1);
+    cursor = next;
+  }
+  return periods;
+}
+
 async function renderWageBalanceStrip() {
   const strip = document.getElementById('wage-balance-strip');
   if (!strip) return;
   const cfg = getSalaryConfig();
   if (!Object.keys(cfg).length) { strip.style.display = 'none'; return; }
 
-  let hasAlerts = false;
   let cards = '';
+  let anyOverdue = false;
+  let overdueAlertHtml = '';
 
   for (const staffName of KNOWN_STAFF) {
     const key = staffName.toLowerCase();
     const staffCfg = cfg[key];
     if (!staffCfg || !staffCfg.amount) continue;
     const colors = STAFF_COLORS[staffName] || { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568' };
+    const freq = staffCfg.freq || 'monthly';
+    const freqLabel = getFrequencyLabel(freq);
 
     const { data: allPayments } = await db.from('expenses')
-      .select('amount, wage_period_start, wage_period_end')
+      .select('amount, wage_period_start, wage_period_end, exp_date')
       .eq('expense_type', 'wage')
-      .eq('wage_staff', staffName);
+      .eq('wage_staff', staffName)
+      .order('wage_period_start', { ascending: true });
 
     const payments = allPayments || [];
 
-    // Current month period
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+    // Current period for this staff's frequency
+    const currentPeriod = getCurrentPeriodForFreq(freq);
 
-    // Payments overlapping current month
-    const thisMonthPayments = payments.filter(p =>
+    // Payments in current period
+    const currentPayments = payments.filter(p =>
       p.wage_period_start && p.wage_period_end &&
-      p.wage_period_start <= monthEnd && p.wage_period_end >= monthStart
+      p.wage_period_start <= currentPeriod.end &&
+      p.wage_period_end >= currentPeriod.start
     );
-    const paidThisMonth = thisMonthPayments.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
-    const monthBalance = staffCfg.amount - paidThisMonth;
-
-    // Total outstanding across all periods
-    const byPeriod = {};
-    payments.forEach(p => {
-      const pk = (p.wage_period_start||'') + '_' + (p.wage_period_end||'');
-      if (!byPeriod[pk]) byPeriod[pk] = { paid: 0 };
-      byPeriod[pk].paid += parseFloat(p.amount || 0);
-    });
-    let totalOwed = 0;
-    Object.values(byPeriod).forEach(pg => { totalOwed += Math.max(0, staffCfg.amount - pg.paid); });
-
-    if (monthBalance > 0.005 || totalOwed > 0.005) hasAlerts = true;
-
-    const pct = Math.min(100, Math.round((paidThisMonth / staffCfg.amount) * 100));
+    const paidCurrentPeriod = currentPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
+    const currentBalance = Math.max(0, staffCfg.amount - paidCurrentPeriod);
+    const pct = Math.min(100, Math.round((paidCurrentPeriod / staffCfg.amount) * 100));
     const barColor = pct >= 100 ? '#1e7e34' : pct >= 50 ? '#d68910' : '#c0392b';
-    const isFullyPaid = monthBalance <= 0.005;
+    const isFullyPaid = currentBalance <= 0.005;
+
+    // ── Compute overdue: all past periods with unpaid balance ──
+    const earliest = payments.length ? payments[0].wage_period_start : null;
+    const allPeriods = earliest ? generateExpectedPeriods(freq, earliest) : [];
+    const today = new Date().toISOString().split('T')[0];
+
+    let staffOverdue = [];
+    allPeriods.forEach(period => {
+      // Only count past periods (fullEnd < today) as overdue
+      if (period.fullEnd >= today) return;
+      const periodPayments = payments.filter(p =>
+        p.wage_period_start && p.wage_period_end &&
+        p.wage_period_start <= period.end &&
+        p.wage_period_end >= period.start
+      );
+      const paid = periodPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
+      const owed = staffCfg.amount - paid;
+      if (owed > 0.005) {
+        staffOverdue.push({ start: period.start, end: period.end, paid, owed });
+      }
+    });
+
+    const totalOverdue = staffOverdue.reduce((s,p) => s + p.owed, 0);
+    if (totalOverdue > 0.005) anyOverdue = true;
 
     cards += `
       <div style="background:#fff;border:1.5px solid ${colors.border};border-radius:8px;padding:10px 13px;min-width:0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
           <div style="width:30px;height:30px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:${colors.text};flex-shrink:0;">${staffName.charAt(0)}</div>
-          <div style="font-weight:700;font-size:13px;color:#1a2332;">${staffName}</div>
-          ${isFullyPaid ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;">✅ Paid</span>` : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;">Owed $${monthBalance.toFixed(2)}</span>`}
+          <div>
+            <div style="font-weight:700;font-size:13px;color:#1a2332;line-height:1.2;">${staffName}</div>
+            <div style="font-size:10px;color:${colors.text};font-weight:600;">${freqLabel} · $${staffCfg.amount.toFixed(2)}/period</div>
+          </div>
+          ${isFullyPaid
+            ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;white-space:nowrap;">✅ Paid</span>`
+            : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;white-space:nowrap;">Owes $${currentBalance.toFixed(2)}</span>`}
         </div>
-        <div style="font-size:11px;color:#888;margin-bottom:4px;">This month: $${paidThisMonth.toFixed(2)} / $${staffCfg.amount.toFixed(2)}</div>
+        <div style="font-size:10.5px;color:#888;margin-bottom:4px;">
+          ${freqLabel === 'Weekly' ? 'This week' : freqLabel === 'Bi-weekly' ? 'This fortnight' : 'This month'}:
+          <strong>$${paidCurrentPeriod.toFixed(2)}</strong> / $${staffCfg.amount.toFixed(2)}
+        </div>
         <div style="background:#e8e8e8;border-radius:20px;height:5px;overflow:hidden;margin-bottom:4px;">
-          <div style="width:${pct}%;background:${barColor};height:100%;border-radius:20px;"></div>
+          <div style="width:${pct}%;background:${barColor};height:100%;border-radius:20px;transition:width 0.4s;"></div>
         </div>
-        ${totalOwed > 0.005 ? `<div style="font-size:11px;color:#c0392b;font-weight:700;">Total owed (all time): $${totalOwed.toFixed(2)}</div>` : ''}
+        <div style="font-size:10px;color:#aaa;text-align:right;margin-bottom:${totalOverdue > 0.005 ? '5px' : '0'};">${pct}% paid this period</div>
+        ${totalOverdue > 0.005
+          ? `<div style="background:#fdf0ef;border:1px solid #f5c0bb;border-radius:6px;padding:5px 8px;font-size:10.5px;color:#c0392b;font-weight:700;">
+               ⚠️ Overdue from past periods: $${totalOverdue.toFixed(2)}
+             </div>`
+          : ''}
       </div>`;
+
+    // Build overdue alert rows for the banner below
+    if (staffOverdue.length) {
+      overdueAlertHtml += `
+        <div style="margin-bottom:8px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <div style="width:22px;height:22px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:${colors.text};flex-shrink:0;">${staffName.charAt(0)}</div>
+            <span style="font-weight:700;font-size:13px;color:${colors.text};">${staffName}</span>
+            <span style="font-size:11px;color:#888;">(${freqLabel})</span>
+            <span style="margin-left:auto;font-size:12px;font-weight:700;color:#c0392b;">Total overdue: $${staffOverdue.reduce((s,p)=>s+p.owed,0).toFixed(2)}</span>
+          </div>
+          ${staffOverdue.map(p => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px 4px 30px;font-size:11.5px;border-bottom:1px solid #fde8e5;">
+              <span style="color:#555;">${fmtDate(p.start)} – ${fmtDate(p.end)}</span>
+              <span style="display:flex;gap:12px;">
+                <span style="color:#888;">Paid: <strong style="color:#1e7e34;">$${p.paid.toFixed(2)}</strong></span>
+                <span style="color:#c0392b;font-weight:700;">Unpaid: $${p.owed.toFixed(2)}</span>
+              </span>
+            </div>`).join('')}
+        </div>`;
+    }
   }
 
   if (!cards) { strip.style.display = 'none'; return; }
 
+  // ── Overdue banner (only if there are overdue periods) ──
+  const overdueBanner = anyOverdue ? `
+    <div style="margin-bottom:12px;background:#fff5f5;border:1.5px solid #f5c0bb;border-radius:10px;overflow:hidden;">
+      <div style="background:linear-gradient(90deg,#7b1a1a,#c0392b);padding:9px 14px;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:16px;">⚠️</span>
+        <span style="color:#fff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;">Overdue Wage Payments</span>
+        <span style="color:rgba(255,255,255,0.7);font-size:11px;margin-left:4px;">— past periods with unpaid balances</span>
+        <button onclick="openSalaryConfig()" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:5px;padding:3px 9px;cursor:pointer;font-family:inherit;font-weight:700;">⚙️ Setup</button>
+      </div>
+      <div style="padding:12px 14px;">
+        ${overdueAlertHtml}
+      </div>
+    </div>` : '';
+
   strip.innerHTML = `
+    ${overdueBanner}
     <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;">👤 Staff Wage Balances — This Month</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;">👤 Staff Wage Balances — Current Period</div>
       <button onclick="openSalaryConfig()" style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;">Edit Setup ⚙️</button>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">${cards}</div>`;
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">${cards}</div>`;
   strip.style.display = 'block';
 }
 
@@ -7662,26 +7812,103 @@ async function renderWageBalanceStrip() {
     }
     toast('🎙️ Recording… Speak now. Click the button again to stop.');
 
-    recognition.onresult = (event) => {
+    // ── Punctuation helpers ──
+    const SENTENCE_ENDERS = /[.!?]$/;
+
+    // Spoken punctuation words → symbols
+    const PUNCT_WORDS = [
+      [/\b(full stop|period)\b/gi, '.'],
+      [/\bcomma\b/gi, ','],
+      [/\bquestion mark\b/gi, '?'],
+      [/\bexclamation mark\b/gi, '!'],
+      [/\bcolon\b/gi, ':'],
+      [/\bsemicolon\b/gi, ';'],
+      [/\bnew line\b/gi, '\n'],
+      [/\bnew paragraph\b/gi, '\n\n'],
+      [/\bdash\b/gi, ' — '],
+      [/\bhyphen\b/gi, '-'],
+      [/\bopen (bracket|parenthesis)\b/gi, '('],
+      [/\bclose (bracket|parenthesis)\b/gi, ')'],
+      [/\bopen quote\b/gi, '"'],
+      [/\bclose quote\b/gi, '"'],
+    ];
+
+    // Patterns that strongly suggest the end of a sentence
+    const SENTENCE_END_PHRASES = [
+      /\b(therefore|however|moreover|furthermore|additionally|consequently|subsequently|nevertheless|nonetheless|in addition|as a result|in conclusion|to summarize|for example|for instance|in summary|on the other hand|at this time|at this point|following this|after that|prior to this|during this time|upon assessment|upon observation|resident (was|is|appears|stated|reported|complained|denied|refused|agreed|requested|indicated|demonstrated|exhibited|showed|responded|remained|continued|began|started|stopped|refused))\b/i,
+      /\b(staff (was|is|did|provided|administered|observed|noted|documented|notified|contacted|assisted|helped|encouraged|reminded|redirected|monitored|checked|assessed|completed|initiated|discontinued))\b/i,
+    ];
+
+    function applyPunctuationWords(text) {
+      let t = text;
+      PUNCT_WORDS.forEach(([rx, sym]) => { t = t.replace(rx, sym); });
+      return t;
+    }
+
+    function capitalizeSentences(text) {
+      // Capitalize first letter after . ! ? \n
+      return text.replace(/(^|[.!?\n]\s*)([a-z])/g, (m, pre, ch) => pre + ch.toUpperCase());
+    }
+
+    function smartPunctuate(raw) {
+      let text = applyPunctuationWords(raw.trim());
+
+      // Already ends with punctuation — just capitalize and return
+      if (SENTENCE_ENDERS.test(text)) {
+        return capitalizeSentences(text) + ' ';
+      }
+
+      // Split into clause-like fragments on natural pauses
+      // We look for conjunctions / transition words to insert commas
+      text = text.replace(/\s+(and then|but then|so then|and also|but also|or else)\s+/gi, ', $1 ');
+
+      // Insert comma before common conjunctions if no punct precedes them
+      text = text.replace(/([^,;:.!?\n])\s+(but|yet|so|for|nor|although|though|whereas|while|unless|until|since|because|if|when|as|that|which|who|whom)\s+/gi, '$1, $2 ');
+
+      // End the sentence with a period
+      text = text.replace(/[,;]?\s*$/, '') + '.';
+
+      return capitalizeSentences(text) + ' ';
+    }
+
+    function mergeWithExisting(existing, newChunk) {
+      const trimmed = existing.trimEnd();
+      if (!trimmed) {
+        // First entry — just capitalize
+        return capitalizeSentences(newChunk);
+      }
+      // If existing ends with sentence-ending punct, new chunk starts fresh capitalized sentence
+      if (SENTENCE_ENDERS.test(trimmed)) {
+        return trimmed + ' ' + capitalizeSentences(newChunk);
+      }
+      // Existing ends with comma or nothing — append lowercase continuation
+      const lower = newChunk.charAt(0).toLowerCase() + newChunk.slice(1);
+      return trimmed + ' ' + lower;
+    }
+
+    
       let interim = '';
       let newFinal = '';
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const t = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          newFinal += t + ' ';
+          newFinal += t;
         } else {
           interim += t;
         }
       }
       if (newFinal) {
-        finalTranscript += newFinal;
+        const punctuated = smartPunctuate(newFinal);
+        finalTranscript = mergeWithExisting(finalTranscript, punctuated);
         textarea.value = finalTranscript;
-        // Auto-resize if textarea has scrollHeight
         textarea.style.height = 'auto';
         textarea.style.height = textarea.scrollHeight + 'px';
+        // Scroll textarea to bottom so admin sees latest text
+        textarea.scrollTop = textarea.scrollHeight;
       }
       if (interimEl) {
-        interimEl.textContent = interim ? '…' + interim : 'Listening…';
+        const interimDisplay = interim ? applyPunctuationWords(interim) : '';
+        interimEl.textContent = interimDisplay ? '…' + interimDisplay : 'Listening…';
       }
     };
 
