@@ -8011,6 +8011,132 @@ async function renderWageBalanceStrip() {
 // INIT
 // ══════════════════════════════════
 checkSession();
+
+async function exportCredentialsPDF() {
+  const html = buildCredentialsHTML();
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'letter' });
+  const container = document.createElement('div');
+  container.style.cssText = 'position:fixed;left:-9999px;top:0;width:816px;background:#fff;font-family:Times New Roman,serif;font-size:12px;';
+  container.innerHTML = html;
+  document.body.appendChild(container);
+  const name = (document.getElementById('cred-staff-name').value || 'Staff').replace(/\s+/g,'_');
+  doc.html(container, {
+    callback: (d) => { document.body.removeChild(container); d.save(`CredentialsChecklist_${name}_${new Date().toISOString().split('T')[0]}.pdf`); setTimeout(() => window.focus(), 300); },
+    x:36, y:20, width:540, windowWidth:816
+  });
+}
+
+const SAVED_DOCS_KEY = 'hlh_saved_staff_docs';
+
+function saveToStaffDocsList(type, data) {
+  const existing = getSavedDocs();
+  const staffName = type === 'orientation' ? (data.name || 'Unknown') : (data['cred-staff-name'] || 'Unknown');
+  const entry = { id: uid(), type, staffName, savedAt: new Date().toISOString(), data };
+  existing.unshift(entry);
+  localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify(existing.slice(0, 50)));
+  renderSavedStaffDocs();
+}
+
+function getSavedDocs() {
+  try { return JSON.parse(localStorage.getItem(SAVED_DOCS_KEY)) || []; } catch { return []; }
+}
+
+function deleteSavedDoc(id) {
+  if (!confirm('Delete this saved record?')) return;
+  const docs = getSavedDocs().filter(d => d.id !== id);
+  localStorage.setItem(SAVED_DOCS_KEY, JSON.stringify(docs));
+  renderSavedStaffDocs();
+  toast('Record deleted');
+}
+
+function loadSavedDoc(id) {
+  const doc = getSavedDocs().find(d => d.id === id);
+  if (!doc) return;
+  if (doc.type === 'orientation') {
+    switchStaffDocTab('orientation');
+    const d = doc.data;
+    document.getElementById('ori-trainee-name').value = d.name || '';
+    document.getElementById('ori-hire-date').value = d.hireDate || '';
+    document.getElementById('ori-date1').value = d.date1 || '';
+    document.getElementById('ori-date2').value = d.date2 || '';
+    document.getElementById('ori-date3').value = d.date3 || '';
+    document.getElementById('ori-trainer-sig').value = d.trainerSig || '';
+    document.getElementById('ori-trainee-sig').value = d.traineeSig || '';
+    document.getElementById('ori-hours').value = d.hours || '';
+    document.getElementById('ori-last-day').value = d.lastDay || '';
+    document.getElementById('ori-notes').value = d.notes || '';
+    if (d.checks) {
+      d.checks.forEach((v, i) => { const el = document.getElementById('ori-chk-' + i); if (el) el.checked = v; });
+    }
+    toast('✅ Orientation record loaded into form');
+  } else {
+    switchStaffDocTab('credentials');
+    const d = doc.data;
+    Object.entries(d).forEach(([elId, val]) => {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      if (el.type === 'checkbox') el.checked = val;
+      else el.value = val || '';
+    });
+    toast('✅ Credentials record loaded into form');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderSavedStaffDocs() {
+  let container = document.getElementById('saved-staffdocs-container');
+  if (!container) {
+    const page = document.getElementById('page-staffdocs');
+    if (!page) return;
+    container = document.createElement('div');
+    container.id = 'saved-staffdocs-container';
+    container.style.cssText = 'margin-top:28px;';
+    page.appendChild(container);
+  }
+  const docs = getSavedDocs();
+  if (!docs.length) { container.innerHTML = ''; return; }
+  const typeLabel = { orientation: '📋 Orientation Checklist', credentials: '🏅 Credentials Checklist' };
+  const typeColor = { orientation: '#b8860b', credentials: '#2563eb' };
+  container.innerHTML = `
+    <div id="saved-docs-list-anchor"></div>
+    <div class="card">
+      <div class="card-header" style="background:linear-gradient(135deg,#1a1a1a,#333);border-radius:10px 10px 0 0;padding:14px 20px;">
+        <div style="color:#fff;font-family:'DM Serif Display',serif;font-size:16px;">💾 Saved Staff Document Records</div>
+        <div style="color:rgba(255,255,255,0.5);font-size:11px;margin-top:2px;">${docs.length} record${docs.length!==1?'s':''} saved locally on this device</div>
+      </div>
+      <div class="card-body" style="padding:0;">
+        ${docs.map(doc => {
+          const savedDate = new Date(doc.savedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+          const color = typeColor[doc.type] || '#b8860b';
+          const label = typeLabel[doc.type] || doc.type;
+          return `<div style="display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid var(--border);">
+            <div style="width:38px;height:38px;border-radius:10px;background:${color}18;border:1.5px solid ${color}40;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">
+              ${doc.type === 'orientation' ? '📋' : '🏅'}
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;font-size:13.5px;color:var(--text);">${doc.staffName}</div>
+              <div style="font-size:11.5px;color:${color};font-weight:600;">${label}</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:1px;">Saved ${savedDate}</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0;">
+              <button class="btn btn-secondary btn-sm" onclick="loadSavedDoc('${doc.id}')" style="font-size:11px;">↩️ Load into Form</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteSavedDoc('${doc.id}')" style="font-size:11px;">Delete</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+
+function viewSavedStaffDocs() {
+  renderSavedStaffDocs();
+  setTimeout(() => {
+    const anchor = document.getElementById('saved-docs-list-anchor');
+    if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }, 80);
+}
 </script>
 </body>
 </html>
