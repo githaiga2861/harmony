@@ -1298,7 +1298,6 @@
                 <button onclick="saveOrientationToSupabase()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save</button>
                 <button onclick="openSavedOrientationsList()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📋 View Saved</button>
                 <button onclick="clearOrientationForm()" style="background:rgba(255,0,0,0.15);color:#ffaaaa;border:1px solid rgba(255,100,100,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Clear</button>
-                <button onclick="viewSavedStaffDocs()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 View Saved</button>
               </div>
             </div>
             <div class="card-body" style="padding:24px 28px;">
@@ -1399,7 +1398,6 @@
                 <button onclick="saveCredentialsToSupabase()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save</button>
                 <button onclick="openSavedCredentialsList()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📋 View Saved</button>
                 <button onclick="clearCredentialsForm()" style="background:rgba(255,0,0,0.15);color:#ffaaaa;border:1px solid rgba(255,100,100,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Clear</button>
-                <button onclick="viewSavedStaffDocs()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 View Saved</button>
               </div>
             </div>
             <div class="card-body" style="padding:24px 28px;">
@@ -3252,7 +3250,7 @@ async function showPage(name) {
   if (name === 'notes') { await populateResidentFilter(); renderAllNotes(); }
   if (name === 'analytics') renderAnalytics();
   if (name === 'residents') renderResidentTable();
-  if (name === 'incidents') { await populateResidentFilter(); renderAllIncidents(); window.scrollTo({ top: 0 }); }
+  if (name === 'incidents') { await populateResidentFilter(); renderAllIncidents(); }
   if (name === 'payments') { await populateResidentFilter(); renderPaymentsPage(); renderExpensesPanel(); }
   if (name === 'staffdocs') { initStaffDocsPage(); }
 }
@@ -3949,6 +3947,7 @@ async function renderAllNotes() {
 // ALL INCIDENTS PAGE
 // ══════════════════════════════════
 async function renderAllIncidents() {
+  window.scrollTo({ top: 0, behavior: 'instant' });
   const q = (document.getElementById('incidents-search')?.value || '').toLowerCase();
   const dateF = document.getElementById('incidents-date-filter')?.value;
   const resF = document.getElementById('incidents-resident-filter')?.value;
@@ -7629,7 +7628,7 @@ async function renderWageBalanceStrip() {
           </div>
           ${isFullyPaid
             ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;white-space:nowrap;">✅ Paid</span>`
-            : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;white-space:nowrap;">Owes $${currentBalance.toFixed(2)}</span>`}
+            : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;white-space:nowrap;">Owed $${currentBalance.toFixed(2)}</span>`}
         </div>
         <div style="font-size:10.5px;color:#888;margin-bottom:4px;">
           ${freqLabel === 'Weekly' ? 'This week' : freqLabel === 'Bi-weekly' ? 'This fortnight' : 'This month'}:
