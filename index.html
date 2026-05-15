@@ -2777,67 +2777,158 @@
           <label>Amount ($) *</label>
           <input type="number" id="exp-amount" placeholder="0.00" step="0.01" min="0">
         </div>
-        <div class="field span2">
-          <label>Category *</label>
-          <select id="exp-category">
-            <option value="">— Select Category —</option>
-            <optgroup label="Food &amp; Household">
-              <option>Food &amp; Groceries</option>
-              <option>Household Supplies</option>
-              <option>Personal Care Supplies</option>
-            </optgroup>
-            <optgroup label="Medical">
-              <option>Medications &amp; Medical</option>
-              <option>Medical Equipment</option>
-            </optgroup>
-            <optgroup label="Staffing">
-              <option>Staff Wages</option>
-              <option>Staff Training</option>
-            </optgroup>
-            <optgroup label="Facility">
-              <option>Utilities</option>
-              <option>Maintenance &amp; Repairs</option>
-              <option>Transportation</option>
-              <option>Insurance</option>
-              <option>Licensing &amp; Compliance</option>
-            </optgroup>
-            <optgroup label="Admin">
-              <option>Office &amp; Admin</option>
+        <!-- Expense Type Toggle -->
+        <div class="field span2" style="margin-bottom:4px;">
+          <label>Expense Type *</label>
+          <div style="display:flex;gap:0;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;">
+            <button type="button" id="exp-type-btn-general" onclick="setExpenseType('general')"
+              style="flex:1;padding:9px 14px;border:none;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--accent);color:#fff;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:6px;">
+              🧾 General Expense
+            </button>
+            <button type="button" id="exp-type-btn-wage" onclick="setExpenseType('wage')"
+              style="flex:1;padding:9px 14px;border:none;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--surface2);color:var(--text2);transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:6px;">
+              👤 Staff Wage Payment
+            </button>
+          </div>
+        </div>
+
+        <!-- ── GENERAL EXPENSE FIELDS ── -->
+        <div id="exp-general-fields" class="span2" style="display:contents;">
+          <div class="field span2">
+            <label>Category *</label>
+            <select id="exp-category">
+              <option value="">— Select Category —</option>
+              <optgroup label="Food &amp; Household">
+                <option>Food &amp; Groceries</option>
+                <option>Household Supplies</option>
+                <option>Personal Care Supplies</option>
+              </optgroup>
+              <optgroup label="Medical">
+                <option>Medications &amp; Medical</option>
+                <option>Medical Equipment</option>
+              </optgroup>
+              <optgroup label="Staff">
+                <option>Staff Training</option>
+              </optgroup>
+              <optgroup label="Facility">
+                <option>Utilities</option>
+                <option>Maintenance &amp; Repairs</option>
+                <option>Transportation</option>
+                <option>Insurance</option>
+                <option>Licensing &amp; Compliance</option>
+              </optgroup>
+              <optgroup label="Admin">
+                <option>Office &amp; Admin</option>
+                <option>Other</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="field span2">
+            <label>Description *</label>
+            <input type="text" id="exp-description" placeholder="e.g. Weekly groceries from Safeway, Paper towels and soap...">
+          </div>
+          <div class="field">
+            <label>Amount ($) *</label>
+            <input type="number" id="exp-amount-general" placeholder="0.00" step="0.01" min="0">
+          </div>
+          <div class="field">
+            <label>Vendor / Store</label>
+            <input type="text" id="exp-vendor" placeholder="e.g. Walmart, Costco, Safeway">
+          </div>
+          <div class="field">
+            <label>Payment Method</label>
+            <select id="exp-method">
+              <option value="">— Select —</option>
+              <option>Cash</option>
+              <option>Debit Card</option>
+              <option>Check</option>
+              <option>Bank Transfer</option>
+              <option>Credit Card</option>
               <option>Other</option>
-            </optgroup>
-          </select>
+            </select>
+          </div>
+          <div class="field">
+            <label>Paid By</label>
+            <input type="text" id="exp-paid-by" placeholder="Staff name">
+          </div>
+          <div class="field">
+            <label>Receipt / Ref Number</label>
+            <input type="text" id="exp-receipt" placeholder="Optional">
+          </div>
+          <div class="field span2">
+            <label>Notes</label>
+            <textarea id="exp-notes" rows="2" placeholder="Any additional details..."></textarea>
+          </div>
         </div>
-        <div class="field span2">
-          <label>Description *</label>
-          <input type="text" id="exp-description" placeholder="e.g. Weekly groceries from Safeway, Paper towels and soap...">
-        </div>
-        <div class="field">
-          <label>Vendor / Store</label>
-          <input type="text" id="exp-vendor" placeholder="e.g. Walmart, Costco, Safeway">
-        </div>
-        <div class="field">
-          <label>Payment Method</label>
-          <select id="exp-method">
-            <option value="">— Select —</option>
-            <option>Cash</option>
-            <option>Debit Card</option>
-            <option>Check</option>
-            <option>Bank Transfer</option>
-            <option>Credit Card</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Paid By</label>
-          <input type="text" id="exp-paid-by" placeholder="Staff name">
-        </div>
-        <div class="field">
-          <label>Receipt / Ref Number</label>
-          <input type="text" id="exp-receipt" placeholder="Optional">
-        </div>
-        <div class="field span2">
-          <label>Notes</label>
-          <textarea id="exp-notes" rows="2" placeholder="Any additional details..."></textarea>
+
+        <!-- ── STAFF WAGE FIELDS ── -->
+        <div id="exp-wage-fields" class="span2" style="display:none;grid-column:span 2;">
+          <!-- Divider banner -->
+          <div style="background:linear-gradient(90deg,#1a1a1a,#b8860b);border-radius:8px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:20px;">👤</span>
+            <div>
+              <div style="color:#fff;font-weight:700;font-size:13px;letter-spacing:0.04em;">Staff Wage Payment</div>
+              <div style="color:rgba(255,255,255,0.6);font-size:11px;">This wage record will appear separately under Staff Wages in the expense register</div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="field span2">
+              <label>Staff Member Receiving Wage *</label>
+              <select id="exp-wage-staff">
+                <option value="">— Select Staff Member —</option>
+                <option value="James">James</option>
+                <option value="Alvan">Alvan</option>
+                <option value="Joseph">Joseph</option>
+                <option value="Other">Other (specify below)</option>
+              </select>
+            </div>
+            <div class="field span2" id="exp-wage-other-wrap" style="display:none;">
+              <label>Other Staff Name *</label>
+              <input type="text" id="exp-wage-other-name" placeholder="Enter staff member's full name">
+            </div>
+            <div class="field">
+              <label>Pay Period Start *</label>
+              <input type="date" id="exp-wage-period-start">
+            </div>
+            <div class="field">
+              <label>Pay Period End *</label>
+              <input type="date" id="exp-wage-period-end">
+            </div>
+            <div class="field">
+              <label>Hours Worked</label>
+              <input type="number" id="exp-wage-hours" placeholder="e.g. 40" step="0.5" min="0">
+            </div>
+            <div class="field">
+              <label>Hourly Rate ($)</label>
+              <input type="number" id="exp-wage-rate" placeholder="e.g. 18.50" step="0.01" min="0" oninput="calcWageTotal()">
+            </div>
+            <div class="field">
+              <label>Gross Amount ($) *</label>
+              <input type="number" id="exp-amount" placeholder="0.00" step="0.01" min="0">
+            </div>
+            <div class="field">
+              <label>Payment Method</label>
+              <select id="exp-wage-method">
+                <option value="">— Select —</option>
+                <option>Cash</option>
+                <option>Check</option>
+                <option>Bank Transfer</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Authorized / Paid By</label>
+              <input type="text" id="exp-wage-paid-by" placeholder="e.g. Penninah Nyandia">
+            </div>
+            <div class="field">
+              <label>Check / Ref Number</label>
+              <input type="text" id="exp-wage-ref" placeholder="Optional">
+            </div>
+            <div class="field span2">
+              <label>Notes (overtime, bonus, deductions, etc.)</label>
+              <textarea id="exp-wage-notes" rows="2" placeholder="e.g. Includes 4 hrs overtime, holiday pay..."></textarea>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -6004,11 +6095,44 @@ async function printPLSummary() {
 // ══════════════════════════════════
 // EXPENSES
 // ══════════════════════════════════
+let currentExpenseType = 'general';
+
+function setExpenseType(type) {
+  currentExpenseType = type;
+  const isWage = type === 'wage';
+  // Toggle button styles
+  const btnG = document.getElementById('exp-type-btn-general');
+  const btnW = document.getElementById('exp-type-btn-wage');
+  if (btnG) { btnG.style.background = isWage ? 'var(--surface2)' : 'var(--accent)'; btnG.style.color = isWage ? 'var(--text2)' : '#fff'; }
+  if (btnW) { btnW.style.background = isWage ? '#1a1a1a' : 'var(--surface2)'; btnW.style.color = isWage ? '#fff' : 'var(--text2)'; }
+  // Toggle field visibility
+  const gFields = document.getElementById('exp-general-fields');
+  const wFields = document.getElementById('exp-wage-fields');
+  if (gFields) gFields.style.display = isWage ? 'none' : 'contents';
+  if (wFields) wFields.style.display = isWage ? 'block' : 'none';
+  // Show/hide amount field in general vs wage
+  const amtGeneral = document.getElementById('exp-amount-general');
+  const amtWage = document.getElementById('exp-amount');
+  if (amtGeneral) amtGeneral.closest('.field').style.display = isWage ? 'none' : 'block';
+}
+
+function calcWageTotal() {
+  const hours = parseFloat(document.getElementById('exp-wage-hours')?.value || 0);
+  const rate = parseFloat(document.getElementById('exp-wage-rate')?.value || 0);
+  if (hours > 0 && rate > 0) {
+    const total = (hours * rate).toFixed(2);
+    const amtEl = document.getElementById('exp-amount');
+    if (amtEl && !amtEl.dataset.manualOverride) amtEl.value = total;
+  }
+}
+
 function openAddExpense() {
   document.getElementById('expense-modal-title').textContent = 'Add Expense';
   document.getElementById('exp-edit-id').value = '';
   document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
-  document.getElementById('exp-amount').value = '';
+  // General fields
+  const amtG = document.getElementById('exp-amount-general');
+  if (amtG) { amtG.value = ''; delete amtG.dataset.manualOverride; }
   document.getElementById('exp-category').value = '';
   document.getElementById('exp-description').value = '';
   document.getElementById('exp-vendor').value = '';
@@ -6016,6 +6140,30 @@ function openAddExpense() {
   document.getElementById('exp-paid-by').value = currentUser ? currentUser.name : '';
   document.getElementById('exp-receipt').value = '';
   document.getElementById('exp-notes').value = '';
+  // Wage fields
+  document.getElementById('exp-amount').value = '';
+  document.getElementById('exp-wage-staff').value = '';
+  document.getElementById('exp-wage-other-name').value = '';
+  document.getElementById('exp-wage-other-wrap').style.display = 'none';
+  document.getElementById('exp-wage-period-start').value = '';
+  document.getElementById('exp-wage-period-end').value = '';
+  document.getElementById('exp-wage-hours').value = '';
+  document.getElementById('exp-wage-rate').value = '';
+  document.getElementById('exp-wage-method').value = '';
+  document.getElementById('exp-wage-paid-by').value = currentUser ? currentUser.name : '';
+  document.getElementById('exp-wage-ref').value = '';
+  document.getElementById('exp-wage-notes').value = '';
+  setExpenseType('general');
+
+  // Wire up "Other" staff toggle
+  const staffSel = document.getElementById('exp-wage-staff');
+  staffSel.onchange = () => {
+    document.getElementById('exp-wage-other-wrap').style.display = staffSel.value === 'Other' ? 'block' : 'none';
+  };
+  // Prevent auto-calc override when user manually types amount
+  const amtWage = document.getElementById('exp-amount');
+  amtWage.oninput = () => { amtWage.dataset.manualOverride = '1'; };
+
   openModal('modal-expense');
 }
 
@@ -6025,54 +6173,114 @@ async function editExpense(id) {
   document.getElementById('expense-modal-title').textContent = 'Edit Expense';
   document.getElementById('exp-edit-id').value = id;
   document.getElementById('exp-date').value = e.exp_date || '';
-  document.getElementById('exp-amount').value = e.amount || '';
-  document.getElementById('exp-category').value = e.category || '';
-  document.getElementById('exp-description').value = e.description || '';
-  document.getElementById('exp-vendor').value = e.vendor || '';
-  document.getElementById('exp-method').value = e.method || '';
-  document.getElementById('exp-paid-by').value = e.paid_by || '';
-  document.getElementById('exp-receipt').value = e.receipt_ref || '';
-  document.getElementById('exp-notes').value = e.notes || '';
+
+  const isWage = e.expense_type === 'wage';
+  setExpenseType(isWage ? 'wage' : 'general');
+
+  if (isWage) {
+    const staffNames = ['James','Alvan','Joseph'];
+    const staffSel = document.getElementById('exp-wage-staff');
+    if (staffNames.includes(e.wage_staff)) { staffSel.value = e.wage_staff; }
+    else { staffSel.value = 'Other'; document.getElementById('exp-wage-other-name').value = e.wage_staff || ''; document.getElementById('exp-wage-other-wrap').style.display = 'block'; }
+    staffSel.onchange = () => { document.getElementById('exp-wage-other-wrap').style.display = staffSel.value === 'Other' ? 'block' : 'none'; };
+    document.getElementById('exp-wage-period-start').value = e.wage_period_start || '';
+    document.getElementById('exp-wage-period-end').value = e.wage_period_end || '';
+    document.getElementById('exp-wage-hours').value = e.wage_hours || '';
+    document.getElementById('exp-wage-rate').value = e.wage_rate || '';
+    document.getElementById('exp-amount').value = e.amount || '';
+    document.getElementById('exp-amount').dataset.manualOverride = '1';
+    document.getElementById('exp-amount').oninput = () => { document.getElementById('exp-amount').dataset.manualOverride = '1'; };
+    document.getElementById('exp-wage-method').value = e.method || '';
+    document.getElementById('exp-wage-paid-by').value = e.paid_by || '';
+    document.getElementById('exp-wage-ref').value = e.receipt_ref || '';
+    document.getElementById('exp-wage-notes').value = e.notes || '';
+  } else {
+    document.getElementById('exp-amount-general').value = e.amount || '';
+    document.getElementById('exp-category').value = e.category || '';
+    document.getElementById('exp-description').value = e.description || '';
+    document.getElementById('exp-vendor').value = e.vendor || '';
+    document.getElementById('exp-method').value = e.method || '';
+    document.getElementById('exp-paid-by').value = e.paid_by || '';
+    document.getElementById('exp-receipt').value = e.receipt_ref || '';
+    document.getElementById('exp-notes').value = e.notes || '';
+  }
   openModal('modal-expense');
 }
 
 async function saveExpense() {
   const date = document.getElementById('exp-date').value;
-  const amount = document.getElementById('exp-amount').value;
-  const category = document.getElementById('exp-category').value;
-  const description = document.getElementById('exp-description').value.trim();
-  if (!date || !amount || !category || !description) {
-    toast('Please fill in Date, Amount, Category and Description');
-    return;
-  }
   const editId = document.getElementById('exp-edit-id').value;
-  const expense = {
-    id: editId || uid(),
-    exp_date: date,
-    amount: parseFloat(amount).toFixed(2),
-    category,
-    description,
-    vendor: document.getElementById('exp-vendor').value.trim(),
-    method: document.getElementById('exp-method').value,
-    paid_by: document.getElementById('exp-paid-by').value.trim(),
-    receipt_ref: document.getElementById('exp-receipt').value.trim(),
-    notes: document.getElementById('exp-notes').value.trim(),
-    created_at: new Date().toISOString()
-  };
-  const { error } = await db.from('expenses').upsert(expense);
-  if (error) { toast('Error saving expense: ' + error.message); return; }
+  const isWage = currentExpenseType === 'wage';
+
+  if (isWage) {
+    const staffSel = document.getElementById('exp-wage-staff').value;
+    const staffName = staffSel === 'Other' ? document.getElementById('exp-wage-other-name').value.trim() : staffSel;
+    const amount = document.getElementById('exp-amount').value;
+    const periodStart = document.getElementById('exp-wage-period-start').value;
+    const periodEnd = document.getElementById('exp-wage-period-end').value;
+    if (!date || !staffName || !amount || !periodStart || !periodEnd) {
+      toast('Please fill in Date, Staff Member, Pay Period and Amount'); return;
+    }
+    const periodLabel = fmtDate(periodStart) + ' – ' + fmtDate(periodEnd);
+    const expense = {
+      id: editId || uid(),
+      expense_type: 'wage',
+      exp_date: date,
+      amount: parseFloat(amount).toFixed(2),
+      category: 'Staff Wages',
+      description: `Wages — ${staffName} (${periodLabel})`,
+      wage_staff: staffName,
+      wage_period_start: periodStart,
+      wage_period_end: periodEnd,
+      wage_hours: document.getElementById('exp-wage-hours').value || null,
+      wage_rate: document.getElementById('exp-wage-rate').value || null,
+      method: document.getElementById('exp-wage-method').value,
+      paid_by: document.getElementById('exp-wage-paid-by').value.trim(),
+      receipt_ref: document.getElementById('exp-wage-ref').value.trim(),
+      notes: document.getElementById('exp-wage-notes').value.trim(),
+      vendor: null,
+      created_at: new Date().toISOString()
+    };
+    const { error } = await db.from('expenses').upsert(expense);
+    if (error) { toast('Error saving wage: ' + error.message); return; }
+  } else {
+    const amount = document.getElementById('exp-amount-general').value;
+    const category = document.getElementById('exp-category').value;
+    const description = document.getElementById('exp-description').value.trim();
+    if (!date || !amount || !category || !description) {
+      toast('Please fill in Date, Amount, Category and Description'); return;
+    }
+    const expense = {
+      id: editId || uid(),
+      expense_type: 'general',
+      exp_date: date,
+      amount: parseFloat(amount).toFixed(2),
+      category,
+      description,
+      vendor: document.getElementById('exp-vendor').value.trim(),
+      method: document.getElementById('exp-method').value,
+      paid_by: document.getElementById('exp-paid-by').value.trim(),
+      receipt_ref: document.getElementById('exp-receipt').value.trim(),
+      notes: document.getElementById('exp-notes').value.trim(),
+      wage_staff: null,
+      created_at: new Date().toISOString()
+    };
+    const { error } = await db.from('expenses').upsert(expense);
+    if (error) { toast('Error saving expense: ' + error.message); return; }
+  }
+
   closeModal('modal-expense');
-  toast(editId ? 'Expense updated' : 'Expense saved');
+  toast(editId ? (isWage ? 'Wage record updated' : 'Expense updated') : (isWage ? '✅ Wage payment recorded' : '✅ Expense saved'));
   renderExpensesPanel();
   renderPaymentsPage();
 }
 
 async function deleteExpense(id) {
-  if (!confirm('Delete this expense record? This cannot be undone.')) return;
+  if (!confirm('Delete this record? This cannot be undone.')) return;
   await db.from('expenses').delete().eq('id', id);
   renderExpensesPanel();
   renderPaymentsPage();
-  toast('Expense deleted');
+  toast('Record deleted');
 }
 
 const EXP_CATEGORY_ICONS = {
@@ -6092,6 +6300,12 @@ const EXP_CATEGORY_ICONS = {
   'Other': '📦',
 };
 
+const STAFF_COLORS = {
+  'James': { bg: '#e8f0fe', border: '#1a73e8', text: '#1a73e8', dot: '#1a73e8' },
+  'Alvan': { bg: '#f3e8fd', border: '#7c3aed', text: '#7c3aed', dot: '#7c3aed' },
+  'Joseph': { bg: '#e6f4ea', border: '#1e7e34', text: '#1e7e34', dot: '#1e7e34' },
+};
+
 async function renderExpensesPanel() {
   const q = (document.getElementById('exp-search')?.value || '').toLowerCase();
   const dateF = document.getElementById('exp-date-filter')?.value;
@@ -6100,7 +6314,6 @@ async function renderExpensesPanel() {
   const { data: allExpenses } = await db.from('expenses').select('*').order('exp_date', { ascending: false });
   let expenses = allExpenses || [];
 
-  // Update global totals used by renderPaymentsPage stats
   const thisMonth = new Date().toISOString().slice(0, 7);
   const totalExp = expenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
   const monthExp = expenses.filter(e => e.exp_date && e.exp_date.startsWith(thisMonth)).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
@@ -6109,13 +6322,12 @@ async function renderExpensesPanel() {
   if (expStatEl) expStatEl.textContent = '$' + totalExp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const expMonthEl = document.getElementById('exp-stat-month');
   if (expMonthEl) expMonthEl.textContent = '$' + monthExp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  const expCountEl = document.getElementById('exp-stat-count');
 
-  // Apply filters
   if (q) expenses = expenses.filter(e => JSON.stringify(e).toLowerCase().includes(q));
   if (dateF) expenses = expenses.filter(e => e.exp_date === dateF);
   if (catF) expenses = expenses.filter(e => e.category === catF);
 
+  const expCountEl = document.getElementById('exp-stat-count');
   if (expCountEl) expCountEl.textContent = expenses.length;
 
   const container = document.getElementById('expenses-list');
@@ -6126,35 +6338,111 @@ async function renderExpensesPanel() {
     return;
   }
 
-  container.innerHTML = expenses.map(e => {
-    const amt = parseFloat(e.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const icon = EXP_CATEGORY_ICONS[e.category] || '📦';
-    return `<div class="note-card" style="cursor:default;border-left:3px solid var(--danger);">
-      <div class="note-card-header">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="font-size:22px;">${icon}</span>
-          <div>
-            <div class="note-date" style="display:flex;align-items:center;gap:10px;">
-              <span>${e.description}</span>
-              <span style="font-size:16px;font-weight:700;color:var(--danger);">-$${amt}</span>
-            </div>
-            <div class="note-staff">
-              ${fmtDate(e.exp_date)} &nbsp;·&nbsp;
-              <span style="background:var(--danger-light);color:var(--danger);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;">${e.category}</span>
-              ${e.vendor ? '&nbsp;·&nbsp; ' + e.vendor : ''}
-              ${e.method ? '&nbsp;·&nbsp; ' + e.method : ''}
-            </div>
+  // Separate wages from general
+  const wages = expenses.filter(e => e.expense_type === 'wage' || e.category === 'Staff Wages');
+  const general = expenses.filter(e => e.expense_type !== 'wage' && e.category !== 'Staff Wages');
+
+  let html = '';
+
+  // ── STAFF WAGES SECTION ──
+  if (wages.length) {
+    const wageTotal = wages.reduce((s,e) => s + parseFloat(e.amount||0), 0);
+    html += `
+      <div style="margin-bottom:8px;margin-top:4px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(90deg,#1a1a1a,#2d2d2d);border-radius:8px 8px 0 0;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:16px;">👤</span>
+            <span style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;">Staff Wages</span>
+            <span style="background:rgba(255,255,255,0.15);color:#fff;border-radius:20px;padding:2px 8px;font-size:11px;">${wages.length} payment${wages.length!==1?'s':''}</span>
           </div>
+          <span style="color:#f5c842;font-size:14px;font-weight:700;">-$${wageTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
         </div>
-        <div class="note-actions">
-          <button class="btn btn-secondary btn-sm" onclick="editExpense('${e.id}')">Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteExpense('${e.id}')">Delete</button>
+        <div style="border:1px solid #2d2d2d;border-top:none;border-radius:0 0 8px 8px;overflow:hidden;">
+          ${wages.map(e => {
+            const amt = parseFloat(e.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+            const staffName = e.wage_staff || 'Staff';
+            const colors = STAFF_COLORS[staffName] || { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568', dot:'#8a9ab0' };
+            const periodLabel = e.wage_period_start && e.wage_period_end
+              ? fmtDate(e.wage_period_start) + ' – ' + fmtDate(e.wage_period_end) : '';
+            const hoursInfo = e.wage_hours ? `${e.wage_hours} hrs` + (e.wage_rate ? ` @ $${parseFloat(e.wage_rate).toFixed(2)}/hr` : '') : '';
+            return `<div style="padding:12px 14px;border-bottom:1px solid #e8e8e8;background:#fff;display:flex;align-items:center;gap:12px;">
+              <!-- Staff colour dot + name badge -->
+              <div style="flex-shrink:0;text-align:center;min-width:64px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;margin:0 auto 3px;font-size:15px;font-weight:800;color:${colors.text};">${staffName.charAt(0)}</div>
+                <div style="font-size:10px;font-weight:700;color:${colors.text};">${staffName}</div>
+              </div>
+              <!-- Details -->
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px;">
+                  <span style="font-weight:700;font-size:13.5px;color:#1a2332;">Wage Payment</span>
+                  <span style="background:${colors.bg};color:${colors.text};border:1px solid ${colors.border};border-radius:20px;padding:2px 9px;font-size:11px;font-weight:700;">${staffName}</span>
+                  ${e.method ? `<span style="background:var(--surface2);color:var(--text2);border-radius:20px;padding:2px 8px;font-size:11px;">${e.method}</span>` : ''}
+                </div>
+                <div style="font-size:12px;color:var(--text2);line-height:1.7;">
+                  ${fmtDate(e.exp_date)}
+                  ${periodLabel ? `&nbsp;·&nbsp; Period: <strong>${periodLabel}</strong>` : ''}
+                  ${hoursInfo ? `&nbsp;·&nbsp; ${hoursInfo}` : ''}
+                </div>
+                ${e.notes ? `<div style="font-size:11.5px;color:var(--text3);margin-top:2px;">${e.notes}</div>` : ''}
+                ${e.paid_by ? `<div style="font-size:11px;color:var(--text3);">Authorized by: ${e.paid_by}${e.receipt_ref ? ' · Ref: ' + e.receipt_ref : ''}</div>` : ''}
+              </div>
+              <!-- Amount + actions -->
+              <div style="flex-shrink:0;text-align:right;">
+                <div style="font-size:17px;font-weight:800;color:var(--danger);">-$${amt}</div>
+                <div style="display:flex;gap:4px;margin-top:6px;justify-content:flex-end;">
+                  <button class="btn btn-secondary btn-sm" style="font-size:11px;padding:4px 10px;" onclick="editExpense('${e.id}')">Edit</button>
+                  <button class="btn btn-danger btn-sm" style="font-size:11px;padding:4px 10px;" onclick="deleteExpense('${e.id}')">Delete</button>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
         </div>
-      </div>
-      ${e.notes ? `<div class="note-preview" style="margin-top:6px;">${e.notes}</div>` : ''}
-      ${e.paid_by ? `<div class="note-preview" style="font-size:12px;color:var(--text3);">Paid by: ${e.paid_by}${e.receipt_ref ? ' · Ref: ' + e.receipt_ref : ''}</div>` : ''}
-    </div>`;
-  }).join('');
+      </div>`;
+  }
+
+  // ── GENERAL EXPENSES SECTION ──
+  if (general.length) {
+    const genTotal = general.reduce((s,e) => s + parseFloat(e.amount||0), 0);
+    html += `
+      <div style="margin-top:${wages.length?'14px':'4px'};">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(90deg,#5a1a1a,#8b2020);border-radius:8px 8px 0 0;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:16px;">🧾</span>
+            <span style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;">Facility Expenses</span>
+            <span style="background:rgba(255,255,255,0.15);color:#fff;border-radius:20px;padding:2px 8px;font-size:11px;">${general.length} item${general.length!==1?'s':''}</span>
+          </div>
+          <span style="color:#f5a0a0;font-size:14px;font-weight:700;">-$${genTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+        </div>
+        <div style="border:1px solid #8b2020;border-top:none;border-radius:0 0 8px 8px;overflow:hidden;">
+          ${general.map(e => {
+            const amt = parseFloat(e.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+            const icon = EXP_CATEGORY_ICONS[e.category] || '📦';
+            return `<div style="padding:11px 14px;border-bottom:1px solid #f0e0e0;background:#fff;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:22px;flex-shrink:0;">${icon}</span>
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:2px;">
+                  <span style="font-weight:700;font-size:13.5px;color:#1a2332;">${e.description}</span>
+                  <span style="background:var(--danger-light);color:var(--danger);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;">${e.category}</span>
+                  ${e.vendor ? `<span style="background:var(--surface2);color:var(--text2);border-radius:20px;padding:2px 8px;font-size:11px;">${e.vendor}</span>` : ''}
+                </div>
+                <div style="font-size:12px;color:var(--text2);">${fmtDate(e.exp_date)}${e.method ? ' · ' + e.method : ''}</div>
+                ${e.notes ? `<div style="font-size:11.5px;color:var(--text3);margin-top:1px;">${e.notes}</div>` : ''}
+                ${e.paid_by ? `<div style="font-size:11px;color:var(--text3);">Paid by: ${e.paid_by}${e.receipt_ref ? ' · Ref: ' + e.receipt_ref : ''}</div>` : ''}
+              </div>
+              <div style="flex-shrink:0;text-align:right;">
+                <div style="font-size:16px;font-weight:800;color:var(--danger);">-$${amt}</div>
+                <div style="display:flex;gap:4px;margin-top:6px;justify-content:flex-end;">
+                  <button class="btn btn-secondary btn-sm" style="font-size:11px;padding:4px 10px;" onclick="editExpense('${e.id}')">Edit</button>
+                  <button class="btn btn-danger btn-sm" style="font-size:11px;padding:4px 10px;" onclick="deleteExpense('${e.id}')">Delete</button>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }
+
+  container.innerHTML = html;
 }
 
 // ══════════════════════════════════
