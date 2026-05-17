@@ -2886,6 +2886,27 @@
             </div>
           </div>
         </div>
+        <!-- Ketty -->
+        <div style="padding:16px 18px;border-bottom:1px solid var(--border);background:#fdf8ff;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <div style="width:38px;height:38px;border-radius:50%;background:#f3e8fd;border:2px solid #7c3aed;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#7c3aed;flex-shrink:0;">A</div>
+            <div style="font-weight:700;font-size:15px;color:#1a2332;">Ketty</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="field" style="margin:0;">
+              <label style="font-size:11px;">Expected Amount Per Period ($)</label>
+              <input type="number" id="salary-Ketty-amount" placeholder="e.g. 800.00" step="0.01" min="0">
+            </div>
+            <div class="field" style="margin:0;">
+              <label style="font-size:11px;">Pay Frequency</label>
+              <select id="salary-Ketty-freq">
+                <option value="monthly">Monthly</option>
+                <option value="biweekly">Bi-weekly</option>
+                <option value="weekly">Weekly</option>
+              </select>
+            </div>
+          </div>
+        </div>
         <!-- Joseph -->
         <div style="padding:16px 18px;background:#f6fff8;">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
@@ -3042,6 +3063,7 @@
                 <option value="">— Select Staff Member —</option>
                 <option value="James">James</option>
                 <option value="Alvan">Alvan</option>
+                <option value="Ketty">Ketty</option>
                 <option value="Joseph">Joseph</option>
                 <option value="Other">Other (specify below)</option>
               </select>
@@ -6349,7 +6371,7 @@ async function editExpense(id) {
   setExpenseType(isWage ? 'wage' : 'general');
 
   if (isWage) {
-    const staffNames = ['James','Alvan','Joseph'];
+    const staffNames = ['James','Alvan','Ketty','Joseph'];
     const staffSel = document.getElementById('exp-wage-staff');
     if (staffNames.includes(e.wage_staff)) { staffSel.value = e.wage_staff; }
     else { staffSel.value = 'Other'; document.getElementById('exp-wage-other-name').value = e.wage_staff || ''; document.getElementById('exp-wage-other-wrap').style.display = 'block'; }
@@ -7277,7 +7299,7 @@ async function deleteSavedCredentials(id) {
 // ══════════════════════════════════
 
 const SALARY_CONFIG_KEY = 'hlh_salary_config';
-const KNOWN_STAFF = ['James', 'Alvan', 'Joseph'];
+const KNOWN_STAFF = ['James', 'Alvan', 'Ketty', 'Joseph'];
 
 const STAFF_COLORS = {
   'James':  { bg:'#e8f0fe', border:'#1a73e8', text:'#1a73e8', dot:'#1a73e8' },
