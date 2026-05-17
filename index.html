@@ -7649,7 +7649,7 @@ async function renderWageBalanceStrip() {
           </div>
           ${isFullyPaid
             ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;white-space:nowrap;">✅ Paid</span>`
-            : `<span style="margin-left:0;margin-right:35px;margin-top:-4px;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:12px;padding:4px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;max-width:54px;min-width:54px;text-align:center;word-break:break-word;overflow-wrap:anywhere;flex-shrink:1;"><span style="font-size:9px;">Owez</span><span style="max-width:100%;word-break:break-word;overflow-wrap:anywhere;">$${currentBalance.toFixed(2)}</span></span>`}
+            : `<span style="margin-left:10;margin-right:35px;margin-top:-4px;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:12px;padding:4px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;max-width:54px;min-width:54px;text-align:center;word-break:break-word;overflow-wrap:anywhere;flex-shrink:1;"><span style="font-size:9px;">Owez</span><span style="max-width:100%;word-break:break-word;overflow-wrap:anywhere;">$${currentBalance.toFixed(2)}</span></span>`}
         </div>
         <div style="font-size:10.5px;color:#888;margin-bottom:4px;">
           ${freqLabel === 'Weekly' ? 'This week' : freqLabel === 'Bi-weekly' ? 'This fortnight' : 'This month'}:
