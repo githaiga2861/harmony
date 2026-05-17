@@ -7434,7 +7434,7 @@ async function renderWageBalancePanel(staffName) {
           <span style="color:#555;">${fmtDate(pg.start)} – ${fmtDate(pg.end)}</span>
           <span style="display:flex;gap:10px;">
             <span style="color:#888;">Paid: <strong>$${pg.paid.toFixed(2)}</strong></span>
-            <span style="color:#c0392b;font-weight:700;">Still owed: $${bal.toFixed(2)}</span>
+            <span style="color:#c0392b;font-weight:600;">Still owed: $${bal.toFixed(2)}</span>
           </span>
         </div>`;
       }
@@ -7649,7 +7649,7 @@ async function renderWageBalanceStrip() {
           </div>
           ${isFullyPaid
             ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;white-space:nowrap;">✅ Paid</span>`
-            : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;white-space:nowrap;">Owed $${currentBalance.toFixed(2)}</span>`}
+            : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;white-space:nowrap;">Owez $${currentBalance.toFixed(2)}</span>`}
         </div>
         <div style="font-size:10.5px;color:#888;margin-bottom:4px;">
           ${freqLabel === 'Weekly' ? 'This week' : freqLabel === 'Bi-weekly' ? 'This fortnight' : 'This month'}:
