@@ -7304,6 +7304,7 @@ const KNOWN_STAFF = ['James', 'Alvan', 'Ketty', 'Joseph'];
 const STAFF_COLORS = {
   'James':  { bg:'#e8f0fe', border:'#1a73e8', text:'#1a73e8', dot:'#1a73e8' },
   'Alvan':  { bg:'#f3e8fd', border:'#7c3aed', text:'#7c3aed', dot:'#7c3aed' },
+  'Ketty':  { bg:'#fff0f6', border:'#db2777', text:'#db2777', dot:'#db2777' },
   'Joseph': { bg:'#e6f4ea', border:'#1e7e34', text:'#1e7e34', dot:'#1e7e34' },
 };
 
@@ -7710,7 +7711,7 @@ async function renderWageBalanceStrip() {
       <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;">👤 Staff Wage Balances — Current Period</div>
       <button onclick="openSalaryConfig()" style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;">Edit Setup ⚙️</button>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">${cards}</div>`;
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">${cards}</div>`;
   strip.style.display = 'block';
 }
 
