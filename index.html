@@ -6371,10 +6371,6 @@ function setExpenseType(type) {
   const wFields = document.getElementById('exp-wage-fields');
   if (gFields) gFields.style.display = isWage ? 'none' : 'contents';
   if (wFields) wFields.style.display = isWage ? 'block' : 'none';
-  // Show/hide amount field in general vs wage
-  const amtGeneral = document.getElementById('exp-amount-general');
-  const amtWage = document.getElementById('exp-amount');
-  if (amtGeneral) amtGeneral.closest('.field').style.display = isWage ? 'none' : 'block';
 }
 
 function calcWageTotal() {
