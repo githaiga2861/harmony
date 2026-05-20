@@ -1125,6 +1125,21 @@
 
         <!-- PAYMENTS TRACKER -->
         <div class="page" id="page-payments">
+
+          <!-- Tab Toggle -->
+          <div style="display:flex;gap:0;margin-bottom:24px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:6px;box-shadow:var(--shadow);">
+            <button id="fin-tab-income" onclick="switchFinTab('income')"
+              style="flex:1;padding:11px 24px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.18s;background:linear-gradient(135deg,#1a3d1a,#1e7e34);color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              Income &amp; Payments Received
+            </button>
+            <button id="fin-tab-expenses" onclick="switchFinTab('expenses')"
+              style="flex:1;padding:11px 24px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.18s;background:transparent;color:var(--text3);display:flex;align-items:center;justify-content:center;gap:8px;">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+              Facility Expenses
+            </button>
+          </div>
+
           <!-- Shared top stats bar -->
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
             <div class="stat-card">
@@ -1161,11 +1176,9 @@
             </div>
           </div>
 
-          <!-- Two-column layout: Income | Expenses -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
-
-            <!-- LEFT: INCOME -->
-            <div class="card">
+          <!-- INCOME SECTION (full width) -->
+          <div id="fin-section-income" style="display:block;">
+          <div class="card">
               <div style="background:linear-gradient(135deg,#1a3d1a,#1e7e34);border-radius:10px 10px 0 0;padding:14px 18px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                   <h3 style="color:#fff;font-size:14px;margin:0;">
@@ -1199,12 +1212,15 @@
                 <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">
                   <span id="pay-stat-count">0</span> payment(s) &nbsp;·&nbsp; This month: <span id="pay-stat-month">$0</span>
                 </div>
-                <div id="payments-list" class="notes-list" style="max-height:65vh;overflow-y:auto;"></div>
+                <div id="payments-list" class="notes-list" style="max-height:72vh;overflow-y:auto;"></div>
               </div>
             </div>
 
-            <!-- RIGHT: EXPENSES -->
-            <div class="card">
+            </div><!-- /fin-section-income -->
+
+          <!-- EXPENSES SECTION (full width) -->
+          <div id="fin-section-expenses" style="display:none;">
+          <div class="card">
               <div style="background:linear-gradient(135deg,#6b1a1a,#c0392b);border-radius:10px 10px 0 0;padding:14px 18px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                   <h3 style="color:#fff;font-size:14px;margin:0;">
@@ -1251,10 +1267,10 @@
                 <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">
                   <span id="exp-stat-count">0</span> expense(s) &nbsp;·&nbsp; This month: <span id="exp-stat-month">$0</span>
                 </div>
-                <div id="expenses-list" class="notes-list" style="max-height:65vh;overflow-y:auto;"></div>
+                <div id="expenses-list" class="notes-list" style="max-height:72vh;overflow-y:auto;"></div>
               </div>
             </div>
-          </div>
+          </div><!-- /fin-section-expenses -->
 
         <!-- ALL INCIDENTS -->
         <div class="page" id="page-incidents">
@@ -3344,7 +3360,13 @@ async function showPage(name) {
   if (name === 'analytics') renderAnalytics();
   if (name === 'residents') renderResidentTable();
   if (name === 'incidents') { await populateResidentFilter(); renderAllIncidents(); document.querySelector('.main').scrollTo({ top: 0, behavior: 'instant' }); window.scrollTo({ top: 0, behavior: 'instant' }); }
-  if (name === 'payments') { await populateResidentFilter(); renderPaymentsPage(); renderExpensesPanel(); }
+  if (name === 'payments') {
+    await populateResidentFilter();
+    renderPaymentsPage();
+    renderExpensesPanel();
+    const savedTab = localStorage.getItem('hlh_fin_tab') || 'income';
+    switchFinTab(savedTab);
+  }
   if (name === 'staffdocs') { initStaffDocsPage(); }
 }
 
@@ -5900,6 +5922,30 @@ function genReceiptNum() {
   const mo = String(now.getMonth()+1).padStart(2,'0');
   const rand = Math.floor(Math.random()*9000)+1000;
   return `HLH-${yr}${mo}-${rand}`;
+}
+
+function switchFinTab(tab) {
+  const isIncome = tab === 'income';
+
+  const incomeBtn = document.getElementById('fin-tab-income');
+  const expensesBtn = document.getElementById('fin-tab-expenses');
+  const incomeSection = document.getElementById('fin-section-income');
+  const expensesSection = document.getElementById('fin-section-expenses');
+
+  if (incomeBtn) {
+    incomeBtn.style.background = isIncome
+      ? 'linear-gradient(135deg,#1a3d1a,#1e7e34)' : 'transparent';
+    incomeBtn.style.color = isIncome ? '#fff' : 'var(--text3)';
+  }
+  if (expensesBtn) {
+    expensesBtn.style.background = !isIncome
+      ? 'linear-gradient(135deg,#6b1a1a,#c0392b)' : 'transparent';
+    expensesBtn.style.color = !isIncome ? '#fff' : 'var(--text3)';
+  }
+  if (incomeSection) incomeSection.style.display = isIncome ? 'block' : 'none';
+  if (expensesSection) expensesSection.style.display = !isIncome ? 'block' : 'none';
+
+  localStorage.setItem('hlh_fin_tab', tab);
 }
 
 async function renderPaymentsPage() {
