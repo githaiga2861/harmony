@@ -3142,16 +3142,20 @@
  const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // ══════════════════════════════════
-// MAINTENANCE BANNER
+// MAINTENANCE BANNER — Supabase synced
 // ══════════════════════════════════
-const MAINTENANCE_KEY = 'hlh_maintenance_mode';
 
-function toggleMaintenance() {
-  const isOn = localStorage.getItem(MAINTENANCE_KEY) === 'true';
-  const newState = !isOn;
-  localStorage.setItem(MAINTENANCE_KEY, newState);
+async function toggleMaintenance() {
+  const banner = document.getElementById('maintenance-banner');
+  const isCurrentlyOn = banner && banner.style.display === 'flex';
+  const newState = !isCurrentlyOn;
+
+  // Save to Supabase so all devices see the change
+  await db.from('system_settings')
+    .upsert({ key: 'maintenance_mode', value: String(newState), updated_at: new Date().toISOString() });
+
   applyMaintenanceState(newState);
-  toast(newState ? '🔧 Maintenance banner is now ON' : '✅ Maintenance banner turned OFF');
+  toast(newState ? '🔧 Maintenance banner ON — all devices notified' : '✅ Maintenance banner OFF — all devices updated');
 }
 
 function applyMaintenanceState(isOn) {
@@ -3161,8 +3165,8 @@ function applyMaintenanceState(isOn) {
 
   if (banner) {
     banner.style.display = isOn ? 'flex' : 'none';
-    // Push content down so banner doesn't overlap the topbar
-    document.querySelector('.main') && (document.querySelector('.main').style.paddingTop = isOn ? '44px' : '');
+    const main = document.querySelector('.main');
+    if (main) main.style.paddingTop = isOn ? '44px' : '';
   }
   if (label) {
     label.textContent = isOn ? 'ON' : 'OFF';
@@ -3175,12 +3179,33 @@ function applyMaintenanceState(isOn) {
   }
 }
 
-// Apply saved state on load
-(function() {
-  const saved = localStorage.getItem(MAINTENANCE_KEY) === 'true';
-  // Defer slightly so DOM is ready
-  setTimeout(() => applyMaintenanceState(saved), 100);
-})();
+async function fetchMaintenanceState() {
+  const { data } = await db.from('system_settings')
+    .select('value')
+    .eq('key', 'maintenance_mode')
+    .single();
+  const isOn = data?.value === 'true';
+  applyMaintenanceState(isOn);
+}
+
+// Poll every 15 seconds so all devices stay in sync
+function startMaintenancePoller() {
+  fetchMaintenanceState(); // immediate check on load
+  setInterval(fetchMaintenanceState, 15000);
+}
+
+// Subscribe to real-time changes if Supabase real-time is enabled
+function subscribeMaintenanceRealtime() {
+  db.channel('system_settings_changes')
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'system_settings', filter: 'key=eq.maintenance_mode' },
+      (payload) => {
+        const isOn = payload.new?.value === 'true';
+        applyMaintenanceState(isOn);
+      }
+    )
+    .subscribe();
+}
   
 // ══════════════════════════════════
 // DATA LAYER — localStorage
@@ -3299,6 +3324,8 @@ function initApp() {
   renderResidentTable();
   populateResidentFilter(); // pre-load all dropdowns immediately on login
   startNotifScheduler();
+  startMaintenancePoller();
+  subscribeMaintenanceRealtime();
 }
 
 // Login on Enter key
