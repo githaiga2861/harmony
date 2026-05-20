@@ -576,6 +576,13 @@
 </style>
 </head>
 <body>
+  
+  <!-- MAINTENANCE BANNER -->
+<div id="maintenance-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#7b1a1a,#c0392b);color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.02em;box-shadow:0 2px 12px rgba(0,0,0,0.3);">
+  <span style="font-size:16px;">🔧</span>
+  <span>System is currently under maintenance. Some features may be unavailable.</span>
+  <button onclick="toggleMaintenance()" style="margin-left:16px;background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:6px;padding:4px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Dismiss</button>
+</div>
 
 <!-- AUTH -->
 <div id="auth-screen">
@@ -700,6 +707,9 @@
       <div class="topbar">
         <div class="topbar-title" id="topbar-title">Dashboard</div>
         <div class="topbar-right">
+          <button onclick="toggleMaintenance()" id="maintenance-toggle-btn" style="display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;">
+  🔧 Maintenance: <span id="maintenance-status-label" style="color:var(--danger);">OFF</span>
+</button>
           <span style="font-size:12px;color:var(--text3);" id="topbar-date"></span>
         </div>
       </div>
@@ -3129,7 +3139,49 @@
 <script>
  const SUPABASE_URL = 'https://gkmvglzjrsneqkrlvohp.supabase.co';
  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrbXZnbHpqcnNuZXFrcmx2b2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2OTU0NTMsImV4cCI6MjA5MDI3MTQ1M30.bcGB06-v9xmJmgkY-4KbnHPgi13qP7_ng-BJHifd0UY';
- const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);  
+ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ══════════════════════════════════
+// MAINTENANCE BANNER
+// ══════════════════════════════════
+const MAINTENANCE_KEY = 'hlh_maintenance_mode';
+
+function toggleMaintenance() {
+  const isOn = localStorage.getItem(MAINTENANCE_KEY) === 'true';
+  const newState = !isOn;
+  localStorage.setItem(MAINTENANCE_KEY, newState);
+  applyMaintenanceState(newState);
+  toast(newState ? '🔧 Maintenance banner is now ON' : '✅ Maintenance banner turned OFF');
+}
+
+function applyMaintenanceState(isOn) {
+  const banner = document.getElementById('maintenance-banner');
+  const label = document.getElementById('maintenance-status-label');
+  const btn = document.getElementById('maintenance-toggle-btn');
+
+  if (banner) {
+    banner.style.display = isOn ? 'flex' : 'none';
+    // Push content down so banner doesn't overlap the topbar
+    document.querySelector('.main') && (document.querySelector('.main').style.paddingTop = isOn ? '44px' : '');
+  }
+  if (label) {
+    label.textContent = isOn ? 'ON' : 'OFF';
+    label.style.color = isOn ? 'var(--danger)' : 'var(--text3)';
+  }
+  if (btn) {
+    btn.style.borderColor = isOn ? 'var(--danger)' : 'var(--border)';
+    btn.style.background = isOn ? 'var(--danger-light)' : 'var(--surface2)';
+    btn.style.color = isOn ? 'var(--danger)' : 'var(--text2)';
+  }
+}
+
+// Apply saved state on load
+(function() {
+  const saved = localStorage.getItem(MAINTENANCE_KEY) === 'true';
+  // Defer slightly so DOM is ready
+  setTimeout(() => applyMaintenanceState(saved), 100);
+})();
+  
 // ══════════════════════════════════
 // DATA LAYER — localStorage
 // ══════════════════════════════════
