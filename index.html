@@ -5287,6 +5287,24 @@ function showCalPopup(event, dateStr, notes, incidents) {
   setTimeout(() => document.addEventListener('click', () => { if(calPopup) { calPopup.remove(); calPopup = null; } }, { once: true }), 100);
 }
 
+function getAllSundaysSince(startDateStr) {
+  const sundays = [];
+  const start = new Date(startDateStr + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // Find first Sunday on or after start
+  let cursor = new Date(start);
+  const dayOfWeek = cursor.getDay();
+  if (dayOfWeek !== 0) cursor.setDate(cursor.getDate() + (7 - dayOfWeek));
+
+  while (cursor <= today) {
+    sundays.push(cursor.toISOString().split('T')[0]);
+    cursor = new Date(cursor);
+    cursor.setDate(cursor.getDate() + 7);
+  }
+  return sundays;
+}  
+
 // ══════════════════════════════════
 // DAILY NOTIFICATIONS
 // ══════════════════════════════════
@@ -7693,13 +7711,85 @@ async function renderWageBalanceStrip() {
       .eq('expense_type', 'wage')
       .eq('wage_staff', staffName)
       .order('wage_period_start', { ascending: true });
-
     const payments = allPayments || [];
 
-    // Current period for this staff's frequency
-    const currentPeriod = getCurrentPeriodForFreq(freq);
+    // ── KETTY: Sunday-only special logic ──
+    if (freq === 'sunday_only') {
+      const allSundays = getAllSundaysSince('2026-05-01');
+      const today = new Date().toISOString().split('T')[0];
 
-    // Payments in current period
+      // Fetch days Ketty was marked as not working
+      const { data: daysOff } = await db.from('staff_days_off')
+        .select('day_date')
+        .eq('staff_name', staffName);
+      const daysOffSet = new Set((daysOff || []).map(d => d.day_date));
+
+      // Payments recorded (keyed by the sunday date = period_start)
+      const paidDates = new Set(payments.map(p => p.wage_period_start).filter(Boolean));
+
+      // Determine overdue Sundays
+      let staffOverdue = [];
+      for (const sunday of allSundays) {
+        if (sunday >= today) continue; // Don't count current Sunday as overdue yet
+        if (daysOffSet.has(sunday)) continue; // Marked as not worked — no payment expected
+        if (paidDates.has(sunday)) continue; // Paid — all good
+        staffOverdue.push(sunday);
+      }
+
+      // Current Sunday
+      const currentSunday = allSundays[allSundays.length - 1];
+      const paidThisSunday = paidDates.has(currentSunday);
+      const offThisSunday = daysOffSet.has(currentSunday);
+      const isFullyPaid = paidThisSunday || offThisSunday;
+      const totalOverdue = staffOverdue.length;
+
+      if (totalOverdue > 0) anyOverdue = true;
+
+      cards += `
+        <div style="background:#fff;border:1.5px solid ${colors.border};border-radius:8px;padding:10px 13px;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+            <div style="width:30px;height:30px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:${colors.text};flex-shrink:0;">${staffName.charAt(0)}</div>
+            <div>
+              <div style="font-weight:700;font-size:13px;color:#1a2332;line-height:1.2;">${staffName}</div>
+              <div style="font-size:10px;color:${colors.text};font-weight:600;">Sunday Only · $${staffCfg.amount.toFixed(2)}/Sunday</div>
+            </div>
+            ${isFullyPaid
+              ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;white-space:nowrap;">${offThisSunday ? '— Day Off' : '✅ Paid'}</span>`
+              : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;white-space:nowrap;">Unpaid this Sunday</span>`}
+          </div>
+          <div style="font-size:10.5px;color:#888;margin-bottom:4px;">
+            This Sunday (${fmtDate(currentSunday)}): 
+            ${paidThisSunday ? `<strong style="color:#1e7e34;">$${staffCfg.amount.toFixed(2)} paid</strong>` : offThisSunday ? '<strong style="color:#888;">Day off — no payment expected</strong>' : `<strong style="color:#c0392b;">$${staffCfg.amount.toFixed(2)} not yet recorded</strong>`}
+          </div>
+          <button onclick="openKettyManager('${staffName}')" style="width:100%;margin-top:6px;background:${colors.bg};color:${colors.text};border:1.5px solid ${colors.border};border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
+            📅 Manage Sundays (${totalOverdue > 0 ? `⚠️ ${totalOverdue} overdue` : 'all clear'})
+          </button>
+        </div>`;
+
+      if (totalOverdue > 0) {
+        overdueAlertHtml += `
+          <div style="margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <div style="width:22px;height:22px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:${colors.text};flex-shrink:0;">${staffName.charAt(0)}</div>
+              <span style="font-weight:700;font-size:13px;color:${colors.text};">${staffName}</span>
+              <span style="font-size:11px;color:#888;">(Sunday Only)</span>
+              <span style="margin-left:auto;font-size:12px;font-weight:700;color:#c0392b;">${totalOverdue} Sunday${totalOverdue !== 1 ? 's' : ''} unaccounted</span>
+            </div>
+            ${staffOverdue.map(d => `
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px 4px 30px;font-size:11.5px;border-bottom:1px solid #fde8e5;">
+                <span style="color:#555;">${fmtDate(d)} (Sunday)</span>
+                <span style="color:#c0392b;font-weight:700;">No payment or day-off recorded</span>
+              </div>`).join('')}
+            <div style="padding:6px 8px 4px 30px;">
+              <button onclick="openKettyManager('${staffName}')" style="background:#fdf0ef;color:#c0392b;border:1px solid #f5c0bb;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">📅 Resolve now →</button>
+            </div>
+          </div>`;
+      }
+      continue; // Skip the rest of the loop for Ketty
+    }
+
+    // ── REGULAR STAFF: existing logic ──
+    const currentPeriod = getCurrentPeriodForFreq(freq);
     const currentPayments = payments.filter(p =>
       p.wage_period_start && p.wage_period_end &&
       p.wage_period_start <= currentPeriod.end &&
@@ -7711,16 +7801,13 @@ async function renderWageBalanceStrip() {
     const barColor = pct >= 100 ? '#1e7e34' : pct >= 50 ? '#d68910' : '#c0392b';
     const isFullyPaid = currentBalance <= 0.005;
 
-    // ── Compute overdue: all past periods with unpaid balance ──
     const earliest = payments.length ? payments[0].wage_period_start : null;
     const allPeriods = earliest ? generateExpectedPeriods(freq, earliest) : [];
     const today = new Date().toISOString().split('T')[0];
 
     let staffOverdue = [];
     allPeriods.forEach(period => {
-      // Only count past periods (fullEnd < today) as overdue
       if (period.fullEnd >= today) return;
-      // Never count periods before tracking started on May 1 2026
       if (period.fullEnd < '2026-05-01') return;
       const periodPayments = payments.filter(p =>
         p.wage_period_start && p.wage_period_end &&
@@ -7747,7 +7834,7 @@ async function renderWageBalanceStrip() {
           </div>
           ${isFullyPaid
             ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;white-space:nowrap;">✅ Paid</span>`
-            : `<span style="position:relative;right:12px;top:-3px;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:12px;padding:4px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05;width:56px;text-align:center;word-break:break-word;overflow-wrap:anywhere;flex-shrink:0;"><span style="font-size:9px;">Owez</span><span style="max-width:100%;word-break:break-word;overflow-wrap:anywhere;">$${currentBalance.toFixed(2)}</span></span>`}
+            : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;white-space:nowrap;">Owed $${currentBalance.toFixed(2)}</span>`}
         </div>
         <div style="font-size:10.5px;color:#888;margin-bottom:4px;">
           ${freqLabel === 'Weekly' ? 'This week' : freqLabel === 'Bi-weekly' ? 'This fortnight' : 'This month'}:
@@ -7764,7 +7851,6 @@ async function renderWageBalanceStrip() {
           : ''}
       </div>`;
 
-    // Build overdue alert rows for the banner below
     if (staffOverdue.length) {
       overdueAlertHtml += `
         <div style="margin-bottom:8px;">
@@ -8256,6 +8342,180 @@ function viewSavedStaffDocs() {
     else window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   }, 80);
 }
+
+// ══════════════════════════════════
+// KETTY SUNDAY MANAGER
+// ══════════════════════════════════
+async function openKettyManager(staffName) {
+  const cfg = getSalaryConfig();
+  const key = staffName.toLowerCase();
+  const staffCfg = cfg[key];
+  const colors = STAFF_COLORS[staffName] || { bg:'#fce4ec', border:'#e91e63', text:'#e91e63' };
+
+  document.getElementById('ketty-manager-title').textContent = `📅 ${staffName} — Sunday Attendance Manager`;
+
+  const allSundays = getAllSundaysSince('2026-05-01');
+  const today = new Date().toISOString().split('T')[0];
+
+  const { data: allPayments } = await db.from('expenses')
+    .select('amount, wage_period_start, exp_date')
+    .eq('expense_type', 'wage')
+    .eq('wage_staff', staffName);
+  const paidDates = new Set((allPayments || []).map(p => p.wage_period_start).filter(Boolean));
+  const payAmounts = {};
+  (allPayments || []).forEach(p => { if (p.wage_period_start) payAmounts[p.wage_period_start] = parseFloat(p.amount || 0); });
+
+  const { data: daysOff } = await db.from('staff_days_off')
+    .select('id, day_date, reason')
+    .eq('staff_name', staffName);
+  const daysOffMap = {};
+  (daysOff || []).forEach(d => { daysOffMap[d.day_date] = d; });
+
+  const rows = allSundays.map(sunday => {
+    const isPaid = paidDates.has(sunday);
+    const isOff = !!daysOffMap[sunday];
+    const isToday = sunday === today;
+    const isFuture = sunday > today;
+    const isPending = !isPaid && !isOff && !isFuture;
+
+    let statusHtml = '';
+    let actionsHtml = '';
+
+    if (isPaid) {
+      const amt = payAmounts[sunday] || staffCfg?.amount || 0;
+      statusHtml = `<span style="background:#e6f4ea;color:#1e7e34;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;">✅ Paid $${amt.toFixed(2)}</span>`;
+      actionsHtml = `<button onclick="removeKettyPayment('${staffName}','${sunday}')" style="background:var(--danger-light);color:var(--danger);border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Undo</button>`;
+    } else if (isOff) {
+      const reason = daysOffMap[sunday].reason || 'Day off';
+      const offId = daysOffMap[sunday].id;
+      statusHtml = `<span style="background:#f0f2f5;color:#8a9ab0;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;">— ${reason}</span>`;
+      actionsHtml = `<button onclick="removeKettyDayOff('${offId}','${sunday}')" style="background:var(--surface2);color:var(--text2);border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Undo</button>`;
+    } else if (isFuture) {
+      statusHtml = `<span style="background:#f0f2f5;color:#8a9ab0;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;">Upcoming</span>`;
+      actionsHtml = '';
+    } else {
+      statusHtml = `<span style="background:#fdf0ef;color:#c0392b;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;">⚠️ Unaccounted</span>`;
+      actionsHtml = `
+        <button onclick="recordKettyPayment('${staffName}','${sunday}',${staffCfg?.amount || 0})" style="background:#e6f4ea;color:#1e7e34;border:1px solid #a8d5b0;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">💰 Record Payment</button>
+        <button onclick="markKettyDayOff('${staffName}','${sunday}')" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">— Did Not Work</button>`;
+    }
+
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);${isPending?'background:#fff9f9;':''}${isToday?'background:#fffdf5;border-left:3px solid var(--accent);':''}">
+      <div style="font-size:13px;font-weight:${isPending||isToday?'700':'400'};color:${isPending?'#c0392b':isToday?'var(--accent)':'var(--text)'};min-width:120px;">
+        ${fmtDate(sunday)}${isToday ? ' <span style="font-size:10px;font-weight:700;color:var(--accent);">(today)</span>' : ''}
+      </div>
+      <div style="flex:1;">${statusHtml}</div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">${actionsHtml}</div>
+    </div>`;
+  }).reverse().join(''); // Most recent first
+
+  const unpaidCount = allSundays.filter(s => !paidDates.has(s) && !daysOffMap[s] && s <= today && s !== today).length;
+  const paidCount = allSundays.filter(s => paidDates.has(s)).length;
+  const offCount = allSundays.filter(s => !!daysOffMap[s]).length;
+
+  document.getElementById('ketty-manager-body').innerHTML = `
+    <div style="background:linear-gradient(135deg,${colors.bg},#fff);border:1.5px solid ${colors.border};border-radius:10px;padding:14px 18px;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;">
+        <div><div style="font-size:22px;font-weight:800;color:#1e7e34;">${paidCount}</div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Paid Sundays</div></div>
+        <div><div style="font-size:22px;font-weight:800;color:#8a9ab0;">${offCount}</div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Days Off</div></div>
+        <div><div style="font-size:22px;font-weight:800;color:${unpaidCount>0?'#c0392b':'#1e7e34'};">${unpaidCount}</div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Unaccounted</div></div>
+      </div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;max-height:55vh;overflow-y:auto;">
+      ${rows}
+    </div>`;
+
+  openModal('modal-ketty-manager');
+}
+
+async function recordKettyPayment(staffName, sunday, amount) {
+  const cfg = getSalaryConfig();
+  const key = staffName.toLowerCase();
+  const staffCfg = cfg[key];
+  const payAmt = staffCfg?.amount || amount;
+
+  const expense = {
+    id: uid(),
+    expense_type: 'wage',
+    exp_date: sunday,
+    amount: parseFloat(payAmt).toFixed(2),
+    category: 'Staff Wages',
+    description: `Wages — ${staffName} (${fmtDate(sunday)})`,
+    wage_staff: staffName,
+    wage_period_start: sunday,
+    wage_period_end: sunday,
+    wage_hours: null,
+    wage_rate: null,
+    method: 'Cash',
+    paid_by: currentUser ? currentUser.name : '',
+    receipt_ref: '',
+    notes: `Sunday payment — ${fmtDate(sunday)}`,
+    vendor: null,
+    created_at: new Date().toISOString()
+  };
+
+  const { error } = await db.from('expenses').upsert(expense);
+  if (error) { toast('Error recording payment: ' + error.message); return; }
+  toast(`✅ Payment of $${parseFloat(payAmt).toFixed(2)} recorded for ${fmtDate(sunday)}`);
+  await openKettyManager(staffName);
+  renderExpensesPanel();
+}
+
+async function removeKettyPayment(staffName, sunday) {
+  if (!confirm(`Remove the payment recorded for ${fmtDate(sunday)}?`)) return;
+  const { error } = await db.from('expenses')
+    .delete()
+    .eq('expense_type', 'wage')
+    .eq('wage_staff', staffName)
+    .eq('wage_period_start', sunday);
+  if (error) { toast('Error: ' + error.message); return; }
+  toast('Payment removed');
+  await openKettyManager(staffName);
+  renderExpensesPanel();
+}
+
+async function markKettyDayOff(staffName, sunday) {
+  const reason = prompt(`Why did ${staffName} not work on ${fmtDate(sunday)}? (optional — press Enter to skip)`) ?? '';
+  const record = {
+    id: uid(),
+    staff_name: staffName,
+    day_date: sunday,
+    reason: reason.trim() || 'Did not work',
+    marked_by: currentUser ? currentUser.name : '',
+    created_at: new Date().toISOString()
+  };
+  const { error } = await db.from('staff_days_off').upsert(record, { onConflict: 'staff_name,day_date' });
+  if (error) { toast('Error: ' + error.message); return; }
+  toast(`📅 ${fmtDate(sunday)} marked as day off`);
+  await openKettyManager(staffName);
+  renderExpensesPanel();
+}
+
+async function removeKettyDayOff(id, sunday) {
+  if (!confirm(`Remove the "day off" marking for ${fmtDate(sunday)}?`)) return;
+  const { error } = await db.from('staff_days_off').delete().eq('id', id);
+  if (error) { toast('Error: ' + error.message); return; }
+  toast('Day off marking removed');
+  await openKettyManager(sunday.staffName); // re-open
+  // Since we don't have staffName here, reload via strip
+  renderExpensesPanel();
+  closeModal('modal-ketty-manager');
+}  
 </script>
+<!-- MODAL: Ketty Sunday Manager -->
+<div class="modal-overlay" id="modal-ketty-manager">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3 id="ketty-manager-title">📅 Sunday Attendance Manager</h3>
+      <button class="btn-close" onclick="closeModal('modal-ketty-manager')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="ketty-manager-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-ketty-manager')">Close</button>
+    </div>
+  </div>
+</div>  
 </body>
 </html>
