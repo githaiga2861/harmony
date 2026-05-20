@@ -2897,26 +2897,24 @@
           </div>
         </div>
         <!-- Ketty -->
-        <div style="padding:16px 18px;border-bottom:1px solid var(--border);background:#fdf8ff;">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-            <div style="width:38px;height:38px;border-radius:50%;background:#f3e8fd;border:2px solid #7c3aed;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#7c3aed;flex-shrink:0;">A</div>
-            <div style="font-weight:700;font-size:15px;color:#1a2332;">Ketty</div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <div class="field" style="margin:0;">
-              <label style="font-size:11px;">Expected Amount Per Period ($)</label>
-              <input type="number" id="salary-ketty-amount" placeholder="e.g. 800.00" step="0.01" min="0">
-            </div>
-            <div class="field" style="margin:0;">
-              <label style="font-size:11px;">Pay Frequency</label>
-              <select id="salary-ketty-freq">
-                <option value="monthly">Monthly</option>
-                <option value="biweekly">Bi-weekly</option>
-                <option value="weekly">Weekly</option>
-              </select>
-            </div>
-          </div>
-        </div>
+<div style="padding:16px 18px;background:#fff5f5;">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+    <div style="width:38px;height:38px;border-radius:50%;background:#fce4ec;border:2px solid #e91e63;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#e91e63;flex-shrink:0;">K</div>
+    <div style="font-weight:700;font-size:15px;color:#1a2332;">Ketty</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <div class="field" style="margin:0;">
+      <label style="font-size:11px;">Expected Amount Per Sunday ($)</label>
+      <input type="number" id="salary-ketty-amount" placeholder="e.g. 150.00" step="0.01" min="0">
+    </div>
+    <div class="field" style="margin:0;">
+      <label style="font-size:11px;">Pay Frequency</label>
+      <select id="salary-ketty-freq">
+        <option value="sunday_only" selected>Sunday Only</option>
+      </select>
+    </div>
+  </div>
+</div>
         <!-- Joseph -->
         <div style="padding:16px 18px;background:#f6fff8;">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
@@ -3083,11 +3081,11 @@
               <input type="text" id="exp-wage-other-name" placeholder="Enter staff member's full name">
             </div>
             <div class="field">
-              <label>Pay Period Start *</label>
+              <label id="wage-period-start-label">Pay Period Start *</label>
               <input type="date" id="exp-wage-period-start">
             </div>
             <div class="field">
-              <label>Pay Period End *</label>
+              <label id="wage-period-end-label">Pay Period End *</label>
               <input type="date" id="exp-wage-period-end">
             </div>
             <div class="field">
@@ -6427,6 +6425,16 @@ function openAddExpense() {
   staffSel.onchange = () => {
     document.getElementById('exp-wage-other-wrap').style.display = staffSel.value === 'Other' ? 'block' : 'none';
     renderWageBalancePanel(staffSel.value);
+    const startLabel = document.getElementById('wage-period-start-label');
+    const endLabel = document.getElementById('wage-period-end-label');
+    if (startLabel) startLabel.textContent = staffSel.value === 'Ketty' ? 'Sunday Date *' : 'Pay Period Start *';
+    if (endLabel) endLabel.style.display = staffSel.value === 'Ketty' ? 'none' : '';
+    // Auto-fill end date for Ketty = same as start
+    if (staffSel.value === 'Ketty') {
+    document.getElementById('exp-wage-period-start').onchange = () => {
+    document.getElementById('exp-wage-period-end').value = document.getElementById('exp-wage-period-start').value;
+  };
+}
   };
   // Also re-render panel when period dates change
   document.getElementById('exp-wage-period-start').onchange = () => renderWageBalancePanel(document.getElementById('exp-wage-staff').value);
@@ -7383,7 +7391,7 @@ const KNOWN_STAFF = ['James', 'Alvan', 'Ketty', 'Joseph'];
 const STAFF_COLORS = {
   'James':  { bg:'#e8f0fe', border:'#1a73e8', text:'#1a73e8', dot:'#1a73e8' },
   'Alvan':  { bg:'#f3e8fd', border:'#7c3aed', text:'#7c3aed', dot:'#7c3aed' },
-  'Ketty':  { bg:'#fff0f6', border:'#db2777', text:'#db2777', dot:'#db2777' },
+  'Ketty':  { bg:'#fce4ec', border:'#e91e63', text:'#e91e63', dot:'#e91e63' },
   'Joseph': { bg:'#e6f4ea', border:'#1e7e34', text:'#1e7e34', dot:'#1e7e34' },
 };
 
@@ -7405,7 +7413,7 @@ function openSalaryConfig() {
 
 function saveSalaryConfig() {
   const cfg = {};
-  KNOWN_STAFF.forEach(name => {
+  ['James','Alvan','Joseph','Ketty'].forEach(name => {
     const key = name.toLowerCase();
     const amount = parseFloat(document.getElementById('salary-' + key + '-amount')?.value || 0);
     const freq = document.getElementById('salary-' + key + '-freq')?.value || 'monthly';
@@ -7577,13 +7585,24 @@ async function renderWageBalancePanel(staffName) {
 
 // ── Frequency helpers ──
 function getFrequencyLabel(freq) {
-  return { monthly:'Monthly', biweekly:'Bi-weekly', weekly:'Weekly' }[freq] || 'Monthly';
+  return { monthly:'Monthly', biweekly:'Bi-weekly', weekly:'Weekly', sunday_only:'Sunday Only' }[freq] || 'Monthly';
 }
 
 // Returns the current period window for a given frequency
 function getCurrentPeriodForFreq(freq) {
   const now = new Date();
   let start, end;
+  if (freq === 'sunday_only') {
+  // Find the most recent Sunday
+  const day = now.getDay(); // 0 = Sunday
+  const diffToSun = day === 0 ? 0 : -(day);
+  start = new Date(now); start.setDate(now.getDate() + diffToSun); start.setHours(0,0,0,0);
+  end = new Date(start); // same day
+  return {
+    start: start.toISOString().split('T')[0],
+    end:   start.toISOString().split('T')[0]
+  };
+}
   if (freq === 'weekly') {
     // Week starts Monday
     const day = now.getDay(); // 0=Sun
@@ -7614,8 +7633,10 @@ function generateExpectedPeriods(freq, earliestDateStr) {
   const now = new Date(); now.setHours(0,0,0,0);
   if (!earliestDateStr) return periods;
 
-  let cursor = new Date(earliestDateStr + 'T00:00:00');
-  // Snap cursor back to the start of the period that contains earliestDate
+  // Financial tracking started May 1 2026 — never count anything before this as overdue
+const TRACKING_START = '2026-05-01';
+const effectiveStart = earliestDateStr < TRACKING_START ? TRACKING_START : earliestDateStr;
+let cursor = new Date(effectiveStart + 'T00:00:00');
   if (freq === 'weekly') {
     const day = cursor.getDay();
     const diffToMon = (day === 0) ? -6 : 1 - day;
@@ -7633,6 +7654,9 @@ function generateExpectedPeriods(freq, earliestDateStr) {
   while (cursor <= now && safety < 500) {
     safety++;
     let periodEnd;
+    if (freq === 'sunday_only') {
+      periodEnd = new Date(cursor); // same day — each Sunday is its own period
+    } else
     if (freq === 'weekly') {
       periodEnd = new Date(cursor); periodEnd.setDate(cursor.getDate() + 6);
     } else if (freq === 'biweekly') {
@@ -7704,6 +7728,11 @@ async function renderWageBalanceStrip() {
     allPeriods.forEach(period => {
       // Only count past periods (fullEnd < today) as overdue
       if (period.fullEnd >= today) return;
+      allPeriods.forEach(period => {
+  // Only count past periods (fullEnd < today) as overdue
+  if (period.fullEnd >= today) return;
+  // Never count periods before tracking started on May 1 2026
+  if (period.fullEnd < '2026-05-01') return;
       const periodPayments = payments.filter(p =>
         p.wage_period_start && p.wage_period_end &&
         p.wage_period_start <= period.end &&
