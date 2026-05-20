@@ -7728,11 +7728,8 @@ async function renderWageBalanceStrip() {
     allPeriods.forEach(period => {
       // Only count past periods (fullEnd < today) as overdue
       if (period.fullEnd >= today) return;
-      allPeriods.forEach(period => {
-  // Only count past periods (fullEnd < today) as overdue
-  if (period.fullEnd >= today) return;
-  // Never count periods before tracking started on May 1 2026
-  if (period.fullEnd < '2026-05-01') return;
+      // Never count periods before tracking started on May 1 2026
+      if (period.fullEnd < '2026-05-01') return;
       const periodPayments = payments.filter(p =>
         p.wage_period_start && p.wage_period_end &&
         p.wage_period_start <= period.end &&
