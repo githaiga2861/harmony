@@ -581,7 +581,7 @@
 <div id="maintenance-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#7b1a1a,#c0392b);color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.02em;box-shadow:0 2px 12px rgba(0,0,0,0.3);">
   <span style="font-size:16px;">🔧</span>
   <span>System is currently under maintenance. Some features may be unavailable.</span>
-  <button onclick="toggleMaintenance()" style="margin-left:16px;background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:6px;padding:4px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Dismiss</button>
+  <button onclick="document.getElementById('maintenance-banner').style.display='none';document.querySelector('.main').style.paddingTop='';" style="margin-left:16px;background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:6px;padding:4px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Dismiss</button>
 </div>
 
 <!-- AUTH -->
@@ -1264,6 +1264,9 @@
                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
                   <button onclick="openSalaryConfig()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
                     ⚙️ Staff Salary Setup
+                  </button>
+                  <button onclick="openAddBill()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
+                    🏠 Add Bill
                   </button>
                   <button onclick="printExpenseReport()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">
                     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -3121,52 +3124,54 @@
           </div>
         </div>
 
-        <!-- ── BILL FIELDS ── -->
+        <!-- ── BILL PAYMENT FIELDS ── -->
         <div id="exp-bill-fields" class="span2" style="display:none;grid-column:span 2;">
-          <div style="background:linear-gradient(90deg,#0f2027,#2c5364);border-radius:8px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+          <div style="background:linear-gradient(90deg,#0f2027,#2c5364);border-radius:8px;padding:10px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
             <span style="font-size:20px;">🏠</span>
             <div>
-              <div style="color:#fff;font-weight:700;font-size:13px;letter-spacing:0.04em;">Bills &amp; Utilities</div>
-              <div style="color:rgba(255,255,255,0.6);font-size:11px;">Add a recurring monthly bill (rent, power, water, internet, etc.)</div>
+              <div style="color:#fff;font-weight:700;font-size:13px;letter-spacing:0.04em;">Record Bill Payment</div>
+              <div style="color:rgba(255,255,255,0.6);font-size:11px;">Select a bill and record a payment against it for the current month</div>
             </div>
           </div>
           <div class="form-grid">
             <div class="field span2">
-              <label>Bill Name *</label>
-              <input type="text" id="exp-bill-name" placeholder="e.g. Pacific Power, Waste Connections, Rent">
-            </div>
-            <div class="field span2">
-              <label>Category *</label>
-              <select id="exp-bill-category">
-                <option value="">— Select Category —</option>
-                <option>Rent / Housing</option>
-                <option>Power / Electricity</option>
-                <option>Water</option>
-                <option>Trash / Garbage</option>
-                <option>Phone</option>
-                <option>Internet</option>
-                <option>Insurance</option>
-                <option>Gas / Heating</option>
-                <option>Cable / Streaming</option>
-                <option>Other</option>
+              <label>Select Bill *</label>
+              <select id="exp-bill-select" onchange="loadBillPaymentDetails()">
+                <option value="">— Select a Bill —</option>
               </select>
             </div>
-            <div class="field">
-              <label>Default Monthly Amount ($)</label>
-              <input type="number" id="exp-bill-default-amount" placeholder="0.00" step="0.01" min="0">
-            </div>
-            <div class="field">
-              <label>Due Day of Month</label>
-              <input type="number" id="exp-bill-due-day" placeholder="e.g. 15" min="1" max="31">
+            <!-- Summary strip — shown after bill selected -->
+            <div id="exp-bill-summary" class="span2" style="display:none;">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:4px;">
+                <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+                  <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Amount Due</div>
+                  <div id="exp-bill-due-display" style="font-size:16px;font-weight:800;color:var(--text);">$0.00</div>
+                </div>
+                <div style="background:#e6f4ea;border-radius:8px;padding:10px;text-align:center;">
+                  <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Paid So Far</div>
+                  <div id="exp-bill-paid-display" style="font-size:16px;font-weight:800;color:#1e7e34;">$0.00</div>
+                </div>
+                <div style="background:#fdf0ef;border-radius:8px;padding:10px;text-align:center;">
+                  <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Remaining</div>
+                  <div id="exp-bill-remaining-display" style="font-size:16px;font-weight:800;color:#c0392b;">$0.00</div>
+                </div>
+              </div>
             </div>
             <div class="field span2">
-              <label>Notes (optional)</label>
-              <input type="text" id="exp-bill-notes" placeholder="e.g. Amount varies each month, auto-pay enrolled">
+              <label>Payment Amount ($) *</label>
+              <input type="number" id="exp-bill-payment-amount" placeholder="0.00" step="0.01" min="0.01">
             </div>
-          </div>
-          <div style="background:#fdf6e3;border:1px solid #f0c040;border-radius:8px;padding:10px 14px;margin-top:4px;">
-            <div style="font-size:12px;color:#7a5c00;line-height:1.75;">
-              💡 <strong>Variable bills</strong> — set a default here, then use the <strong>$</strong> button on the bill card each month to update the exact amount before paying.
+            <div class="field">
+              <label>Payment Date *</label>
+              <input type="date" id="exp-bill-payment-date">
+            </div>
+            <div class="field">
+              <label>Paid By</label>
+              <input type="text" id="exp-bill-payment-by" placeholder="Staff name">
+            </div>
+            <div class="field span2">
+              <label>Reference / Note (optional)</label>
+              <input type="text" id="exp-bill-payment-note" placeholder="e.g. Check #1045, online payment, cash">
             </div>
           </div>
         </div>
@@ -3206,14 +3211,6 @@
             <div class="field">
               <label id="wage-period-end-label">Pay Period End *</label>
               <input type="date" id="exp-wage-period-end">
-            </div>
-            <div class="field">
-              <label>Hours Worked</label>
-              <input type="number" id="exp-wage-hours" placeholder="e.g. 40" step="0.5" min="0">
-            </div>
-            <div class="field">
-              <label>Hourly Rate ($)</label>
-              <input type="number" id="exp-wage-rate" placeholder="e.g. 18.50" step="0.01" min="0" oninput="calcWageTotal()">
             </div>
             <div class="field">
               <label>Gross Amount ($) *</label>
@@ -6404,6 +6401,37 @@ function openAddExpenseBill() {
   setTimeout(() => setExpenseType('bill'), 50);
 }
 
+async function populateBillSelect() {
+  const sel = document.getElementById('exp-bill-select');
+  if (!sel) return;
+  const bills = await getBills();
+  sel.innerHTML = '<option value="">— Select a Bill —</option>';
+  bills.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b.id;
+    opt.textContent = `${BILL_ICONS[b.category] || '📋'} ${b.name} (${b.category})`;
+    sel.appendChild(opt);
+  });
+}
+
+async function loadBillPaymentDetails() {
+  const billId = document.getElementById('exp-bill-select').value;
+  const summaryEl = document.getElementById('exp-bill-summary');
+  if (!billId) { if (summaryEl) summaryEl.style.display = 'none'; return; }
+  const currentMK = getCurrentMonthKey();
+  let { data: rec } = await db.from('bill_month_records').select('*').eq('bill_id', billId).eq('month_key', currentMK).maybeSingle();
+  const { data: b } = await db.from('recurring_bills').select('*').eq('id', billId).single();
+  if (!b) return;
+  const amtDue = rec ? parseFloat(rec.amount_due || 0) : parseFloat(b.default_amount || 0);
+  const amtPaid = rec ? parseFloat(rec.amount_paid || 0) : 0;
+  const remaining = Math.max(0, amtDue - amtPaid);
+  document.getElementById('exp-bill-due-display').textContent = '$' + amtDue.toFixed(2);
+  document.getElementById('exp-bill-paid-display').textContent = '$' + amtPaid.toFixed(2);
+  document.getElementById('exp-bill-remaining-display').textContent = '$' + remaining.toFixed(2);
+  document.getElementById('exp-bill-payment-amount').value = remaining > 0 ? remaining.toFixed(2) : '';
+  if (summaryEl) summaryEl.style.display = 'block';
+}
+
 function openAddBill() {
   document.getElementById('bill-modal-title').textContent = 'Add Recurring Bill';
   document.getElementById('bill-edit-id').value = '';
@@ -7088,17 +7116,17 @@ function setExpenseType(type) {
   if (gFields) gFields.style.display = isGeneral ? 'contents' : 'none';
   if (wFields) wFields.style.display = isWage ? 'block' : 'none';
   if (bFields) bFields.style.display = isBill ? 'block' : 'none';
-}
-
-function calcWageTotal() {
-  const hours = parseFloat(document.getElementById('exp-wage-hours')?.value || 0);
-  const rate = parseFloat(document.getElementById('exp-wage-rate')?.value || 0);
-  if (hours > 0 && rate > 0) {
-    const total = (hours * rate).toFixed(2);
-    const amtEl = document.getElementById('exp-amount');
-    if (amtEl && !amtEl.dataset.manualOverride) amtEl.value = total;
+  if (isBill) {
+    populateBillSelect();
+    document.getElementById('exp-bill-summary').style.display = 'none';
+    document.getElementById('exp-bill-payment-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('exp-bill-payment-by').value = currentUser ? currentUser.name : '';
+    document.getElementById('exp-bill-payment-amount').value = '';
+    document.getElementById('exp-bill-payment-note').value = '';
   }
 }
+
+function calcWageTotal() { /* removed — hours/rate fields no longer used */ }
 
 function openAddExpense() {
   document.getElementById('expense-modal-title').textContent = 'Add Expense';
@@ -7121,18 +7149,10 @@ function openAddExpense() {
   document.getElementById('exp-wage-other-wrap').style.display = 'none';
   document.getElementById('exp-wage-period-start').value = '';
   document.getElementById('exp-wage-period-end').value = '';
-  document.getElementById('exp-wage-hours').value = '';
-  document.getElementById('exp-wage-rate').value = '';
   document.getElementById('exp-wage-method').value = '';
   document.getElementById('exp-wage-paid-by').value = currentUser ? currentUser.name : '';
   document.getElementById('exp-wage-ref').value = '';
   document.getElementById('exp-wage-notes').value = '';
-  // Reset bill fields
-  document.getElementById('exp-bill-name').value = '';
-  document.getElementById('exp-bill-category').value = '';
-  document.getElementById('exp-bill-default-amount').value = '';
-  document.getElementById('exp-bill-due-day').value = '';
-  document.getElementById('exp-bill-notes').value = '';
   setExpenseType('general');
 
   // Wire up "Other" staff toggle + balance panel
@@ -7179,11 +7199,9 @@ async function editExpense(id) {
     else { staffSel.value = 'Other'; document.getElementById('exp-wage-other-name').value = e.wage_staff || ''; document.getElementById('exp-wage-other-wrap').style.display = 'block'; }
     staffSel.onchange = () => { document.getElementById('exp-wage-other-wrap').style.display = staffSel.value === 'Other' ? 'block' : 'none'; };
     document.getElementById('exp-wage-period-start').value = e.wage_period_start || '';
-    document.getElementById('exp-wage-period-end').value = e.wage_period_end || '';
-    document.getElementById('exp-wage-hours').value = e.wage_hours || '';
-    document.getElementById('exp-wage-rate').value = e.wage_rate || '';
     document.getElementById('exp-amount').value = e.amount || '';
     document.getElementById('exp-amount').dataset.manualOverride = '1';
+    document.getElementById('exp-amount').oninput = () => { document.getElementById('exp-amount').dataset.manualOverride = '1'; };
     document.getElementById('exp-amount').oninput = () => { document.getElementById('exp-amount').dataset.manualOverride = '1'; };
     document.getElementById('exp-wage-method').value = e.method || '';
     document.getElementById('exp-wage-paid-by').value = e.paid_by || '';
@@ -7208,23 +7226,44 @@ async function saveExpense() {
   const isBill = currentExpenseType === 'bill';
   const isWage = currentExpenseType === 'wage';
 
-  // ── BILL SAVE ──
+  // ── BILL PAYMENT SAVE ──
   if (isBill) {
-    const name = document.getElementById('exp-bill-name').value.trim();
-    const category = document.getElementById('exp-bill-category').value;
-    if (!name || !category) { toast('Please fill in Bill Name and Category'); return; }
-    const bill = {
-      id: editId || uid(), name, category,
-      due_day: parseInt(document.getElementById('exp-bill-due-day').value) || null,
-      default_amount: parseFloat(document.getElementById('exp-bill-default-amount').value) || 0,
-      notes: document.getElementById('exp-bill-notes').value.trim(),
-      is_active: true,
-    };
-    if (!editId) bill.created_at = new Date().toISOString();
-    const { error } = await db.from('recurring_bills').upsert(bill);
-    if (error) { toast('Error saving bill: ' + error.message); return; }
+    const billId = document.getElementById('exp-bill-select').value;
+    const amount = parseFloat(document.getElementById('exp-bill-payment-amount').value);
+    const payDate = document.getElementById('exp-bill-payment-date').value;
+    if (!billId) { toast('Please select a bill'); return; }
+    if (!amount || amount <= 0) { toast('Please enter a valid payment amount'); return; }
+    if (!payDate) { toast('Please enter the payment date'); return; }
+    const currentMK = getCurrentMonthKey();
+    const { data: b } = await db.from('recurring_bills').select('*').eq('id', billId).single();
+    if (!b) { toast('Bill not found'); return; }
+    let { data: rec } = await db.from('bill_month_records').select('*').eq('bill_id', billId).eq('month_key', currentMK).maybeSingle();
+    if (!rec) {
+      const newRec = {
+        id: uid(), bill_id: billId, month_key: currentMK,
+        amount_due: parseFloat(b.default_amount || 0), amount_paid: 0,
+        is_fully_paid: false, payment_entries: '[]', created_at: new Date().toISOString()
+      };
+      await db.from('bill_month_records').insert(newRec);
+      rec = newRec;
+    }
+    const entries = (() => { try { return JSON.parse(rec.payment_entries || '[]'); } catch { return []; } })();
+    entries.push({
+      id: uid(), amount,
+      date: payDate,
+      by: document.getElementById('exp-bill-payment-by').value.trim(),
+      note: document.getElementById('exp-bill-payment-note').value.trim()
+    });
+    const newAmountPaid = parseFloat(rec.amount_paid || 0) + amount;
+    const isFullyPaid = newAmountPaid >= parseFloat(rec.amount_due || 0) - 0.005;
+    const { error } = await db.from('bill_month_records').update({
+      amount_paid: newAmountPaid,
+      is_fully_paid: isFullyPaid,
+      payment_entries: JSON.stringify(entries)
+    }).eq('id', rec.id);
+    if (error) { toast('Error saving payment: ' + error.message); return; }
     closeModal('modal-expense');
-    toast('✅ Bill added successfully');
+    toast(isFullyPaid ? `✅ ${b.name} fully paid for ${fmtMonthKey(currentMK)}!` : `✅ $${amount.toFixed(2)} recorded for ${b.name}`);
     renderExpensesPanel();
     return;
   }
@@ -7249,8 +7288,8 @@ async function saveExpense() {
       wage_staff: staffName,
       wage_period_start: periodStart,
       wage_period_end: periodEnd,
-      wage_hours: document.getElementById('exp-wage-hours').value || null,
-      wage_rate: document.getElementById('exp-wage-rate').value || null,
+      wage_hours: null,
+      wage_rate: null,
       method: document.getElementById('exp-wage-method').value,
       paid_by: document.getElementById('exp-wage-paid-by').value.trim(),
       receipt_ref: document.getElementById('exp-wage-ref').value.trim(),
