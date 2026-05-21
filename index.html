@@ -1220,7 +1220,7 @@
 
           <!-- EXPENSES SECTION (full width) -->
           <div id="fin-section-expenses" style="display:none;">
-          <!-- ══ BILLS & UTILITIES ══ (now rendered inline in expenses panel) ══ -->
+          <!-- ══ BILLS & UTILITIES ══ (managed inline in expenses panel via Add Expense) ══ -->
           <div id="bills-utilities-section" class="card" style="display:none;margin-bottom:24px;">
             <div style="background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);border-radius:10px 10px 0 0;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
               <div>
@@ -3018,8 +3018,12 @@
               🧾 General Expense
             </button>
             <button type="button" id="exp-type-btn-wage" onclick="setExpenseType('wage')"
-              style="flex:1;padding:9px 14px;border:none;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;background:var(--surface2);color:var(--text2);transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:6px;">
+              style="flex:1;padding:9px 14px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;background:var(--surface2);color:var(--text3);display:flex;align-items:center;justify-content:center;gap:8px;">
               👤 Staff Wage Payment
+            </button>
+            <button type="button" id="exp-type-btn-bill" onclick="setExpenseType('bill')"
+              style="flex:1;padding:9px 14px;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;background:var(--surface2);color:var(--text3);display:flex;align-items:center;justify-content:center;gap:8px;">
+              🏠 Bills &amp; Utilities
             </button>
           </div>
         </div>
@@ -3090,6 +3094,56 @@
           <div class="field span2">
             <label>Notes</label>
             <textarea id="exp-notes" rows="2" placeholder="Any additional details..."></textarea>
+          </div>
+        </div>
+
+        <!-- ── BILL FIELDS ── -->
+        <div id="exp-bill-fields" class="span2" style="display:none;grid-column:span 2;">
+          <div style="background:linear-gradient(90deg,#0f2027,#2c5364);border-radius:8px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+            <span style="font-size:20px;">🏠</span>
+            <div>
+              <div style="color:#fff;font-weight:700;font-size:13px;letter-spacing:0.04em;">Bills &amp; Utilities</div>
+              <div style="color:rgba(255,255,255,0.6);font-size:11px;">Add a recurring monthly bill (rent, power, water, internet, etc.)</div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="field span2">
+              <label>Bill Name *</label>
+              <input type="text" id="exp-bill-name" placeholder="e.g. Pacific Power, Waste Connections, Rent">
+            </div>
+            <div class="field span2">
+              <label>Category *</label>
+              <select id="exp-bill-category">
+                <option value="">— Select Category —</option>
+                <option>Rent / Housing</option>
+                <option>Power / Electricity</option>
+                <option>Water</option>
+                <option>Trash / Garbage</option>
+                <option>Phone</option>
+                <option>Internet</option>
+                <option>Insurance</option>
+                <option>Gas / Heating</option>
+                <option>Cable / Streaming</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Default Monthly Amount ($)</label>
+              <input type="number" id="exp-bill-default-amount" placeholder="0.00" step="0.01" min="0">
+            </div>
+            <div class="field">
+              <label>Due Day of Month</label>
+              <input type="number" id="exp-bill-due-day" placeholder="e.g. 15" min="1" max="31">
+            </div>
+            <div class="field span2">
+              <label>Notes (optional)</label>
+              <input type="text" id="exp-bill-notes" placeholder="e.g. Amount varies each month, auto-pay enrolled">
+            </div>
+          </div>
+          <div style="background:#fdf6e3;border:1px solid #f0c040;border-radius:8px;padding:10px 14px;margin-top:4px;">
+            <div style="font-size:12px;color:#7a5c00;line-height:1.75;">
+              💡 <strong>Variable bills</strong> — set a default here, then use the <strong>$</strong> button on the bill card each month to update the exact amount before paying.
+            </div>
           </div>
         </div>
 
@@ -6321,6 +6375,11 @@ async function renderBillsSection() {
   }).join('');
 }
 
+function openAddExpenseBill() {
+  openAddExpense();
+  setTimeout(() => setExpenseType('bill'), 50);
+}
+
 function openAddBill() {
   document.getElementById('bill-modal-title').textContent = 'Add Recurring Bill';
   document.getElementById('bill-edit-id').value = '';
@@ -6503,7 +6562,7 @@ function switchFinTab(tab) {
   if (expensesSection) expensesSection.style.display = !isIncome ? 'block' : 'none';
 
   localStorage.setItem('hlh_fin_tab', tab);
-  if (!isIncome) renderExpensesPanel();
+  if (!isIncome) { renderExpensesPanel(); }
 }
 
 async function renderPaymentsPage() {
@@ -6989,16 +7048,22 @@ let currentExpenseType = 'general';
 function setExpenseType(type) {
   currentExpenseType = type;
   const isWage = type === 'wage';
+  const isBill = type === 'bill';
+  const isGeneral = type === 'general';
   // Toggle button styles
   const btnG = document.getElementById('exp-type-btn-general');
   const btnW = document.getElementById('exp-type-btn-wage');
-  if (btnG) { btnG.style.background = isWage ? 'var(--surface2)' : 'var(--accent)'; btnG.style.color = isWage ? 'var(--text2)' : '#fff'; }
+  const btnB = document.getElementById('exp-type-btn-bill');
+  if (btnG) { btnG.style.background = isGeneral ? 'var(--accent)' : 'var(--surface2)'; btnG.style.color = isGeneral ? '#fff' : 'var(--text2)'; }
   if (btnW) { btnW.style.background = isWage ? '#1a1a1a' : 'var(--surface2)'; btnW.style.color = isWage ? '#fff' : 'var(--text2)'; }
+  if (btnB) { btnB.style.background = isBill ? 'linear-gradient(135deg,#0f2027,#2c5364)' : 'var(--surface2)'; btnB.style.color = isBill ? '#fff' : 'var(--text2)'; }
   // Toggle field visibility
   const gFields = document.getElementById('exp-general-fields');
   const wFields = document.getElementById('exp-wage-fields');
-  if (gFields) gFields.style.display = isWage ? 'none' : 'contents';
+  const bFields = document.getElementById('exp-bill-fields');
+  if (gFields) gFields.style.display = isGeneral ? 'contents' : 'none';
   if (wFields) wFields.style.display = isWage ? 'block' : 'none';
+  if (bFields) bFields.style.display = isBill ? 'block' : 'none';
 }
 
 function calcWageTotal() {
@@ -7038,6 +7103,12 @@ function openAddExpense() {
   document.getElementById('exp-wage-paid-by').value = currentUser ? currentUser.name : '';
   document.getElementById('exp-wage-ref').value = '';
   document.getElementById('exp-wage-notes').value = '';
+  // Reset bill fields
+  document.getElementById('exp-bill-name').value = '';
+  document.getElementById('exp-bill-category').value = '';
+  document.getElementById('exp-bill-default-amount').value = '';
+  document.getElementById('exp-bill-due-day').value = '';
+  document.getElementById('exp-bill-notes').value = '';
   setExpenseType('general');
 
   // Wire up "Other" staff toggle + balance panel
@@ -7110,7 +7181,29 @@ async function editExpense(id) {
 async function saveExpense() {
   const date = document.getElementById('exp-date').value;
   const editId = document.getElementById('exp-edit-id').value;
+  const isBill = currentExpenseType === 'bill';
   const isWage = currentExpenseType === 'wage';
+
+  // ── BILL SAVE ──
+  if (isBill) {
+    const name = document.getElementById('exp-bill-name').value.trim();
+    const category = document.getElementById('exp-bill-category').value;
+    if (!name || !category) { toast('Please fill in Bill Name and Category'); return; }
+    const bill = {
+      id: editId || uid(), name, category,
+      due_day: parseInt(document.getElementById('exp-bill-due-day').value) || null,
+      default_amount: parseFloat(document.getElementById('exp-bill-default-amount').value) || 0,
+      notes: document.getElementById('exp-bill-notes').value.trim(),
+      is_active: true,
+    };
+    if (!editId) bill.created_at = new Date().toISOString();
+    const { error } = await db.from('recurring_bills').upsert(bill);
+    if (error) { toast('Error saving bill: ' + error.message); return; }
+    closeModal('modal-expense');
+    toast('✅ Bill added successfully');
+    renderExpensesPanel();
+    return;
+  }
 
   if (isWage) {
     const staffSel = document.getElementById('exp-wage-staff').value;
@@ -7246,15 +7339,15 @@ async function renderExpensesPanel() {
     const wageTotal = wages.reduce((s,e) => s + parseFloat(e.amount||0), 0);
     html += `
       <div style="margin-bottom:8px;margin-top:4px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(90deg,#1a1a1a,#2d2d2d);border-radius:8px 8px 0 0;">
-          <div style="display:flex;align-items:center;gap:8px;">
+        <div onclick="toggleExpenseSection('wages')" id="wages-section-header" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:linear-gradient(90deg,#1a1a1a,#2d2d2d);border-radius:8px;cursor:pointer;user-select:none;">
+          <div style="display:flex;align-items:center;gap:10px;">
             <span style="font-size:16px;">👤</span>
             <span style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;">Staff Wages</span>
-            <span style="background:rgba(255,255,255,0.15);color:#fff;border-radius:20px;padding:2px 8px;font-size:11px;">${wages.length} payment${wages.length!==1?'s':''}</span>
+            <span style="color:rgba(255,255,255,0.65);font-size:11px;">${wages.length} payment${wages.length!==1?'s':''} &nbsp;·&nbsp; -$${wageTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
           </div>
-          <span style="color:#f5c842;font-size:14px;font-weight:700;">-$${wageTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+          <span id="wages-section-chevron" style="color:#f5c842;font-size:16px;transition:transform 0.2s;display:inline-block;">▼</span>
         </div>
-        <div style="border:1px solid #2d2d2d;border-top:none;border-radius:0 0 8px 8px;overflow:hidden;">
+        <div id="wages-section-body" style="border:1px solid #2d2d2d;border-top:none;border-radius:0 0 8px 8px;overflow:hidden;display:none;">
           ${wages.map(e => {
             const amt = parseFloat(e.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
             const staffName = e.wage_staff || 'Staff';
@@ -7297,35 +7390,39 @@ async function renderExpensesPanel() {
       </div>`;
   }
 
-  // ── BILLS & UTILITIES INLINE SECTION ──
+  // ── BILLS & UTILITIES COLLAPSIBLE SECTION ──
   html += `<div id="bills-inline-section" style="margin-top:${wages.length?'14px':'4px'};margin-bottom:14px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(90deg,#0f2027,#2c5364);border-radius:8px 8px 0 0;">
-      <div style="display:flex;align-items:center;gap:8px;">
+    <div onclick="toggleExpenseSection('bills')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:linear-gradient(90deg,#0f2027,#2c5364);border-radius:8px;cursor:pointer;user-select:none;" id="bills-section-header">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
         <span style="font-size:16px;">🏠</span>
         <span style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;">Bills &amp; Utilities</span>
+        <span id="bills-section-summary" style="color:rgba(255,255,255,0.65);font-size:11px;margin-left:4px;"></span>
       </div>
-      <button onclick="openAddBill()" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:4px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Bill</button>
+      <span id="bills-section-chevron" style="color:#fff;font-size:16px;transition:transform 0.2s;display:inline-block;">▼</span>
     </div>
-    <div id="bills-inline-grid" style="border:1px solid #2c5364;border-top:none;border-radius:0 0 8px 8px;padding:14px;background:#fff;">
+    <div id="bills-inline-grid" style="border:1px solid #2c5364;border-top:none;border-radius:0 0 8px 8px;padding:14px;background:#fff;display:none;">
       <div style="color:var(--text3);font-size:13px;font-style:italic;text-align:center;padding:10px 0;">Loading bills…</div>
     </div>
   </div>`;
 
-  
-  // ── GENERAL EXPENSES SECTION ──
+  // ── GENERAL EXPENSES COLLAPSIBLE SECTION ──
   if (general.length) {
     const genTotal = general.reduce((s,e) => s + parseFloat(e.amount||0), 0);
     html += `
       <div style="margin-top:4px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(90deg,#5a1a1a,#8b2020);border-radius:8px 8px 0 0;">
-          <div style="display:flex;align-items:center;gap:8px;">
+        <div onclick="toggleExpenseSection('general')" id="general-section-header" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:linear-gradient(90deg,#5a1a1a,#8b2020);border-radius:8px;cursor:pointer;user-select:none;">
+          <div style="display:flex;align-items:center;gap:10px;">
             <span style="font-size:16px;">🧾</span>
             <span style="color:#fff;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;">Groceries &amp; General</span>
+            <span style="color:rgba(255,255,255,0.65);font-size:11px;">${general.length} item${general.length!==1?'s':''} &nbsp;·&nbsp; -$${genTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
+          </div>
+          <span id="general-section-chevron" style="color:#fff;font-size:16px;transition:transform 0.2s;display:inline-block;">▼</span>
+        </div>
             <span style="background:rgba(255,255,255,0.15);color:#fff;border-radius:20px;padding:2px 8px;font-size:11px;">${general.length} item${general.length!==1?'s':''}</span>
           </div>
           <span style="color:#f5a0a0;font-size:14px;font-weight:700;">-$${genTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
         </div>
-        <div style="border:1px solid #8b2020;border-top:none;border-radius:0 0 8px 8px;overflow:hidden;">
+        <div id="general-section-body" style="border:1px solid #8b2020;border-top:none;border-radius:0 0 8px 8px;overflow:hidden;display:none;">
           ${general.map(e => {
             const amt = parseFloat(e.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
             const icon = EXP_CATEGORY_ICONS[e.category] || '📦';
@@ -7359,6 +7456,20 @@ async function renderExpensesPanel() {
   renderBillsInline();
 }
 
+const _expSectionState = { wages: false, bills: false, general: false };
+
+function toggleExpenseSection(section) {
+  _expSectionState[section] = !_expSectionState[section];
+  const isOpen = _expSectionState[section];
+  const bodyMap = { wages: 'wages-section-body', bills: 'bills-inline-grid', general: 'general-section-body' };
+  const chevronMap = { wages: 'wages-section-chevron', bills: 'bills-section-chevron', general: 'general-section-chevron' };
+  const body = document.getElementById(bodyMap[section]);
+  const chevron = document.getElementById(chevronMap[section]);
+  if (body) body.style.display = isOpen ? 'block' : 'none';
+  if (chevron) chevron.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+  if (section === 'bills' && isOpen) renderBillsInline();
+}
+
 async function renderBillsInline() {
   const inlineGrid = document.getElementById('bills-inline-grid');
   if (!inlineGrid) return;
@@ -7368,12 +7479,21 @@ async function renderBillsInline() {
   const currentMap = {};
   currentRecords.forEach(r => { currentMap[r.bill_id] = r; });
 
+  const summaryEl = document.getElementById('bills-section-summary');
   if (!bills.length) {
     inlineGrid.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">
-      No bills added yet. <button onclick="openAddBill()" style="color:var(--accent);background:none;border:none;cursor:pointer;font-weight:700;font-family:inherit;">Add your first bill →</button>
+      No bills added yet. <button onclick="openAddExpenseBill()" style="color:var(--accent);background:none;border:none;cursor:pointer;font-weight:700;font-family:inherit;">Add your first bill →</button>
     </div>`;
+    if (summaryEl) summaryEl.textContent = '0 bills';
     return;
   }
+
+  const currentRecordsForSummary = await getBillMonthRecords(getCurrentMonthKey());
+  const currentMapForSummary = {};
+  currentRecordsForSummary.forEach(r => { currentMapForSummary[r.bill_id] = r; });
+  const totalDue = bills.reduce((s,b) => s + parseFloat((currentMapForSummary[b.id]?.amount_due) || b.default_amount || 0), 0);
+  const paidCount = bills.filter(b => currentMapForSummary[b.id]?.is_fully_paid).length;
+  if (summaryEl) summaryEl.textContent = `${bills.length} bill${bills.length!==1?'s':''} · ${paidCount}/${bills.length} paid · $${totalDue.toFixed(2)} due`;
 
   const today = new Date();
   inlineGrid.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">
