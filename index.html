@@ -1220,6 +1220,35 @@
 
           <!-- EXPENSES SECTION (full width) -->
           <div id="fin-section-expenses" style="display:none;">
+          <!-- ══ BILLS & UTILITIES ══ -->
+          <div id="bills-utilities-section" class="card" style="margin-bottom:24px;">
+            <div style="background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);border-radius:10px 10px 0 0;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+              <div>
+                <div style="color:#fff;font-family:'DM Serif Display',serif;font-size:18px;">🏠 Bills &amp; Utilities</div>
+                <div style="color:rgba(255,255,255,0.5);font-size:11px;margin-top:3px;">Recurring monthly obligations — partial payments, overdue detection &amp; auto-reset</div>
+              </div>
+              <button onclick="openAddBill()" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.35);border-radius:8px;padding:9px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Bill
+              </button>
+            </div>
+            <div style="padding:20px 22px;">
+              <div id="bills-overdue-section" style="display:none;margin-bottom:16px;"></div>
+              <div id="bills-current-header" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+                <div id="bills-month-label" style="font-size:15px;font-weight:700;color:var(--text);"></div>
+                <div id="bills-summary-badge" style="font-size:12px;font-weight:600;color:var(--text3);"></div>
+              </div>
+              <div id="bills-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;"></div>
+              <div id="bills-empty" style="display:none;text-align:center;padding:56px 24px;">
+                <div style="font-size:52px;margin-bottom:14px;">🏠</div>
+                <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px;">No Bills Added Yet</div>
+                <div style="font-size:13px;color:var(--text3);margin-bottom:20px;">Track rent, power, water, internet and more — all in one place with overdue detection.</div>
+                <button onclick="openAddBill()" class="btn btn-primary">+ Add Your First Bill</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- General Expenses Card -->
           <div class="card">
               <div style="background:linear-gradient(135deg,#6b1a1a,#c0392b);border-radius:10px 10px 0 0;padding:14px 18px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -3141,6 +3170,122 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-expense')">Cancel</button>
       <button class="btn btn-primary" onclick="saveExpense()">Save Expense</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add / Edit Recurring Bill -->
+<div class="modal-overlay" id="modal-bill">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <h3 id="bill-modal-title">Add Recurring Bill</h3>
+      <button class="btn-close" onclick="closeModal('modal-bill')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="bill-edit-id">
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Bill Name *</label>
+          <input type="text" id="bill-name" placeholder="e.g. Pacific Power, Waste Connections, Rent">
+        </div>
+        <div class="field span2">
+          <label>Category *</label>
+          <select id="bill-category">
+            <option value="">— Select Category —</option>
+            <option>Rent / Housing</option>
+            <option>Power / Electricity</option>
+            <option>Water</option>
+            <option>Trash / Garbage</option>
+            <option>Phone</option>
+            <option>Internet</option>
+            <option>Insurance</option>
+            <option>Gas / Heating</option>
+            <option>Cable / Streaming</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Default Amount ($)</label>
+          <input type="number" id="bill-default-amount" placeholder="0.00" step="0.01" min="0">
+        </div>
+        <div class="field">
+          <label>Due Day of Month</label>
+          <input type="number" id="bill-due-day" placeholder="e.g. 15" min="1" max="31">
+        </div>
+        <div class="field span2">
+          <label>Notes (optional)</label>
+          <input type="text" id="bill-notes" placeholder="e.g. Amount varies each month, auto-pay enrolled">
+        </div>
+        <div class="field span2" style="background:#fdf6e3;border:1px solid #f0c040;border-radius:8px;padding:10px 14px;margin:0;">
+          <div style="font-size:12px;color:#7a5c00;line-height:1.75;">
+            💡 <strong>Variable bills</strong> (like water or trash) — set a default here, then tap the <strong>$</strong> button on the card each month to update the exact amount before paying.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-bill')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBill()">Save Bill</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Record Bill Payment -->
+<div class="modal-overlay" id="modal-bill-payment">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <h3 id="billpay-modal-title">Record Payment</h3>
+      <button class="btn-close" onclick="closeModal('modal-bill-payment')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="billpay-bill-id">
+      <input type="hidden" id="billpay-month-key">
+      <input type="hidden" id="billpay-rec-id">
+
+      <!-- Summary strip -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;">
+        <div style="background:var(--surface2);border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Amount Due</div>
+          <div id="billpay-amount-due" style="font-size:17px;font-weight:800;color:var(--text);">$0.00</div>
+        </div>
+        <div style="background:#e6f4ea;border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Paid So Far</div>
+          <div id="billpay-amount-paid" style="font-size:17px;font-weight:800;color:#1e7e34;">$0.00</div>
+        </div>
+        <div style="background:#fdf0ef;border-radius:8px;padding:12px;text-align:center;">
+          <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Remaining</div>
+          <div id="billpay-remaining" style="font-size:17px;font-weight:800;color:#c0392b;">$0.00</div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Payment Amount ($) *</label>
+          <input type="number" id="billpay-amount" placeholder="0.00" step="0.01" min="0.01">
+        </div>
+        <div class="field">
+          <label>Payment Date *</label>
+          <input type="date" id="billpay-date">
+        </div>
+        <div class="field">
+          <label>Paid By</label>
+          <input type="text" id="billpay-paid-by" placeholder="Staff name">
+        </div>
+        <div class="field span2">
+          <label>Reference / Note (optional)</label>
+          <input type="text" id="billpay-note" placeholder="e.g. Check #1045, online payment, cash">
+        </div>
+      </div>
+
+      <div id="billpay-history" style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);min-height:36px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-bill-payment')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBillPayment()">Record Payment</button>
     </div>
   </div>
 </div>
@@ -5924,6 +6069,418 @@ function genReceiptNum() {
   return `HLH-${yr}${mo}-${rand}`;
 }
 
+// ══════════════════════════════════
+// BILLS & UTILITIES ENGINE
+// ══════════════════════════════════
+
+function toLocalDateStr(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+const BILL_ICONS = {
+  'Rent / Housing': '🏠', 'Power / Electricity': '⚡', 'Water': '💧',
+  'Trash / Garbage': '🗑️', 'Phone': '📱', 'Internet': '🌐',
+  'Insurance': '🛡️', 'Gas / Heating': '🔥', 'Cable / Streaming': '📺', 'Other': '📋',
+};
+
+function getCurrentMonthKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getPreviousMonthKey() {
+  const prev = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1);
+  return `${prev.getFullYear()}-${String(prev.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function fmtMonthKey(mk) {
+  if (!mk) return '';
+  const [y, m] = mk.split('-');
+  return new Date(parseInt(y), parseInt(m) - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+function ordinal(n) {
+  const s = ['th','st','nd','rd'], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+async function getBills() {
+  const { data } = await db.from('recurring_bills').select('*').eq('is_active', true).order('created_at', { ascending: true });
+  return data || [];
+}
+
+async function getBillMonthRecords(monthKey) {
+  const { data } = await db.from('bill_month_records').select('*').eq('month_key', monthKey);
+  return data || [];
+}
+
+async function renderBillsSection() {
+  const bills = await getBills();
+  const currentMK = getCurrentMonthKey();
+  const prevMK = getPreviousMonthKey();
+  const grid = document.getElementById('bills-grid');
+  const emptyEl = document.getElementById('bills-empty');
+  const overdueSection = document.getElementById('bills-overdue-section');
+  const monthLabel = document.getElementById('bills-month-label');
+  const summaryBadge = document.getElementById('bills-summary-badge');
+  if (!grid) return;
+
+  if (!bills.length) {
+    grid.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = 'block';
+    if (overdueSection) overdueSection.style.display = 'none';
+    if (monthLabel) monthLabel.textContent = '';
+    if (summaryBadge) summaryBadge.textContent = '';
+    return;
+  }
+
+  grid.style.display = 'grid';
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  const [currentRecords, prevRecords] = await Promise.all([
+    getBillMonthRecords(currentMK),
+    getBillMonthRecords(prevMK),
+  ]);
+
+  const currentMap = {}, prevMap = {};
+  currentRecords.forEach(r => { currentMap[r.bill_id] = r; });
+  prevRecords.forEach(r => { prevMap[r.bill_id] = r; });
+
+  if (monthLabel) monthLabel.textContent = fmtMonthKey(currentMK);
+
+  const paidCount = bills.filter(b => currentMap[b.id]?.is_fully_paid).length;
+  const partialCount = bills.filter(b => !currentMap[b.id]?.is_fully_paid && parseFloat(currentMap[b.id]?.amount_paid || 0) > 0).length;
+  const unpaidCount = bills.length - paidCount - partialCount;
+
+  if (summaryBadge) {
+    summaryBadge.innerHTML =
+      `<span style="color:#1e7e34;font-weight:700;">${paidCount} paid</span>` +
+      (partialCount ? `&nbsp;·&nbsp;<span style="color:#d68910;">${partialCount} partial</span>` : '') +
+      (unpaidCount ? `&nbsp;·&nbsp;<span style="color:var(--text3);">${unpaidCount} unpaid</span>` : '');
+  }
+
+  // ── Overdue from previous month ──
+  const overdueItems = bills.filter(b => {
+    const pr = prevMap[b.id];
+    return pr && !pr.is_fully_paid && parseFloat(pr.amount_due || 0) > 0;
+  });
+
+  if (overdueSection) {
+    if (overdueItems.length) {
+      overdueSection.style.display = 'block';
+      overdueSection.innerHTML = `
+        <div style="background:linear-gradient(135deg,#7b1a1a,#c0392b);border-radius:10px;padding:14px 18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">⚠️</span>
+            <span style="color:#fff;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:0.06em;">Overdue from ${fmtMonthKey(prevMK)}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            ${overdueItems.map(b => {
+              const pr = prevMap[b.id];
+              const due = parseFloat(pr.amount_due || b.default_amount || 0);
+              const paid = parseFloat(pr.amount_paid || 0);
+              const rem = due - paid;
+              const pct = due > 0 ? Math.min(100, Math.round(paid / due * 100)) : 0;
+              const icon = BILL_ICONS[b.category] || '📋';
+              return `<div style="background:rgba(255,255,255,0.12);border-radius:8px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">
+                  <span style="font-size:22px;">${icon}</span>
+                  <div style="min-width:0;">
+                    <div style="color:#fff;font-weight:700;font-size:13px;">${b.name}</div>
+                    <div style="color:rgba(255,255,255,0.65);font-size:11.5px;margin-top:2px;">
+                      Paid: <strong>$${paid.toFixed(2)}</strong> of $${due.toFixed(2)}
+                      &nbsp;·&nbsp; <strong style="color:#f5b8b8;">$${rem.toFixed(2)} still owed</strong>
+                    </div>
+                    <div style="background:rgba(255,255,255,0.2);border-radius:20px;height:4px;overflow:hidden;margin-top:5px;max-width:160px;">
+                      <div style="width:${pct}%;background:#fff;height:100%;border-radius:20px;"></div>
+                    </div>
+                  </div>
+                </div>
+                <button onclick="openBillPayment('${b.id}','${prevMK}')"
+                  style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.45);border-radius:7px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">
+                  Settle Overdue →
+                </button>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+    } else {
+      overdueSection.style.display = 'none';
+    }
+  }
+
+  // ── Current month bill cards ──
+  const today = new Date();
+  grid.innerHTML = bills.map(b => {
+    const rec = currentMap[b.id];
+    const amountDue = rec ? parseFloat(rec.amount_due) : parseFloat(b.default_amount || 0);
+    const amountPaid = rec ? parseFloat(rec.amount_paid || 0) : 0;
+    const isFullyPaid = rec ? rec.is_fully_paid : false;
+    const remaining = Math.max(0, amountDue - amountPaid);
+    const pct = amountDue > 0 ? Math.min(100, Math.round(amountPaid / amountDue * 100)) : 0;
+    const isPartial = amountPaid > 0 && !isFullyPaid;
+    const icon = BILL_ICONS[b.category] || '📋';
+    const dueDate = b.due_day ? new Date(today.getFullYear(), today.getMonth(), b.due_day) : null;
+    const isPastDue = dueDate && today > dueDate && !isFullyPaid;
+
+    let statusText, statusBg, statusColor, borderColor, cardBg, barColor;
+    if (isFullyPaid) {
+      statusText = '✅ PAID'; statusBg = '#e6f4ea'; statusColor = '#1e7e34';
+      borderColor = '#a8d5b0'; cardBg = '#f8fdf9'; barColor = '#1e7e34';
+    } else if (isPartial) {
+      statusText = '⏳ PARTIAL'; statusBg = '#fff3cd'; statusColor = '#856404';
+      borderColor = '#ffe08a'; cardBg = '#fffef5'; barColor = '#d68910';
+    } else if (isPastDue) {
+      statusText = '🔴 OVERDUE'; statusBg = '#fdf0ef'; statusColor = '#c0392b';
+      borderColor = '#f5c0bb'; cardBg = '#fff9f9'; barColor = '#c0392b';
+    } else {
+      statusText = 'UNPAID'; statusBg = 'var(--surface2)'; statusColor = 'var(--text3)';
+      borderColor = 'var(--border)'; cardBg = '#fff'; barColor = '#e0e0e0';
+    }
+
+    const entries = (() => { try { return JSON.parse(rec?.payment_entries || '[]'); } catch { return []; } })();
+
+    const historyHtml = entries.length ? `
+      <div style="margin-top:10px;padding-top:8px;border-top:1px solid ${borderColor};">
+        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;">This month</div>
+        ${entries.map(e => `
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text2);padding:2px 0;">
+            <span>${fmtDate(e.date)}${e.note ? ' · ' + e.note : ''}</span>
+            <span style="font-weight:700;color:#1e7e34;">+$${parseFloat(e.amount).toFixed(2)}</span>
+          </div>`).join('')}
+      </div>` : '';
+
+    const payBtnLabel = isPartial ? '+ Add Payment' : isPastDue ? '🔴 Pay Overdue' : '💳 Pay';
+    const payBtnBg = isPastDue && !isPartial ? '#c0392b' : 'var(--accent)';
+
+    return `
+      <div style="border:1.5px solid ${borderColor};border-radius:12px;overflow:hidden;background:${cardBg};
+                  transition:box-shadow 0.15s,transform 0.15s;"
+           onmouseover="this.style.boxShadow='0 6px 20px rgba(0,0,0,0.1)';this.style.transform='translateY(-2px)'"
+           onmouseout="this.style.boxShadow='';this.style.transform=''">
+
+        <!-- Card header -->
+        <div style="padding:13px 14px 10px;border-bottom:1px solid ${borderColor};">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:9px;">
+            <div style="display:flex;align-items:center;gap:9px;flex:1;min-width:0;">
+              <span style="font-size:26px;flex-shrink:0;">${icon}</span>
+              <div style="min-width:0;">
+                <div style="font-weight:700;font-size:13.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${b.name}</div>
+                <div style="font-size:11px;color:var(--text3);margin-top:1px;">${b.category}${b.due_day ? ' &middot; Due ' + ordinal(b.due_day) : ''}</div>
+              </div>
+            </div>
+            <span style="background:${statusBg};color:${statusColor};border-radius:20px;padding:3px 9px;font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0;">${statusText}</span>
+          </div>
+
+          <!-- Amount -->
+          <div style="margin-bottom:5px;">
+            ${amountDue > 0
+              ? `<span style="font-size:22px;font-weight:800;color:var(--text);">$${amountPaid.toFixed(2)}</span><span style="font-size:12px;color:var(--text3);"> / $${amountDue.toFixed(2)}</span>`
+              : `<span style="font-size:13px;color:var(--text3);font-style:italic;">No amount set — tap $ to set</span>`}
+          </div>
+          ${isPartial ? `<div style="font-size:11.5px;color:#c0392b;font-weight:700;margin-bottom:5px;">$${remaining.toFixed(2)} remaining</div>` : ''}
+
+          <!-- Progress bar -->
+          <div style="background:#e8e8e8;border-radius:20px;height:6px;overflow:hidden;">
+            <div style="width:${pct}%;background:${barColor};height:100%;border-radius:20px;transition:width 0.4s;"></div>
+          </div>
+          ${pct > 0 && pct < 100 ? `<div style="font-size:10px;color:var(--text3);text-align:right;margin-top:2px;">${pct}%</div>` : ''}
+        </div>
+
+        <!-- Card body -->
+        <div style="padding:10px 14px 13px;">
+          ${historyHtml}
+
+          <!-- Action buttons -->
+          <div style="display:flex;gap:6px;margin-top:${entries.length ? '10px' : '4px'};">
+            ${!isFullyPaid
+              ? `<button onclick="openBillPayment('${b.id}','${currentMK}')"
+                  style="flex:1;background:${payBtnBg};color:#fff;border:none;border-radius:7px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">
+                  ${payBtnLabel}
+                </button>`
+              : `<button onclick="openBillPayment('${b.id}','${currentMK}')"
+                  style="flex:1;background:none;border:1px dashed #a8d5b0;border-radius:7px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;color:#1e7e34;">
+                  + Add Another Payment
+                </button>`}
+            <button onclick="openSetBillAmount('${b.id}','${currentMK}',${amountDue})"
+              style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;"
+              title="Adjust amount due this month">$</button>
+            <button onclick="openEditBill('${b.id}')"
+              style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:7px;padding:9px 11px;font-size:12px;cursor:pointer;font-family:inherit;"
+              title="Edit bill">✏️</button>
+          </div>
+          <button onclick="deleteBill('${b.id}')"
+            style="margin-top:6px;width:100%;background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;font-family:inherit;padding:3px;">
+            Remove bill
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function openAddBill() {
+  document.getElementById('bill-modal-title').textContent = 'Add Recurring Bill';
+  document.getElementById('bill-edit-id').value = '';
+  document.getElementById('bill-name').value = '';
+  document.getElementById('bill-category').value = '';
+  document.getElementById('bill-due-day').value = '';
+  document.getElementById('bill-default-amount').value = '';
+  document.getElementById('bill-notes').value = '';
+  openModal('modal-bill');
+}
+
+async function openEditBill(id) {
+  const { data: b } = await db.from('recurring_bills').select('*').eq('id', id).single();
+  if (!b) return;
+  document.getElementById('bill-modal-title').textContent = 'Edit Bill';
+  document.getElementById('bill-edit-id').value = id;
+  document.getElementById('bill-name').value = b.name || '';
+  document.getElementById('bill-category').value = b.category || '';
+  document.getElementById('bill-due-day').value = b.due_day || '';
+  document.getElementById('bill-default-amount').value = b.default_amount || '';
+  document.getElementById('bill-notes').value = b.notes || '';
+  openModal('modal-bill');
+}
+
+async function saveBill() {
+  const name = document.getElementById('bill-name').value.trim();
+  const category = document.getElementById('bill-category').value;
+  if (!name || !category) { toast('Please fill in Bill Name and Category'); return; }
+  const editId = document.getElementById('bill-edit-id').value;
+  const bill = {
+    id: editId || uid(), name, category,
+    due_day: parseInt(document.getElementById('bill-due-day').value) || null,
+    default_amount: parseFloat(document.getElementById('bill-default-amount').value) || 0,
+    notes: document.getElementById('bill-notes').value.trim(),
+    is_active: true,
+  };
+  if (!editId) bill.created_at = new Date().toISOString();
+  const { error } = await db.from('recurring_bills').upsert(bill);
+  if (error) { toast('Error: ' + error.message); return; }
+  closeModal('modal-bill');
+  toast(editId ? '✅ Bill updated' : '✅ Bill added');
+  renderBillsSection();
+}
+
+async function deleteBill(id) {
+  if (!confirm('Remove this bill from tracking?\nAll payment history will be kept for your records.')) return;
+  await db.from('recurring_bills').update({ is_active: false }).eq('id', id);
+  toast('Bill removed from tracking');
+  renderBillsSection();
+}
+
+async function openBillPayment(billId, monthKey) {
+  const { data: b } = await db.from('recurring_bills').select('*').eq('id', billId).single();
+  if (!b) return;
+
+  let { data: rec } = await db.from('bill_month_records').select('*').eq('bill_id', billId).eq('month_key', monthKey).maybeSingle();
+  if (!rec) {
+    const newRec = {
+      id: uid(), bill_id: billId, month_key: monthKey,
+      amount_due: parseFloat(b.default_amount || 0), amount_paid: 0,
+      is_fully_paid: false, payment_entries: '[]', created_at: new Date().toISOString()
+    };
+    const { error } = await db.from('bill_month_records').insert(newRec);
+    if (error) { toast('Error: ' + error.message); return; }
+    rec = newRec;
+  }
+
+  const amtDue = parseFloat(rec.amount_due || 0);
+  const amtPaid = parseFloat(rec.amount_paid || 0);
+  const remaining = Math.max(0, amtDue - amtPaid);
+
+  document.getElementById('billpay-bill-id').value = billId;
+  document.getElementById('billpay-month-key').value = monthKey;
+  document.getElementById('billpay-rec-id').value = rec.id;
+  document.getElementById('billpay-modal-title').textContent = `💳 ${b.name} — ${fmtMonthKey(monthKey)}`;
+  document.getElementById('billpay-amount-due').textContent = `$${amtDue.toFixed(2)}`;
+  document.getElementById('billpay-amount-paid').textContent = `$${amtPaid.toFixed(2)}`;
+  document.getElementById('billpay-remaining').textContent = `$${remaining.toFixed(2)}`;
+  document.getElementById('billpay-amount').value = remaining > 0 ? remaining.toFixed(2) : '';
+  document.getElementById('billpay-paid-by').value = currentUser ? currentUser.name : '';
+  document.getElementById('billpay-note').value = '';
+  document.getElementById('billpay-date').value = toLocalDateStr(new Date());
+
+  const entries = (() => { try { return JSON.parse(rec.payment_entries || '[]'); } catch { return []; } })();
+  const histEl = document.getElementById('billpay-history');
+  histEl.innerHTML = entries.length ? `
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Payment History — ${fmtMonthKey(monthKey)}</div>
+    ${entries.map(e => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;">
+        <span style="color:var(--text2);">${fmtDate(e.date)}${e.note ? ' · ' + e.note : ''}${e.by ? ' · by ' + e.by : ''}</span>
+        <span style="font-weight:700;color:#1e7e34;flex-shrink:0;">+$${parseFloat(e.amount).toFixed(2)}</span>
+      </div>`).join('')}
+    <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;padding-top:8px;color:var(--text);">
+      <span>Total paid</span><span style="color:#1e7e34;">$${amtPaid.toFixed(2)} of $${amtDue.toFixed(2)}</span>
+    </div>` :
+    `<div style="font-size:12px;color:var(--text3);font-style:italic;text-align:center;padding:10px 0;">No payments recorded for ${fmtMonthKey(monthKey)} yet.</div>`;
+
+  openModal('modal-bill-payment');
+}
+
+async function saveBillPayment() {
+  const billId = document.getElementById('billpay-bill-id').value;
+  const monthKey = document.getElementById('billpay-month-key').value;
+  const recId = document.getElementById('billpay-rec-id').value;
+  const amount = parseFloat(document.getElementById('billpay-amount').value);
+  if (!amount || amount <= 0) { toast('Please enter a valid payment amount'); return; }
+
+  const { data: rec } = await db.from('bill_month_records').select('*').eq('id', recId).single();
+  if (!rec) { toast('Error: record not found — please close and try again'); return; }
+
+  const entries = (() => { try { return JSON.parse(rec.payment_entries || '[]'); } catch { return []; } })();
+  entries.push({
+    id: uid(), amount,
+    date: document.getElementById('billpay-date').value || toLocalDateStr(new Date()),
+    by: document.getElementById('billpay-paid-by').value.trim(),
+    note: document.getElementById('billpay-note').value.trim()
+  });
+
+  const newAmountPaid = parseFloat(rec.amount_paid || 0) + amount;
+  const isFullyPaid = newAmountPaid >= parseFloat(rec.amount_due || 0) - 0.005;
+
+  const { error } = await db.from('bill_month_records').update({
+    amount_paid: newAmountPaid,
+    is_fully_paid: isFullyPaid,
+    payment_entries: JSON.stringify(entries)
+  }).eq('id', recId);
+
+  if (error) { toast('Error saving: ' + error.message); return; }
+
+  const remaining = Math.max(0, parseFloat(rec.amount_due || 0) - newAmountPaid);
+  closeModal('modal-bill-payment');
+  toast(isFullyPaid
+    ? `✅ ${fmtMonthKey(monthKey)} bill fully paid!`
+    : `✅ $${amount.toFixed(2)} recorded — $${remaining.toFixed(2)} remaining`);
+  renderBillsSection();
+}
+
+async function openSetBillAmount(billId, monthKey, currentAmountDue) {
+  const newAmt = prompt(
+    `Set the exact amount due for ${fmtMonthKey(monthKey)}:\n(This month's bill — leave unchanged if same as default)`,
+    parseFloat(currentAmountDue || 0).toFixed(2)
+  );
+  if (newAmt === null || newAmt.trim() === '') return;
+  const parsed = parseFloat(newAmt);
+  if (isNaN(parsed) || parsed < 0) { toast('Please enter a valid dollar amount'); return; }
+
+  const { data: existing } = await db.from('bill_month_records').select('id').eq('bill_id', billId).eq('month_key', monthKey).maybeSingle();
+  if (existing) {
+    await db.from('bill_month_records').update({ amount_due: parsed }).eq('id', existing.id);
+  } else {
+    await db.from('bill_month_records').insert({
+      id: uid(), bill_id: billId, month_key: monthKey,
+      amount_due: parsed, amount_paid: 0, is_fully_paid: false,
+      payment_entries: '[]', created_at: new Date().toISOString()
+    });
+  }
+  toast(`✅ Amount due set to $${parsed.toFixed(2)} for ${fmtMonthKey(monthKey)}`);
+  renderBillsSection();
+}
+
 function switchFinTab(tab) {
   const isIncome = tab === 'income';
 
@@ -5946,6 +6503,7 @@ function switchFinTab(tab) {
   if (expensesSection) expensesSection.style.display = !isIncome ? 'block' : 'none';
 
   localStorage.setItem('hlh_fin_tab', tab);
+  if (!isIncome) renderBillsSection();
 }
 
 async function renderPaymentsPage() {
