@@ -7410,7 +7410,7 @@ async function renderExpensesPanel() {
           </div>
           <span id="wages-section-chevron" style="color:#f5c842;font-size:16px;transition:transform 0.2s;display:inline-block;">▼</span>
         </div>
-        <div id="wages-section-body" style="border:1px solid #2d2d2d;border-top:none;border-radius:0 0 8px 8px;overflow:hidden;display:none;">
+        <div id="wages-section-body" style="display:none;"><div style="border:1px solid #2d2d2d;border-top:none;border-radius:0 0 8px 8px;overflow:hidden;">
           ${wages.map(e => {
             const amt = parseFloat(e.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
             const staffName = e.wage_staff || 'Staff';
@@ -7449,7 +7449,7 @@ async function renderExpensesPanel() {
               </div>
             </div>`;
           }).join('')}
-        </div>
+        </div></div>
       </div>`;
   }
 
@@ -7481,11 +7481,8 @@ async function renderExpensesPanel() {
           </div>
           <span id="general-section-chevron" style="color:#fff;font-size:16px;transition:transform 0.2s;display:inline-block;">▼</span>
         </div>
-            <span style="background:rgba(255,255,255,0.15);color:#fff;border-radius:20px;padding:2px 8px;font-size:11px;">${general.length} item${general.length!==1?'s':''}</span>
-          </div>
-          <span style="color:#f5a0a0;font-size:14px;font-weight:700;">-$${genTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</span>
-        </div>
-        <div id="general-section-body" style="border:1px solid #8b2020;border-top:none;border-radius:0 0 8px 8px;overflow:hidden;display:none;">
+        <div id="general-section-body" style="display:none;">
+        <div style="border:1px solid #8b2020;border-top:none;border-radius:0 0 8px 8px;overflow:hidden;">
           ${general.map(e => {
             const amt = parseFloat(e.amount||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
             const icon = EXP_CATEGORY_ICONS[e.category] || '📦';
@@ -7510,6 +7507,7 @@ async function renderExpensesPanel() {
               </div>
             </div>`;
           }).join('')}
+        </div>
         </div>
       </div>`;
   }
