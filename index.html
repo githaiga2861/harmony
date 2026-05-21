@@ -801,7 +801,7 @@
             </div>
             <div class="card-body">
               <div class="search-bar">
-                <input class="search-input" id="resident-search" placeholder="Search by name..." oninput="renderResidentTable()">
+                <input class="search-input" id="resident-search" placeholder="Search by name..." oninput="debouncedRenderResidents()">
               </div>
               <table>
                 <thead><tr>
@@ -983,7 +983,7 @@
             </div>
             <div class="card-body">
               <div class="search-bar">
-                <input class="search-input" id="notes-search" placeholder="Search notes by keyword..." oninput="renderAllNotes()">
+                <input class="search-input" id="notes-search" placeholder="Search notes by keyword..." oninput="debouncedRenderAllNotes()">
                 <input type="date" id="notes-date-filter" class="search-input" style="max-width:180px;" oninput="renderAllNotes()">
                 <select id="notes-resident-filter" class="search-input" style="max-width:200px;" onchange="renderAllNotes()">
                   <option value="">All Residents</option>
@@ -1316,7 +1316,7 @@
             </div>
             <div class="card-body">
               <div class="search-bar">
-                <input class="search-input" id="incidents-search" placeholder="Search incident reports..." oninput="renderAllIncidents()">
+                <input class="search-input" id="incidents-search" placeholder="Search incident reports..." oninput="debouncedRenderAllIncidents()">
                 <input type="date" id="incidents-date-filter" class="search-input" style="max-width:180px;" oninput="renderAllIncidents()">
                 <select id="incidents-resident-filter" class="search-input" style="max-width:200px;" onchange="renderAllIncidents()">
                   <option value="">All Residents</option>
@@ -3365,6 +3365,16 @@
   </div>
 </div>
 
+<button id="back-to-top" onclick="document.querySelector('.main').scrollTo({top:0,behavior:'smooth'});window.scrollTo({top:0,behavior:'smooth'});"
+  title="Back to top"
+  style="display:none;position:fixed;bottom:80px;right:24px;z-index:998;
+         width:42px;height:42px;border-radius:50%;
+         background:var(--accent);color:#fff;border:none;cursor:pointer;
+         font-size:18px;box-shadow:0 4px 14px rgba(184,134,11,0.4);
+         transition:opacity 0.2s,transform 0.2s;
+         display:flex;align-items:center;justify-content:center;">
+  ↑
+</button>
 <div id="toast"></div>
 <script>
  const SUPABASE_URL = 'https://gkmvglzjrsneqkrlvohp.supabase.co';
@@ -3459,6 +3469,17 @@ function getData(key) {
   try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
 }
 function setData(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+// Debounce utility — prevents expensive calls on every keystroke
+function debounce(fn, ms) {
+  let timer;
+  return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
+}
+const debouncedRenderAllNotes     = debounce(renderAllNotes, 280);
+const debouncedRenderAllIncidents = debounce(renderAllIncidents, 280);
+const debouncedRenderResidents    = debounce(renderResidentTable, 280);
+const debouncedRenderPayments     = debounce(renderPaymentsPage, 280);
+const debouncedRenderExpenses     = debounce(renderExpensesPanel, 280);
 
 async function getResidents() {
   const { data } = await db.from('residents').select('*').order('created_at', { ascending: false });
@@ -3635,9 +3656,16 @@ function calcAge(dob) {
   return age;
 }
 
-function fmtDate(d) {
+function fmtDate(d, relative) {
   if (!d) return '—';
   const dt = new Date(d + 'T00:00:00');
+  if (relative) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const diff = Math.round((today - dt) / 86400000);
+    if (diff === 0) return '📅 Today';
+    if (diff === 1) return '📅 Yesterday';
+    if (diff <= 6) return `📅 ${diff} days ago`;
+  }
   return dt.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
 }
 
@@ -3826,15 +3854,23 @@ async function openProfile(id) {
       res.emergency_contact3 ? { label: 'Emergency Contact 3', val: res.emergency_contact3, icon: '🚨' } : null,
     ].filter(Boolean);
     if (contacts.length) {
-      ecEl.innerHTML = contacts.map(c => `
+      ecEl.innerHTML = contacts.map(c => {
+        // Extract first phone-like number for tel: link
+        const phoneMatch = c.val.match(/[\d\-\(\)\s\+]{7,}/);
+        const phoneHref = phoneMatch ? `href="tel:${phoneMatch[0].replace(/\D/g,'')}"` : '';
+        return `
         <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);">
           <span style="font-size:16px;">${c.icon}</span>
           <div style="flex:1;min-width:0;">
             <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">${c.label}</div>
             <div style="font-size:13.5px;font-weight:600;color:var(--text);word-break:break-word;">${c.val}</div>
           </div>
-        </div>
-      `).join('');
+          <div style="display:flex;gap:5px;flex-shrink:0;">
+            ${phoneHref ? `<a ${phoneHref} style="background:#e8f0fe;color:#1a73e8;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;text-decoration:none;" title="Call">📞 Call</a>` : ''}
+            <button onclick="navigator.clipboard.writeText('${c.val.replace(/'/g,"\\'")}').then(()=>toast('📋 Copied to clipboard'))" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;" title="Copy">Copy</button>
+          </div>
+        </div>`;
+      }).join('');
       ecEl.style.display = 'block';
     } else {
       ecEl.innerHTML = `<div style="font-size:13px;color:var(--text3);font-style:italic;padding:8px 0;">No contacts recorded. <button class="btn btn-secondary btn-sm" style="margin-left:6px;" onclick="openEditResident('${id}')">Add now</button></div>`;
@@ -3866,7 +3902,7 @@ async function renderProfileNotes() {
     return `<div class="note-card" onclick="viewNote('${n.id}')">
       <div class="note-card-header">
         <div>
-          <div class="note-date">${fmtDate(n.note_date)} &middot; ${n.shift || ''} Shift</div>
+          <div class="note-date">${fmtDate(n.note_date, true)} &middot; ${n.shift || ''} Shift</div>
           <div class="note-staff">By ${n.created_by} &middot; ${flagBadge}</div>
         </div>
         <div class="note-actions" onclick="event.stopPropagation()">
@@ -3882,6 +3918,8 @@ async function renderProfileNotes() {
 // ══════════════════════════════════
 // NOTES CRUD
 // ══════════════════════════════════
+const NOTE_DRAFT_KEY = 'hlh_note_draft';
+
 function openAddNote() {
   document.getElementById('note-modal-title').textContent = 'Add Progress Note';
   document.getElementById('note-edit-id').value = '';
@@ -3890,8 +3928,31 @@ function openAddNote() {
   document.getElementById('note-staff').value = currentUser.name;
   document.getElementById('note-flag').value = 'routine';
   document.getElementById('note-shift').value = '';
-  document.getElementById('note-behavior-notes').value = '';
   document.getElementById('note-resident-field').style.display = 'none';
+
+  // Restore draft if one exists for this resident
+  const draft = (() => { try { return JSON.parse(localStorage.getItem(NOTE_DRAFT_KEY)); } catch { return null; } })();
+  const ta = document.getElementById('note-behavior-notes');
+  if (draft && draft.residentId === currentResidentId && draft.text) {
+    ta.value = draft.text;
+    const banner = document.createElement('div');
+    banner.id = 'note-draft-banner';
+    banner.style.cssText = 'background:#fff3cd;border:1px solid #ffe08a;border-radius:6px;padding:8px 12px;font-size:12px;color:#856404;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;';
+    banner.innerHTML = `⚠️ <strong>Unsaved draft restored</strong> from your last session. <button onclick="document.getElementById('note-behavior-notes').value='';localStorage.removeItem('${NOTE_DRAFT_KEY}');this.parentElement.remove();" style="background:none;border:none;cursor:pointer;color:#856404;font-weight:700;font-family:inherit;font-size:12px;">✕ Discard</button>`;
+    const modalBody = document.querySelector('#modal-note .modal-body');
+    const existingBanner = document.getElementById('note-draft-banner');
+    if (!existingBanner && modalBody) modalBody.prepend(banner);
+  } else {
+    ta.value = '';
+  }
+  // Auto-save as user types
+  ta.oninput = () => {
+    if (ta.value.trim()) {
+      localStorage.setItem(NOTE_DRAFT_KEY, JSON.stringify({ residentId: currentResidentId, text: ta.value, ts: Date.now() }));
+    } else {
+      localStorage.removeItem(NOTE_DRAFT_KEY);
+    }
+  };
   openModal('modal-note');
 }
 
@@ -3969,8 +4030,9 @@ async function saveNote() {
     created_at: new Date().toISOString()
   };
   await saveNoteToDb(noteData);
+  localStorage.removeItem(NOTE_DRAFT_KEY);
   closeModal('modal-note');
-  toast(editId ? 'Note updated' : 'Note saved');
+  toast(editId ? 'Note updated' : '✅ Note saved');
   renderProfileNotes();
 }
   
@@ -5014,6 +5076,12 @@ function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const open = document.querySelector('.modal-overlay.open');
+    if (open) open.classList.remove('open');
+  }
 });
 
 // ══════════════════════════════════
@@ -9085,6 +9153,19 @@ async function renderWageBalanceStrip() {
     if (document.hidden && activeRecognition) stopRecording();
   });
 
+})();
+
+// ── Back-to-top visibility ──
+(function() {
+  function handleScroll() {
+    const btn = document.getElementById('back-to-top');
+    if (!btn) return;
+    const scrollY = (document.querySelector('.main') || document.documentElement).scrollTop || window.scrollY;
+    btn.style.display = scrollY > 400 ? 'flex' : 'none';
+    btn.style.opacity = scrollY > 400 ? '1' : '0';
+  }
+  document.querySelector('.main')?.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('scroll', handleScroll, { passive: true });
 })();
 
 // ══════════════════════════════════
