@@ -6700,12 +6700,35 @@ async function saveBillPayment() {
 
   if (error) { toast('Error saving: ' + error.message); return; }
 
+  // Also record as an expense so it appears in total expenses
+  const { data: billData } = await db.from('recurring_bills').select('name, category').eq('id', billId).single();
+  const expenseRecord = {
+    id: uid(),
+    expense_type: 'bill',
+    exp_date: document.getElementById('billpay-date').value || toLocalDateStr(new Date()),
+    amount: parseFloat(amount).toFixed(2),
+    category: billData?.category || 'Utilities',
+    description: `${billData?.name || 'Bill'} — ${fmtMonthKey(monthKey)}`,
+    vendor: billData?.name || '',
+    method: null,
+    paid_by: document.getElementById('billpay-paid-by').value.trim(),
+    receipt_ref: document.getElementById('billpay-note').value.trim(),
+    notes: `Bill payment — ${fmtMonthKey(monthKey)}`,
+    wage_staff: null,
+    bill_id: billId,
+    bill_month_key: monthKey,
+    created_at: new Date().toISOString()
+  };
+  await db.from('expenses').insert(expenseRecord);
+
   const remaining = Math.max(0, parseFloat(rec.amount_due || 0) - newAmountPaid);
   closeModal('modal-bill-payment');
   toast(isFullyPaid
     ? `✅ ${fmtMonthKey(monthKey)} bill fully paid!`
     : `✅ $${amount.toFixed(2)} recorded — $${remaining.toFixed(2)} remaining`);
   renderBillsSection();
+  renderExpensesPanel();
+  renderPaymentsPage();
 }
 
 async function openSetBillAmount(billId, monthKey, currentAmountDue) {
@@ -7401,9 +7424,31 @@ async function saveExpense() {
       payment_entries: JSON.stringify(entries)
     }).eq('id', rec.id);
     if (error) { toast('Error saving payment: ' + error.message); return; }
+
+    // Record as expense so it counts in totals
+    const expenseRecord = {
+      id: uid(),
+      expense_type: 'bill',
+      exp_date: document.getElementById('exp-bill-payment-date').value || toLocalDateStr(new Date()),
+      amount: parseFloat(amount).toFixed(2),
+      category: b.category || 'Utilities',
+      description: `${b.name} — ${fmtMonthKey(currentMK)}`,
+      vendor: b.name || '',
+      method: null,
+      paid_by: document.getElementById('exp-bill-payment-by').value.trim(),
+      receipt_ref: document.getElementById('exp-bill-payment-note').value.trim(),
+      notes: `Bill payment — ${fmtMonthKey(currentMK)}`,
+      wage_staff: null,
+      bill_id: billId,
+      bill_month_key: currentMK,
+      created_at: new Date().toISOString()
+    };
+    await db.from('expenses').insert(expenseRecord);
+
     closeModal('modal-expense');
     toast(isFullyPaid ? `✅ ${b.name} fully paid for ${fmtMonthKey(currentMK)}!` : `✅ $${amount.toFixed(2)} recorded for ${b.name}`);
     renderExpensesPanel();
+    renderPaymentsPage();
     return;
   }
 
@@ -7530,9 +7575,9 @@ async function renderExpensesPanel() {
     return;
   }
 
-  // Separate wages from general
+  // Separate wages, bill payments, and general expenses
   const wages = expenses.filter(e => e.expense_type === 'wage' || e.category === 'Staff Wages');
-  const general = expenses.filter(e => e.expense_type !== 'wage' && e.category !== 'Staff Wages');
+  const general = expenses.filter(e => e.expense_type !== 'wage' && e.category !== 'Staff Wages' && e.expense_type !== 'bill');
 
   let html = '';
 
