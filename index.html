@@ -6800,9 +6800,16 @@ async function renderPaymentsPage() {
   const payCountEl = document.getElementById('pay-stat-count');
   if (payCountEl) payCountEl.textContent = (allPayments||[]).length;
   // Net this month = income this month minus expenses this month
-  const { data: allExpForNet } = await db.from('expenses').select('amount, exp_date');
+  const { data: allExpForNet } = await db.from('expenses').select('amount, exp_date, expense_type');
   const expMonthTotal = (allExpForNet||[]).filter(e => e.exp_date && e.exp_date.startsWith(thisMonth)).reduce((s,e) => s + parseFloat(e.amount||0), 0);
-  const netMonth = monthTotal - expMonthTotal;
+
+  // Also count any bill payments in bill_month_records not yet dual-written as expense rows
+  const { data: billRecsForNet } = await db.from('bill_month_records').select('amount_paid, month_key');
+  const billPaidThisMonthForNet = (billRecsForNet||[]).filter(r => r.month_key === new Date().toISOString().slice(0,7)).reduce((s,r) => s + parseFloat(r.amount_paid||0), 0);
+  const billAlreadyInExpForNet = (allExpForNet||[]).filter(e => e.expense_type === 'bill' && e.exp_date && e.exp_date.startsWith(thisMonth)).reduce((s,e) => s + parseFloat(e.amount||0), 0);
+  const billGapForNet = Math.max(0, billPaidThisMonthForNet - billAlreadyInExpForNet);
+
+  const netMonth = monthTotal - expMonthTotal - billGapForNet;
   const netEl = document.getElementById('pay-stat-net-month');
   if (netEl) {
     netEl.textContent = (netMonth < 0 ? '-$' : '$') + Math.abs(netMonth).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -7551,8 +7558,28 @@ async function renderExpensesPanel() {
   let expenses = allExpenses || [];
 
   const thisMonth = new Date().toISOString().slice(0, 7);
-  const totalExp = expenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
-  const monthExp = expenses.filter(e => e.exp_date && e.exp_date.startsWith(thisMonth)).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+  const currentMK = getCurrentMonthKey();
+
+  // Sum all expenses rows (general + wage + bill payments already dual-written)
+  const totalExpFromRows = expenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+  const monthExpFromRows = expenses.filter(e => e.exp_date && e.exp_date.startsWith(thisMonth)).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+
+  // Also pull bill_month_records to catch any bill payments not yet in expenses table
+  const { data: allBillRecs } = await db.from('bill_month_records').select('amount_paid, month_key');
+  const billRecs = allBillRecs || [];
+
+  const billAlreadyCounted = expenses.filter(e => e.expense_type === 'bill').reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+  const billAlreadyCountedThisMonth = expenses.filter(e => e.expense_type === 'bill' && e.exp_date && e.exp_date.startsWith(thisMonth)).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+
+  const billRecordsTotal = billRecs.reduce((s, r) => s + parseFloat(r.amount_paid || 0), 0);
+  const billRecordsThisMonth = billRecs.filter(r => r.month_key === currentMK).reduce((s, r) => s + parseFloat(r.amount_paid || 0), 0);
+
+  // Gap = payments in bill_month_records not yet reflected as expense rows (legacy data)
+  const billGap = Math.max(0, billRecordsTotal - billAlreadyCounted);
+  const billGapThisMonth = Math.max(0, billRecordsThisMonth - billAlreadyCountedThisMonth);
+
+  const totalExp = totalExpFromRows + billGap;
+  const monthExp = monthExpFromRows + billGapThisMonth;
 
   const expStatEl = document.getElementById('pay-stat-expenses');
   if (expStatEl) expStatEl.textContent = '$' + totalExp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
