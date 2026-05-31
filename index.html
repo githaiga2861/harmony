@@ -752,6 +752,42 @@
             </div>
           </div>
 
+          <!-- Financial Summary Strip -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;" id="dash-financials-grid">
+            <div class="stat-card" id="dash-fin-income-card" style="transition:background 0.4s,border-color 0.4s;cursor:pointer;" onclick="showPage('payments')">
+              <div class="stat-icon" id="dash-fin-income-icon" style="float:right;background:#e8f5e9;color:#1e7e34;">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              </div>
+              <div class="label">Total Income</div>
+              <div class="value" id="dash-stat-income" style="font-size:24px;">$0</div>
+              <div class="sub" id="dash-stat-income-sub">All time collected</div>
+            </div>
+            <div class="stat-card" id="dash-fin-expenses-card" style="transition:background 0.4s,border-color 0.4s;cursor:pointer;" onclick="showPage('payments')">
+              <div class="stat-icon" id="dash-fin-expenses-icon" style="float:right;background:#fdf0ef;color:#c0392b;">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+              </div>
+              <div class="label">Total Expenses</div>
+              <div class="value" id="dash-stat-expenses" style="font-size:24px;">$0</div>
+              <div class="sub" id="dash-stat-expenses-sub">All time spent</div>
+            </div>
+            <div class="stat-card" id="dash-fin-net-card" style="transition:background 0.4s,border-color 0.4s;cursor:pointer;" onclick="showPage('payments')">
+              <div class="stat-icon" id="dash-fin-net-icon" style="float:right;background:#e8f0fe;color:#1a73e8;">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <div class="label">Net This Month</div>
+              <div class="value" id="dash-stat-net" style="font-size:24px;">$0</div>
+              <div class="sub" id="dash-stat-net-sub">Income minus expenses</div>
+            </div>
+            <div class="stat-card" id="dash-fin-payers-card" style="transition:background 0.4s,border-color 0.4s;cursor:pointer;" onclick="showPage('payments')">
+              <div class="stat-icon" style="float:right;background:#fff3cd;color:#d68910;">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              </div>
+              <div class="label">Income This Month</div>
+              <div class="value" id="dash-stat-month-income" style="font-size:24px;">$0</div>
+              <div class="sub" id="dash-stat-month-income-sub">Current calendar month</div>
+            </div>
+          </div>
+
           <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap: 20px;">
             <div class="card">
               <div class="card-header">
@@ -3744,6 +3780,71 @@ async function refreshDashboard() {
   document.getElementById('stat-notes').textContent = notes.length;
   document.getElementById('stat-week').textContent = weekNotes.length;
   document.getElementById('stat-flags').textContent = flagged.length;
+
+  // Financial summary on dashboard
+  const { data: dashPayments } = await db.from('payments').select('amount, pay_date');
+  const { data: dashExpenses } = await db.from('expenses').select('amount, exp_date, expense_type');
+  const { data: dashBillRecs } = await db.from('bill_month_records').select('amount_paid, month_key');
+  const thisMonthKey = new Date().toISOString().slice(0, 7);
+
+  const totalIncome = (dashPayments || []).reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+  const monthIncome = (dashPayments || []).filter(p => p.pay_date && p.pay_date.startsWith(thisMonthKey)).reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+
+  const totalExpBase = (dashExpenses || []).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+  const billAlreadyCounted = (dashExpenses || []).filter(e => e.expense_type === 'bill').reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+  const billRecordsTotal = (dashBillRecs || []).reduce((s, r) => s + parseFloat(r.amount_paid || 0), 0);
+  const totalExpenses = totalExpBase + Math.max(0, billRecordsTotal - billAlreadyCounted);
+
+  const monthExpBase = (dashExpenses || []).filter(e => e.exp_date && e.exp_date.startsWith(thisMonthKey)).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+  const billAlreadyThisMonth = (dashExpenses || []).filter(e => e.expense_type === 'bill' && e.exp_date && e.exp_date.startsWith(thisMonthKey)).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+  const billRecsThisMonth = (dashBillRecs || []).filter(r => r.month_key === thisMonthKey).reduce((s, r) => s + parseFloat(r.amount_paid || 0), 0);
+  const monthExpenses = monthExpBase + Math.max(0, billRecsThisMonth - billAlreadyThisMonth);
+
+  const netMonth = monthIncome - monthExpenses;
+
+  const fmt = (n) => (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  // Income card
+  const dashIncomeEl = document.getElementById('dash-stat-income');
+  const dashIncomeCard = document.getElementById('dash-fin-income-card');
+  if (dashIncomeEl) { dashIncomeEl.textContent = fmt(totalIncome); dashIncomeEl.style.color = '#1e7e34'; }
+  if (dashIncomeCard) { dashIncomeCard.style.background = '#e8f5e9'; dashIncomeCard.style.borderColor = '#a5d6a7'; }
+  const dashIncomeSub = document.getElementById('dash-stat-income-sub');
+  if (dashIncomeSub) dashIncomeSub.textContent = (dashPayments||[]).length + ' payment' + ((dashPayments||[]).length !== 1 ? 's' : '') + ' recorded';
+
+  // Expenses card
+  const dashExpEl = document.getElementById('dash-stat-expenses');
+  const dashExpCard = document.getElementById('dash-fin-expenses-card');
+  if (dashExpEl) { dashExpEl.textContent = fmt(totalExpenses); dashExpEl.style.color = '#c0392b'; }
+  if (dashExpCard) { dashExpCard.style.background = '#fdf0ef'; dashExpCard.style.borderColor = '#f5c0bb'; }
+
+  // Net this month card
+  const dashNetEl = document.getElementById('dash-stat-net');
+  const dashNetCard = document.getElementById('dash-fin-net-card');
+  const dashNetIcon = document.getElementById('dash-fin-net-icon');
+  if (dashNetEl) {
+    dashNetEl.textContent = fmt(netMonth);
+    dashNetEl.style.color = netMonth < 0 ? '#c0392b' : netMonth > 0 ? '#1e7e34' : 'var(--text)';
+  }
+  if (dashNetCard) {
+    dashNetCard.style.background = netMonth < 0 ? '#fdf0ef' : netMonth > 0 ? '#e8f5e9' : '';
+    dashNetCard.style.borderColor = netMonth < 0 ? '#f5c0bb' : netMonth > 0 ? '#a5d6a7' : '';
+  }
+  if (dashNetIcon) {
+    dashNetIcon.style.background = netMonth < 0 ? '#fdf0ef' : netMonth > 0 ? '#e8f5e9' : '#e8f0fe';
+    dashNetIcon.style.color = netMonth < 0 ? '#c0392b' : netMonth > 0 ? '#1e7e34' : '#1a73e8';
+  }
+  const dashNetSub = document.getElementById('dash-stat-net-sub');
+  if (dashNetSub) dashNetSub.textContent = netMonth < 0 ? '⚠️ Running at a loss' : netMonth > 0 ? '✅ Running at a profit' : 'Break even';
+
+  // Month income card
+  const dashMonthIncEl = document.getElementById('dash-stat-month-income');
+  if (dashMonthIncEl) {
+    dashMonthIncEl.textContent = fmt(monthIncome);
+    dashMonthIncEl.style.color = monthIncome > 0 ? '#d68910' : 'var(--text)';
+  }
+  const dashMonthSub = document.getElementById('dash-stat-month-income-sub');
+  if (dashMonthSub) dashMonthSub.textContent = new Date().toLocaleDateString('en-US', {month:'long', year:'numeric'});
 
   const recent = [...notes].sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5);
   const tbody = document.getElementById('recent-notes-table');
@@ -6840,7 +6941,16 @@ async function renderPaymentsPage() {
   const thisMonth = new Date().toISOString().slice(0,7);
   const monthTotal = (allPayments||[]).filter(p => p.pay_date && p.pay_date.startsWith(thisMonth)).reduce((s,p) => s + parseFloat(p.amount||0), 0);
   const uniquePayers = new Set((allPayments||[]).map(p => p.resident_id)).size;
-  document.getElementById('pay-stat-total').textContent = '$' + total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const incomeEl = document.getElementById('pay-stat-total');
+  const incomeCard = incomeEl ? incomeEl.closest('.stat-card') : null;
+  if (incomeEl) incomeEl.textContent = '$' + total.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  if (incomeCard) {
+    incomeCard.style.transition = 'background 0.4s, border-color 0.4s';
+    incomeCard.style.background = total > 0 ? '#e8f5e9' : '';
+    incomeCard.style.borderColor = total > 0 ? '#a5d6a7' : '';
+    const incomeVal = incomeCard.querySelector('.value');
+    if (incomeVal) incomeVal.style.color = total > 0 ? '#1e7e34' : 'var(--text)';
+  }
   const payMonthEl = document.getElementById('pay-stat-month');
   if (payMonthEl) payMonthEl.textContent = '$' + monthTotal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   document.getElementById('pay-stat-residents').textContent = uniquePayers;
@@ -7668,7 +7778,15 @@ async function renderExpensesPanel() {
   const monthExp = monthExpFromRows + billGapThisMonth;
 
   const expStatEl = document.getElementById('pay-stat-expenses');
+  const expStatCard = expStatEl ? expStatEl.closest('.stat-card') : null;
   if (expStatEl) expStatEl.textContent = '$' + totalExp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (expStatCard) {
+    expStatCard.style.transition = 'background 0.4s, border-color 0.4s';
+    expStatCard.style.background = totalExp > 0 ? '#fdf0ef' : '';
+    expStatCard.style.borderColor = totalExp > 0 ? '#f5c0bb' : '';
+    const expVal = expStatCard.querySelector('.value');
+    if (expVal) expVal.style.color = totalExp > 0 ? '#c0392b' : 'var(--text)';
+  }
   const expMonthEl = document.getElementById('exp-stat-month');
   if (expMonthEl) expMonthEl.textContent = '$' + monthExp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
