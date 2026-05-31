@@ -2963,6 +2963,53 @@
           </select>
         </div>
         <div class="field span2">
+          <label>Payment Source / Classification</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;" id="pay-classification-tags">
+            <button type="button" class="pay-tag" data-value="Medicaid" onclick="togglePayTag(this)"
+              style="padding:5px 13px;border-radius:20px;border:1.5px solid #1a73e8;background:#e8f0fe;color:#1a73e8;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;">
+              Medicaid
+            </button>
+            <button type="button" class="pay-tag" data-value="Medicare" onclick="togglePayTag(this)"
+              style="padding:5px 13px;border-radius:20px;border:1.5px solid #0d47a1;background:#e3f2fd;color:#0d47a1;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;">
+              Medicare
+            </button>
+            <button type="button" class="pay-tag" data-value="Client Responsible Amount" onclick="togglePayTag(this)"
+              style="padding:5px 13px;border-radius:20px;border:1.5px solid #b8860b;background:#fdf6e3;color:#b8860b;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;">
+              Client Responsible Amount
+            </button>
+            <button type="button" class="pay-tag" data-value="Medicaid Spend-Down" onclick="togglePayTag(this)"
+              style="padding:5px 13px;border-radius:20px;border:1.5px solid #6a1b9a;background:#f3e5f5;color:#6a1b9a;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;">
+              Medicaid Spend-Down
+            </button>
+            <button type="button" class="pay-tag" data-value="SSI / SSA Benefit" onclick="togglePayTag(this)"
+              style="padding:5px 13px;border-radius:20px;border:1.5px solid #2e7d32;background:#e8f5e9;color:#2e7d32;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;">
+              SSI / SSA Benefit
+            </button>
+            <button type="button" class="pay-tag" data-value="Private Pay" onclick="togglePayTag(this)"
+              style="padding:5px 13px;border-radius:20px;border:1.5px solid #c0392b;background:#fdf0ef;color:#c0392b;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;">
+              Private Pay
+            </button>
+            <button type="button" class="pay-tag" data-value="DSHS / State Contracted Rate" onclick="togglePayTag(this)"
+              style="padding:5px 13px;border-radius:20px;border:1.5px solid #00695c;background:#e0f2f1;color:#00695c;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;">
+              DSHS / State Contracted Rate
+            </button>
+            <button type="button" class="pay-tag" data-value="VA Benefits" onclick="togglePayTag(this)"
+              style="padding:5px 13px;border-radius:20px;border:1.5px solid #1565c0;background:#e8eaf6;color:#1565c0;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;">
+              VA Benefits
+            </button>
+            <button type="button" class="pay-tag" data-value="Long-Term Care Insurance" onclick="togglePayTag(this)"
+              style="padding:5px 13px;border-radius:20px;border:1.5px solid #4a148c;background:#ede7f6;color:#4a148c;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;">
+              Long-Term Care Insurance
+            </button>
+            <button type="button" class="pay-tag" data-value="Other Government Assistance" onclick="togglePayTag(this)"
+              style="padding:5px 13px;border-radius:20px;border:1.5px solid #558b2f;background:#f1f8e9;color:#558b2f;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;">
+              Other Government Assistance
+            </button>
+          </div>
+          <input type="hidden" id="pay-classification">
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">Select one or more that apply. Selected tags will be saved with the payment record.</div>
+        </div>
+        <div class="field span2">
           <label>Description / Notes</label>
           <input type="text" id="pay-notes" placeholder="e.g. April 2025 room and board, Medicaid co-pay...">
         </div>
@@ -6838,6 +6885,22 @@ async function renderPaymentsPage() {
           <button class="btn btn-danger btn-sm" onclick="deletePayment('${p.id}')">Delete</button>
         </div>
       </div>
+      ${p.classification ? `<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:5px;">${p.classification.split(',').map(tag => {
+        const tagColors = {
+          'Medicaid':'background:#e8f0fe;color:#1a73e8;border:1px solid #b0c8f8;',
+          'Medicare':'background:#e3f2fd;color:#0d47a1;border:1px solid #90caf9;',
+          'Client Responsible Amount':'background:#fdf6e3;color:#b8860b;border:1px solid #f0c040;',
+          'Medicaid Spend-Down':'background:#f3e5f5;color:#6a1b9a;border:1px solid #ce93d8;',
+          'SSI / SSA Benefit':'background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;',
+          'Private Pay':'background:#fdf0ef;color:#c0392b;border:1px solid #f5c0bb;',
+          'DSHS / State Contracted Rate':'background:#e0f2f1;color:#00695c;border:1px solid #80cbc4;',
+          'VA Benefits':'background:#e8eaf6;color:#1565c0;border:1px solid #9fa8da;',
+          'Long-Term Care Insurance':'background:#ede7f6;color:#4a148c;border:1px solid #ce93d8;',
+          'Other Government Assistance':'background:#f1f8e9;color:#558b2f;border:1px solid #aed581;',
+        };
+        const s = tagColors[tag.trim()] || 'background:var(--surface2);color:var(--text2);border:1px solid var(--border);';
+        return `<span style="padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;${s}">${tag.trim()}</span>`;
+      }).join('')}</div>` : ''}
       ${p.notes ? `<div class="note-preview">${p.notes}</div>` : ''}
       ${p.received_by ? `<div class="note-preview" style="font-size:12px;color:var(--text3);">Received by: ${p.received_by}</div>` : ''}
     </div>`;
@@ -6860,6 +6923,13 @@ async function openAddPayment() {
   document.getElementById('pay-method').value = '';
   document.getElementById('pay-period').value = '';
   document.getElementById('pay-notes').value = '';
+  document.getElementById('pay-classification').value = '';
+  document.querySelectorAll('.pay-tag').forEach(btn => {
+    btn.style.opacity = '1';
+    btn.style.transform = 'scale(1)';
+    btn.dataset.selected = '';
+    btn.style.boxShadow = '';
+  });
   document.getElementById('pay-received-by').value = currentUser.name;
   document.getElementById('pay-receipt-num').value = genReceiptNum();
   openModal('modal-payment');
@@ -6879,6 +6949,7 @@ async function savePayment() {
     method: document.getElementById('pay-method').value,
     period: document.getElementById('pay-period').value,
     notes: document.getElementById('pay-notes').value.trim(),
+    classification: document.getElementById('pay-classification').value || null,
     received_by: document.getElementById('pay-received-by').value.trim(),
     receipt_num: document.getElementById('pay-receipt-num').value.trim() || genReceiptNum(),
     created_at: new Date().toISOString()
@@ -6952,6 +7023,7 @@ async function printReceipt(id) {
   <div class="row"><span class="lbl">Payment Date</span><span class="val">${fmtDate(p.pay_date)}</span></div>
   <div class="row"><span class="lbl">Payment Period</span><span class="val">${p.period||'—'}</span></div>
   <div class="row"><span class="lbl">Payment Method</span><span class="val">${p.method||'—'}</span></div>
+  ${p.classification ? `<div class="row"><span class="lbl">Payment Classification</span><span class="val" style="max-width:300px;text-align:right;">${p.classification}</span></div>` : ''}
   ${p.notes ? `<div class="row"><span class="lbl">Description</span><span class="val" style="max-width:300px;text-align:right;">${p.notes}</span></div>` : ''}
 </div>
 
@@ -9598,6 +9670,29 @@ async function renderWageBalanceStrip() {
   document.querySelector('.main')?.addEventListener('scroll', handleScroll, { passive: true });
   window.addEventListener('scroll', handleScroll, { passive: true });
 })();
+
+// ══════════════════════════════════
+// PAYMENT CLASSIFICATION TAGS
+// ══════════════════════════════════
+function togglePayTag(btn) {
+  const isSelected = btn.dataset.selected === 'true';
+  btn.dataset.selected = isSelected ? '' : 'true';
+  if (btn.dataset.selected === 'true') {
+    btn.style.opacity = '1';
+    btn.style.transform = 'scale(1.05)';
+    btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.18)';
+    btn.style.fontWeight = '800';
+  } else {
+    btn.style.opacity = '0.6';
+    btn.style.transform = 'scale(1)';
+    btn.style.boxShadow = '';
+    btn.style.fontWeight = '700';
+  }
+  const selected = [...document.querySelectorAll('.pay-tag')]
+    .filter(b => b.dataset.selected === 'true')
+    .map(b => b.dataset.value);
+  document.getElementById('pay-classification').value = selected.join(',');
+}
 
 // ══════════════════════════════════
 // INIT
