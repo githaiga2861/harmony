@@ -682,6 +682,10 @@
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Essential Documents
         </button>
+        <button class="nav-item" onclick="showPage('alerts')" id="nav-alerts">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Alerts
+        </button>
         <button class="nav-item" onclick="showPage('contacts')" id="nav-contacts">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.64-1.64a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
           Quick Contacts
@@ -1340,6 +1344,97 @@
             </div>
           </div><!-- /fin-section-expenses -->
 
+        <!-- ALERTS PAGE -->
+        <div class="page" id="page-alerts">
+          <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div>
+              <div style="font-size:13px;color:var(--text3);margin-top:3px;">Automated alerts are checked every time this page loads and sent to <strong>hello@harmonylivinghouse.com</strong></div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button onclick="runAllAlertChecks(true)" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;">
+                <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-.49-4.49"/></svg>
+                Run All Checks Now
+              </button>
+              <button onclick="sendTestEmail()" style="background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">
+                📧 Send Test Email
+              </button>
+            </div>
+          </div>
+
+          <div id="alerts-status-strip" style="display:none;background:linear-gradient(90deg,#1a3d1a,#1e7e34);border-radius:10px;padding:13px 20px;margin-bottom:20px;color:#fff;font-size:13px;font-weight:600;align-items:center;gap:10px;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <span id="alerts-status-text">All checks passed</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+
+            <div class="card">
+              <div class="card-header" style="background:linear-gradient(135deg,#1a3d5c,#1a73e8);border-radius:10px 10px 0 0;padding:14px 18px;">
+                <div><div style="color:#fff;font-family:'DM Serif Display',serif;font-size:15px;">📅 Upcoming Appointments</div><div style="color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;">Alerts sent for appointments within 3 days</div></div>
+                <div id="alert-appt-badge" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:#fff;">Checking…</div>
+              </div>
+              <div class="card-body" id="alert-appt-body" style="padding:14px;min-height:80px;"><div style="text-align:center;color:var(--text3);font-size:13px;padding:20px;">Loading…</div></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header" style="background:linear-gradient(135deg,#3a1a6e,#7c3aed);border-radius:10px 10px 0 0;padding:14px 18px;">
+                <div><div style="color:#fff;font-family:'DM Serif Display',serif;font-size:15px;">📋 Progress Notes Reminder</div><div style="color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;">Alert if any resident has no note in 48 hours</div></div>
+                <div id="alert-notes-badge" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:#fff;">Checking…</div>
+              </div>
+              <div class="card-body" id="alert-notes-body" style="padding:14px;min-height:80px;"><div style="text-align:center;color:var(--text3);font-size:13px;padding:20px;">Loading…</div></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header" style="background:linear-gradient(135deg,#6e1a1a,#c0392b);border-radius:10px 10px 0 0;padding:14px 18px;">
+                <div><div style="color:#fff;font-family:'DM Serif Display',serif;font-size:15px;">❤️ Vitals Update Reminder</div><div style="color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;">Alert if vitals not updated in 48 hours</div></div>
+                <div id="alert-vitals-badge" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:#fff;">Checking…</div>
+              </div>
+              <div class="card-body" id="alert-vitals-body" style="padding:14px;min-height:80px;"><div style="text-align:center;color:var(--text3);font-size:13px;padding:20px;">Loading…</div></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header" style="background:linear-gradient(135deg,#5a3a00,#d68910);border-radius:10px 10px 0 0;padding:14px 18px;">
+                <div><div style="color:#fff;font-family:'DM Serif Display',serif;font-size:15px;">💰 Overdue Payments</div><div style="color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;">Unpaid bills &amp; overdue staff wages</div></div>
+                <div id="alert-exp-badge" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:#fff;">Checking…</div>
+              </div>
+              <div class="card-body" id="alert-exp-body" style="padding:14px;min-height:80px;"><div style="text-align:center;color:var(--text3);font-size:13px;padding:20px;">Loading…</div></div>
+            </div>
+
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>📬 Email Alert Log</h3>
+              <button onclick="loadAlertLog()" class="btn btn-secondary btn-sm">Refresh Log</button>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <div id="alert-log-list" style="max-height:400px;overflow-y:auto;">
+                <div style="text-align:center;color:var(--text3);padding:32px;font-size:13px;">Loading log…</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:20px;">
+            <div class="card-header"><h3>⚙️ Alert Configuration</h3></div>
+            <div class="card-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+                <div class="field"><label>Alert Email Address</label><input type="email" id="alert-email-config" value="hello@harmonylivinghouse.com" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;"></div>
+                <div class="field"><label>Notes Reminder Interval (hours)</label><input type="number" id="alert-notes-interval" value="48" min="12" max="168" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;"></div>
+                <div class="field"><label>Vitals Reminder Interval (hours)</label><input type="number" id="alert-vitals-interval" value="48" min="12" max="168" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;"></div>
+              </div>
+              <div style="margin-top:14px;padding:12px 16px;background:#fdf6e3;border:1px solid #f0c040;border-radius:8px;font-size:12px;color:#7a5c00;line-height:1.7;">
+                <strong>💡 How it works:</strong> Each time the Alerts page loads, all conditions are checked automatically. Alerts are logged to the <code>alert_log</code> Supabase table and throttled to one email per alert type per 6 hours to prevent duplicates. To enable actual email delivery, create the <code>alert_log</code> table using the SQL below, deploy the Supabase Edge Function, and paste its URL into the <code>ALERT_EDGE_FN_URL</code> constant in the JavaScript.<br><br>
+                <strong>SQL to run in Supabase:</strong><br>
+                <code style="background:#fff8e8;display:block;padding:8px 10px;border-radius:5px;margin-top:5px;font-size:11px;">CREATE TABLE IF NOT EXISTS alert_log (id TEXT PRIMARY KEY, alert_type TEXT, subject TEXT, body_preview TEXT, recipient TEXT, sent_at TIMESTAMPTZ DEFAULT NOW(), sent_by TEXT);</code>
+              </div>
+              <div style="margin-top:12px;">
+                <button onclick="saveAlertConfig()" class="btn btn-primary">Save Configuration</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
         <!-- ALL INCIDENTS -->
         <div class="page" id="page-incidents">
           <div class="card">
@@ -1842,6 +1937,34 @@
                 <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
                   <span style="font-size:20px;">📠</span>
                   <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Fax</div><div style="font-size:15px;font-weight:700;color:var(--text);">425-867-5087</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header" style="background:linear-gradient(135deg,#0a4a6e,#0d7fb5);border-radius:10px 10px 0 0;">
+                <h3 style="color:#fff;font-family:'DM Serif Display',serif;font-size:16px;">🧠 AJ Psychiatry PLLC</h3>
+              </div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">👩‍⚕️</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Clinic Nurse</div><div style="font-size:14px;font-weight:600;color:var(--text);">Jeromae M. Magallanes</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">📞</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Office</div><a href="tel:2147445438" style="font-size:15px;font-weight:700;color:#0d7fb5;text-decoration:none;">(214)-744-5438</a></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">📠</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Fax</div><div style="font-size:15px;font-weight:700;color:var(--text);">(972)-478-0554</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:#e3f6ff;border-radius:8px;">
+                  <span style="font-size:20px;">📧</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Email</div><a href="mailto:info@ajpsychiatry.com" style="font-size:14px;font-weight:600;color:#0d7fb5;text-decoration:none;">info@ajpsychiatry.com</a></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:#e3f6ff;border-radius:8px;">
+                  <span style="font-size:20px;">💬</span>
+                  <div style="font-size:12px;font-style:italic;color:#555;line-height:1.6;">"Mental health is a journey, and every day you choose yourself is a victory."</div>
                 </div>
               </div>
             </div>
@@ -3739,7 +3862,7 @@ document.getElementById('login-password').addEventListener('keydown', e => { if 
 // ══════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════
-const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Financials — Income & Expenses', staffdocs: 'Staff Documents', contacts: 'Quick Contacts' };
+const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Financials — Income & Expenses', staffdocs: 'Staff Documents', contacts: 'Quick Contacts', alerts: '🔔 Alerts & Automated Notifications' };
 
 async function showPage(name) {
   if (name !== 'profile') localStorage.setItem('hlh_last_page', name);
@@ -3763,6 +3886,7 @@ async function showPage(name) {
     switchFinTab(savedTab);
   }
   if (name === 'staffdocs') { initStaffDocsPage(); }
+  if (name === 'alerts') { renderAlertsPage(); }
 }
 
 // ══════════════════════════════════
@@ -9824,6 +9948,313 @@ function togglePayTag(btn) {
     .filter(b => b.dataset.selected === 'true')
     .map(b => b.dataset.value);
   document.getElementById('pay-classification').value = selected.join(',');
+}
+
+// ══════════════════════════════════
+// ALERTS & AUTOMATED NOTIFICATIONS
+// ══════════════════════════════════
+
+const ALERT_EMAIL = 'hello@harmonylivinghouse.com';
+const ALERT_LOG_TABLE = 'alert_log';
+const ALERT_THROTTLE_HOURS = 6;
+const ALERT_EDGE_FN_URL = null; // paste your Supabase Edge Function URL here after deployment
+
+function getAlertConfig() {
+  try { return JSON.parse(localStorage.getItem('hlh_alert_config')) || {}; } catch { return {}; }
+}
+
+function saveAlertConfig() {
+  const cfg = {
+    email: document.getElementById('alert-email-config')?.value?.trim() || ALERT_EMAIL,
+    notesIntervalHours: parseInt(document.getElementById('alert-notes-interval')?.value || '48'),
+    vitalsIntervalHours: parseInt(document.getElementById('alert-vitals-interval')?.value || '48'),
+  };
+  localStorage.setItem('hlh_alert_config', JSON.stringify(cfg));
+  toast('✅ Alert configuration saved');
+}
+
+async function wasAlertSentRecently(alertType) {
+  const cutoff = new Date(Date.now() - ALERT_THROTTLE_HOURS * 60 * 60 * 1000).toISOString();
+  try {
+    const { data } = await db.from(ALERT_LOG_TABLE).select('id').eq('alert_type', alertType).gte('sent_at', cutoff).limit(1);
+    return data && data.length > 0;
+  } catch { return false; }
+}
+
+async function logAlert(alertType, subject, body, recipientEmail) {
+  try {
+    await db.from(ALERT_LOG_TABLE).insert({
+      id: uid(), alert_type: alertType, subject,
+      body_preview: body.slice(0, 300),
+      recipient: recipientEmail || ALERT_EMAIL,
+      sent_at: new Date().toISOString(),
+      sent_by: currentUser ? currentUser.name : 'System'
+    });
+  } catch(e) { console.warn('Alert log table missing:', e.message); }
+}
+
+async function sendAlertEmail(alertType, subject, htmlBody, forceEmail) {
+  const cfg = getAlertConfig();
+  const recipient = cfg.email || ALERT_EMAIL;
+  await logAlert(alertType, subject, htmlBody.replace(/<[^>]+>/g,''), recipient);
+  await loadAlertLog();
+  if (!ALERT_EDGE_FN_URL && !forceEmail) return { success: true, method: 'in-app-only' };
+  try {
+    const res = await fetch(ALERT_EDGE_FN_URL || '', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
+      body: JSON.stringify({ to: recipient, subject, html: htmlBody })
+    });
+    return { success: res.ok, method: 'edge-function' };
+  } catch (err) { return { success: false, error: err.message }; }
+}
+
+function buildAlertEmailHtml(title, intro, items, color) {
+  const itemRows = items.map(item => `<tr><td style="padding:10px 16px;border-bottom:1px solid #f0e8d0;font-size:13px;color:#333;line-height:1.6;">${item}</td></tr>`).join('');
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#f4f1eb;font-family:Georgia,serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f1eb;padding:30px 0;"><tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+      <tr><td style="background:linear-gradient(135deg,#1a1a1a,${color});padding:28px 32px;text-align:center;">
+        <div style="font-family:Georgia,serif;font-size:22px;color:#fff;font-weight:bold;">Harmony Living House</div>
+        <div style="color:rgba(255,255,255,0.65);font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-top:4px;">Adult Family LLC — Alert System</div>
+      </td></tr>
+      <tr><td style="background:${color};padding:12px 32px;"><div style="color:#fff;font-size:16px;font-weight:bold;">${title}</div></td></tr>
+      <tr><td style="padding:20px 32px 10px;font-size:13px;color:#555;line-height:1.7;">${intro}</td></tr>
+      <tr><td style="padding:0 32px 10px;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8dfc8;border-radius:8px;overflow:hidden;"><tbody>${itemRows}</tbody></table>
+      </td></tr>
+      <tr><td style="padding:20px 32px;border-top:1px solid #f0e8d0;background:#faf7f2;">
+        <div style="font-size:11px;color:#999;line-height:1.6;">Generated by Harmony Living House Admin Portal · 120 Newaukum Village Dr, Chehalis, WA 98532<br>
+        <em>Sent: ${new Date().toLocaleDateString('en-US',{timeZone:'America/Los_Angeles',month:'long',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})} PT</em></div>
+      </td></tr>
+    </table></td></tr></table></body></html>`;
+}
+
+async function checkAppointmentAlerts(sendEmail) {
+  const bodyEl = document.getElementById('alert-appt-body');
+  const badgeEl = document.getElementById('alert-appt-badge');
+  const residents = await getResidents();
+  const today = new Date(); today.setHours(0,0,0,0);
+  const { data: appts } = await db.from('appointments').select('*').eq('status','upcoming').order('appt_date');
+  const upcoming = (appts || []).filter(a => {
+    if (!a.appt_date) return false;
+    const d = new Date(a.appt_date + 'T00:00:00');
+    const daysAway = Math.round((d - today) / 86400000);
+    return daysAway >= 0 && daysAway <= 3;
+  });
+  if (!upcoming.length) {
+    if (badgeEl) badgeEl.textContent = '✅ All Clear';
+    if (bodyEl) bodyEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:16px;color:#1e7e34;font-size:13px;font-weight:600;"><span style="font-size:22px;">✅</span> No appointments in the next 3 days.</div>`;
+    return;
+  }
+  if (badgeEl) { badgeEl.textContent = `⚠️ ${upcoming.length} upcoming`; badgeEl.style.background = 'rgba(255,80,80,0.3)'; }
+  const rows = upcoming.map(a => {
+    const res = residents.find(r => r.id === a.resident_id);
+    const daysAway = Math.round((new Date(a.appt_date + 'T00:00:00') - today) / 86400000);
+    const label = daysAway === 0 ? '🔴 TODAY' : daysAway === 1 ? '🟠 Tomorrow' : `🟡 In ${daysAway} days`;
+    return {
+      html: `<div style="padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;"><strong>${res ? res.name : 'Unknown'}</strong><span style="font-size:11px;font-weight:700;color:${daysAway===0?'#c0392b':daysAway===1?'#d68910':'#856404'};">${label}</span></div><div style="color:var(--text2);">${a.doctor}${a.appt_type ? ' · ' + a.appt_type : ''}</div><div style="color:var(--text3);font-size:12px;">${fmtDate(a.appt_date)}${a.appt_time ? ' at ' + a.appt_time : ''}${a.location ? ' · ' + a.location : ''}</div>${a.reason ? `<div style="color:var(--text3);font-size:12px;">Reason: ${a.reason}</div>` : ''}</div>`,
+      emailLine: `<strong>${res ? res.name : 'Unknown'}</strong> — ${a.doctor}${a.appt_type ? ' (' + a.appt_type + ')' : ''} on ${fmtDate(a.appt_date)}${a.appt_time ? ' at ' + a.appt_time : ''} (${label.replace(/[🔴🟠🟡]/g,'').trim()})${a.location ? ' · ' + a.location : ''}`
+    };
+  });
+  if (bodyEl) bodyEl.innerHTML = rows.map(r => r.html).join('');
+  if (sendEmail) {
+    const alreadySent = await wasAlertSentRecently('appointments');
+    if (!alreadySent) {
+      const html = buildAlertEmailHtml('📅 Upcoming Doctor Appointments', `There are <strong>${upcoming.length}</strong> appointment${upcoming.length>1?'s':''} coming up in the next 3 days:`, rows.map(r => r.emailLine), '#1a73e8');
+      await sendAlertEmail('appointments', `[HLH Alert] ${upcoming.length} Upcoming Appointment${upcoming.length>1?'s':''}`, html);
+      toast(`📧 Appointment alert logged (${upcoming.length} upcoming)`);
+    }
+  }
+}
+
+async function checkNotesAlerts(sendEmail) {
+  const bodyEl = document.getElementById('alert-notes-body');
+  const badgeEl = document.getElementById('alert-notes-badge');
+  const cfg = getAlertConfig();
+  const intervalHours = cfg.notesIntervalHours || 48;
+  const cutoffMs = intervalHours * 60 * 60 * 1000;
+  const residents = await getResidents();
+  const activeResidents = residents.filter(r => !r.status || r.status === 'active' || r.status === 'hospitalized');
+  const allNotes = await getNotes();
+  const now = Date.now();
+  const overdue = activeResidents.filter(res => {
+    const resNotes = allNotes.filter(n => n.resident_id === res.id);
+    if (!resNotes.length) return true;
+    const latest = Math.max(...resNotes.map(n => new Date(n.note_date + 'T23:59:59').getTime()));
+    return (now - latest) > cutoffMs;
+  }).map(res => {
+    const resNotes = allNotes.filter(n => n.resident_id === res.id);
+    const latest = resNotes.length ? new Date(Math.max(...resNotes.map(n => new Date(n.note_date + 'T23:59:59').getTime()))) : null;
+    const hoursAgo = latest ? Math.round((now - latest.getTime()) / 3600000) : null;
+    return { res, hoursAgo, latest };
+  });
+  if (!overdue.length) {
+    if (badgeEl) badgeEl.textContent = '✅ All Up-to-date';
+    if (bodyEl) bodyEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:16px;color:#1e7e34;font-size:13px;font-weight:600;"><span style="font-size:22px;">✅</span> All active residents have recent progress notes.</div>`;
+    return;
+  }
+  if (badgeEl) { badgeEl.textContent = `⚠️ ${overdue.length} overdue`; badgeEl.style.background = 'rgba(255,80,80,0.3)'; }
+  if (bodyEl) bodyEl.innerHTML = overdue.map(({ res, hoursAgo, latest }) => `<div style="padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:10px;"><div><div style="font-weight:700;color:var(--text);">${res.name}</div><div style="color:var(--text3);font-size:12px;">${latest ? `Last note: ${fmtDate(latest.toISOString().split('T')[0])} (${hoursAgo}h ago)` : 'No notes on record'}</div></div><button onclick="currentResidentId='${res.id}';openProfile('${res.id}').then(()=>{switchProfileTab('notes');openAddNote();});" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Note</button></div>`).join('');
+  if (sendEmail) {
+    const alreadySent = await wasAlertSentRecently('progress_notes');
+    if (!alreadySent) {
+      const html = buildAlertEmailHtml(`📋 Progress Notes Overdue (${intervalHours}h+)`, `The following <strong>${overdue.length}</strong> resident${overdue.length>1?'s have':' has'} not had a progress note in the last <strong>${intervalHours} hours</strong>:`, overdue.map(({ res, hoursAgo, latest }) => `<strong>${res.name}</strong> — ${latest ? `Last note ${hoursAgo} hours ago (${fmtDate(latest.toISOString().split('T')[0])})` : 'No notes on record ever'}`), '#7c3aed');
+      await sendAlertEmail('progress_notes', `[HLH Alert] ${overdue.length} Resident${overdue.length>1?'s':''} Need Progress Note Updates`, html);
+      toast(`📧 Progress notes alert logged (${overdue.length} overdue)`);
+    }
+  }
+}
+
+async function checkVitalsAlerts(sendEmail) {
+  const bodyEl = document.getElementById('alert-vitals-body');
+  const badgeEl = document.getElementById('alert-vitals-badge');
+  const cfg = getAlertConfig();
+  const intervalHours = cfg.vitalsIntervalHours || 48;
+  const cutoffMs = intervalHours * 60 * 60 * 1000;
+  const residents = await getResidents();
+  const activeResidents = residents.filter(r => !r.status || r.status === 'active');
+  const now = Date.now();
+  const overdueVitals = [];
+  for (const res of activeResidents) {
+    const { data: vitals } = await db.from('vitals').select('vitals_date').eq('resident_id', res.id).order('vitals_date', { ascending: false }).limit(1);
+    const latest = vitals && vitals.length ? new Date(vitals[0].vitals_date + 'T23:59:59') : null;
+    const hoursAgo = latest ? Math.round((now - latest.getTime()) / 3600000) : null;
+    if (!latest || (now - latest.getTime()) > cutoffMs) overdueVitals.push({ res, hoursAgo, latest });
+  }
+  if (!overdueVitals.length) {
+    if (badgeEl) badgeEl.textContent = '✅ All Up-to-date';
+    if (bodyEl) bodyEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:16px;color:#1e7e34;font-size:13px;font-weight:600;"><span style="font-size:22px;">✅</span> All active residents have recent vitals recorded.</div>`;
+    return;
+  }
+  if (badgeEl) { badgeEl.textContent = `⚠️ ${overdueVitals.length} overdue`; badgeEl.style.background = 'rgba(255,80,80,0.3)'; }
+  if (bodyEl) bodyEl.innerHTML = overdueVitals.map(({ res, hoursAgo, latest }) => `<div style="padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:10px;"><div><div style="font-weight:700;color:var(--text);">${res.name}</div><div style="color:var(--text3);font-size:12px;">${latest ? `Last vitals: ${fmtDate(latest.toISOString().split('T')[0])} (${hoursAgo}h ago)` : 'No vitals on record'}</div></div><button onclick="openProfile('${res.id}').then(()=>switchProfileTab('vitals'));" style="background:#c0392b;color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Vitals</button></div>`).join('');
+  if (sendEmail) {
+    const alreadySent = await wasAlertSentRecently('vitals');
+    if (!alreadySent) {
+      const html = buildAlertEmailHtml(`❤️ Vitals Updates Overdue (${intervalHours}h+)`, `The following <strong>${overdueVitals.length}</strong> resident${overdueVitals.length>1?'s have':' has'} not had vitals recorded in the last <strong>${intervalHours} hours</strong>:`, overdueVitals.map(({ res, hoursAgo, latest }) => `<strong>${res.name}</strong> — ${latest ? `Last recorded ${hoursAgo}h ago (${fmtDate(latest.toISOString().split('T')[0])})` : 'No vitals on record'}`), '#c0392b');
+      await sendAlertEmail('vitals', `[HLH Alert] ${overdueVitals.length} Resident${overdueVitals.length>1?'s':''} Need Vitals Updates`, html);
+      toast(`📧 Vitals alert logged (${overdueVitals.length} overdue)`);
+    }
+  }
+}
+
+async function checkPaymentAlerts(sendEmail) {
+  const bodyEl = document.getElementById('alert-exp-body');
+  const badgeEl = document.getElementById('alert-exp-badge');
+  const cfg2 = getSalaryConfig();
+  const currentMK = getCurrentMonthKey();
+  const today = new Date().toISOString().split('T')[0];
+  const overdueItems = [];
+  const bills = await getBills();
+  const billRecs = await getBillMonthRecords(currentMK);
+  const billRecMap = {};
+  billRecs.forEach(r => { billRecMap[r.bill_id] = r; });
+  bills.forEach(b => {
+    const rec = billRecMap[b.id];
+    const amtDue = rec ? parseFloat(rec.amount_due) : parseFloat(b.default_amount || 0);
+    const amtPaid = rec ? parseFloat(rec.amount_paid || 0) : 0;
+    const dueDate = b.due_day ? new Date(new Date().getFullYear(), new Date().getMonth(), b.due_day).toISOString().split('T')[0] : null;
+    const isPastDue = dueDate && today > dueDate;
+    if (!rec?.is_fully_paid && isPastDue && amtDue > 0) {
+      overdueItems.push({ label: `🏠 ${b.name}`, detail: `$${(amtDue - amtPaid).toFixed(2)} remaining (due ${ordinal(b.due_day)} of month)` });
+    }
+  });
+  for (const staffName of KNOWN_STAFF) {
+    const key = staffName.toLowerCase();
+    const staffCfg = cfg2[key];
+    if (!staffCfg || !staffCfg.amount || staffCfg.freq === 'sunday_only') continue;
+    const { data: allPayments } = await db.from('expenses').select('amount, wage_period_start, wage_period_end').eq('expense_type','wage').eq('wage_staff', staffName);
+    const payments = allPayments || [];
+    const earliest = payments.length ? payments.reduce((min,p) => (!p.wage_period_start || p.wage_period_start > min) ? min : p.wage_period_start, payments[0].wage_period_start) : null;
+    if (!earliest) continue;
+    generateExpectedPeriods(staffCfg.freq || 'monthly', earliest).forEach(period => {
+      if (period.fullEnd >= today || period.fullEnd < '2026-05-01') return;
+      const paid = payments.filter(p => p.wage_period_start && p.wage_period_end && p.wage_period_start <= period.end && p.wage_period_end >= period.start).reduce((s,p) => s + parseFloat(p.amount||0), 0);
+      const owed = staffCfg.amount - paid;
+      if (owed > 0.005) overdueItems.push({ label: `👤 ${staffName} Wages`, detail: `$${owed.toFixed(2)} owed for ${fmtDate(period.start)} – ${fmtDate(period.end)}` });
+    });
+  }
+  if (!overdueItems.length) {
+    if (badgeEl) badgeEl.textContent = '✅ All Clear';
+    if (bodyEl) bodyEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:16px;color:#1e7e34;font-size:13px;font-weight:600;"><span style="font-size:22px;">✅</span> No overdue bills or unpaid wages detected.</div>`;
+    return;
+  }
+  if (badgeEl) { badgeEl.textContent = `⚠️ ${overdueItems.length} overdue`; badgeEl.style.background = 'rgba(255,80,80,0.3)'; }
+  if (bodyEl) bodyEl.innerHTML = overdueItems.map(item => `<div style="padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;"><div style="font-weight:700;color:var(--text);">${item.label}</div><div style="color:#c0392b;font-size:12px;font-weight:600;">${item.detail}</div></div>`).join('');
+  if (sendEmail) {
+    const alreadySent = await wasAlertSentRecently('overdue_payments');
+    if (!alreadySent) {
+      const html = buildAlertEmailHtml('💰 Overdue Payments Detected', `The following <strong>${overdueItems.length}</strong> payment${overdueItems.length>1?'s':''} require immediate attention:`, overdueItems.map(i => `<strong>${i.label}</strong> — ${i.detail}`), '#d68910');
+      await sendAlertEmail('overdue_payments', `[HLH Alert] ${overdueItems.length} Overdue Payment${overdueItems.length>1?'s':''} Require Attention`, html);
+      toast(`📧 Overdue payments alert logged (${overdueItems.length} items)`);
+    }
+  }
+}
+
+async function loadAlertLog() {
+  const container = document.getElementById('alert-log-list');
+  if (!container) return;
+  const { data, error } = await db.from(ALERT_LOG_TABLE).select('*').order('sent_at', { ascending: false }).limit(50);
+  if (error) {
+    container.innerHTML = `<div style="padding:20px;text-align:center;color:var(--danger);font-size:13px;">⚠️ Alert log table not found. Run this SQL in your Supabase SQL editor:<br><br><code style="background:#f4f6f9;padding:10px;display:inline-block;border-radius:6px;font-size:11px;text-align:left;">CREATE TABLE IF NOT EXISTS alert_log (id TEXT PRIMARY KEY, alert_type TEXT, subject TEXT, body_preview TEXT, recipient TEXT, sent_at TIMESTAMPTZ DEFAULT NOW(), sent_by TEXT);</code><br><br><button onclick="loadAlertLog()" class="btn btn-secondary btn-sm" style="margin-top:8px;">Retry</button></div>`;
+    return;
+  }
+  if (!data || !data.length) {
+    container.innerHTML = `<div style="text-align:center;color:var(--text3);padding:32px;font-size:13px;">No alerts logged yet. Run a check to populate this log.</div>`;
+    return;
+  }
+  const typeIcons = { appointments:'📅', progress_notes:'📋', vitals:'❤️', overdue_payments:'💰', test:'🧪' };
+  const typeColors = { appointments:'#1a73e8', progress_notes:'#7c3aed', vitals:'#c0392b', overdue_payments:'#d68910', test:'#1e7e34' };
+  container.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead><tr>
+      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Type</th>
+      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Subject</th>
+      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Recipient</th>
+      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Sent At</th>
+      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">By</th>
+    </tr></thead><tbody>
+    ${data.map(log => {
+      const ic = typeIcons[log.alert_type] || '🔔';
+      const col = typeColors[log.alert_type] || '#b8860b';
+      const sentAt = new Date(log.sent_at).toLocaleString('en-US',{timeZone:'America/Los_Angeles',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      return `<tr><td style="padding:10px 14px;border-bottom:1px solid var(--border);"><span style="background:${col}15;color:${col};border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;">${ic} ${(log.alert_type||'').replace(/_/g,' ')}</span></td><td style="padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text);">${log.subject}</td><td style="padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text2);">${log.recipient}</td><td style="padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text3);">${sentAt} PT</td><td style="padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text3);">${log.sent_by||'—'}</td></tr>`;
+    }).join('')}
+    </tbody></table>`;
+}
+
+async function sendTestEmail() {
+  const cfg = getAlertConfig();
+  const recipient = cfg.email || ALERT_EMAIL;
+  const html = buildAlertEmailHtml('🧪 Test Alert — System Working', 'This is a test alert from your Harmony Living House Admin Portal. Your alert system is configured correctly.', ['✅ Appointment alerts: <strong>Enabled</strong> — fires for appointments within 3 days','✅ Progress notes: <strong>Enabled</strong> — fires if no note in 48h','✅ Vitals reminders: <strong>Enabled</strong> — fires if vitals not updated in 48h','✅ Overdue payments: <strong>Enabled</strong> — fires when bills or wages are past due'], '#b8860b');
+  await logAlert('test', `[HLH Test] Alert System Test — ${new Date().toLocaleTimeString()}`, 'Test alert logged successfully.', recipient);
+  await loadAlertLog();
+  toast('✅ Test alert logged. Check the Email Log below.');
+  if (ALERT_EDGE_FN_URL) {
+    const result = await sendAlertEmail('test', '[HLH Test] Alert System Test', html, true);
+    toast(result.success ? '📧 Test email sent via Edge Function!' : '⚠️ Email delivery failed — check Edge Function setup.');
+  }
+}
+
+async function runAllAlertChecks(sendEmails) {
+  toast('🔄 Running all alert checks…');
+  await Promise.all([
+    checkAppointmentAlerts(sendEmails),
+    checkNotesAlerts(sendEmails),
+    checkVitalsAlerts(sendEmails),
+    checkPaymentAlerts(sendEmails),
+  ]);
+  await loadAlertLog();
+  const strip = document.getElementById('alerts-status-strip');
+  const txt = document.getElementById('alerts-status-text');
+  if (strip && txt) {
+    strip.style.display = 'flex';
+    txt.textContent = `All checks completed at ${new Date().toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles',hour:'2-digit',minute:'2-digit'})} PT`;
+  }
+}
+
+async function renderAlertsPage() {
+  await runAllAlertChecks(true);
 }
 
 // ══════════════════════════════════
