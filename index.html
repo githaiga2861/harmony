@@ -1422,14 +1422,6 @@
                 <div class="field"><label>Notes Reminder Interval (hours)</label><input type="number" id="alert-notes-interval" value="48" min="12" max="168" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;"></div>
                 <div class="field"><label>Vitals Reminder Interval (hours)</label><input type="number" id="alert-vitals-interval" value="48" min="12" max="168" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;"></div>
               </div>
-              <div style="margin-top:14px;padding:12px 16px;background:#fdf6e3;border:1px solid #f0c040;border-radius:8px;font-size:12px;color:#7a5c00;line-height:1.7;">
-                <strong>💡 How it works:</strong> Each time the Alerts page loads, all conditions are checked automatically. Alerts are logged to the <code>alert_log</code> Supabase table and throttled to one email per alert type per 6 hours to prevent duplicates. To enable actual email delivery, create the <code>alert_log</code> table using the SQL below, deploy the Supabase Edge Function, and paste its URL into the <code>ALERT_EDGE_FN_URL</code> constant in the JavaScript.<br><br>
-                <strong>SQL to run in Supabase:</strong><br>
-                <code style="background:#fff8e8;display:block;padding:8px 10px;border-radius:5px;margin-top:5px;font-size:11px;">CREATE TABLE IF NOT EXISTS alert_log (id TEXT PRIMARY KEY, alert_type TEXT, subject TEXT, body_preview TEXT, recipient TEXT, sent_at TIMESTAMPTZ DEFAULT NOW(), sent_by TEXT);</code>
-              </div>
-              <div style="margin-top:12px;">
-                <button onclick="saveAlertConfig()" class="btn btn-primary">Save Configuration</button>
-              </div>
             </div>
           </div>
 
