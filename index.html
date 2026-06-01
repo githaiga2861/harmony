@@ -9956,8 +9956,10 @@ function togglePayTag(btn) {
 
 const ALERT_EMAIL = 'hello@harmonylivinghouse.com';
 const ALERT_LOG_TABLE = 'alert_log';
-const ALERT_THROTTLE_HOURS = 6;
-const ALERT_EDGE_FN_URL = null; // paste your Supabase Edge Function URL here after deployment
+const ALERT_THROTTLE_HOURS = 6; // Min hours between same alert type emails
+
+// ── Supabase Edge Function URL ──
+const ALERT_EDGE_FN_URL = 'https://gkmvglzjrsneqkrlvohp.supabase.co/functions/v1/send-alert';
 
 function getAlertConfig() {
   try { return JSON.parse(localStorage.getItem('hlh_alert_config')) || {}; } catch { return {}; }
@@ -9973,40 +9975,89 @@ function saveAlertConfig() {
   toast('✅ Alert configuration saved');
 }
 
+// ── Ensure alert_log table exists ──
+async function ensureAlertLogTable() {
+  // Try to insert a test record — if the table doesn't exist, Supabase returns an error
+  // We rely on the user creating this table via Supabase SQL editor (instructions shown in UI)
+}
+
+// ── Check if an alert of this type was sent recently (throttle) ──
 async function wasAlertSentRecently(alertType) {
   const cutoff = new Date(Date.now() - ALERT_THROTTLE_HOURS * 60 * 60 * 1000).toISOString();
-  try {
-    const { data } = await db.from(ALERT_LOG_TABLE).select('id').eq('alert_type', alertType).gte('sent_at', cutoff).limit(1);
-    return data && data.length > 0;
-  } catch { return false; }
+
+  const { data } = await db.from(ALERT_LOG_TABLE)
+    .select('id')
+    .eq('alert_type', alertType)
+    .gte('sent_at', cutoff)
+    .limit(1);
+
+  return data && data.length > 0;
 }
 
+// ── Log a sent alert ──
 async function logAlert(alertType, subject, body, recipientEmail) {
-  try {
-    await db.from(ALERT_LOG_TABLE).insert({
-      id: uid(), alert_type: alertType, subject,
-      body_preview: body.slice(0, 300),
-      recipient: recipientEmail || ALERT_EMAIL,
-      sent_at: new Date().toISOString(),
-      sent_by: currentUser ? currentUser.name : 'System'
-    });
-  } catch(e) { console.warn('Alert log table missing:', e.message); }
+  await db.from(ALERT_LOG_TABLE).insert({
+    id: uid(),
+    alert_type: alertType,
+    subject,
+    body_preview: body.slice(0, 300),
+    recipient: recipientEmail || ALERT_EMAIL,
+    sent_at: new Date().toISOString(),
+    sent_by: currentUser ? currentUser.name : 'System'
+  });
 }
 
-async function sendAlertEmail(alertType, subject, htmlBody, forceEmail) {
+// ── Send email via Supabase Edge Function ──
+async function sendAlertEmail(alertType, subject, htmlBody, forceEmail = false) {
   const cfg = getAlertConfig();
   const recipient = cfg.email || ALERT_EMAIL;
-  await logAlert(alertType, subject, htmlBody.replace(/<[^>]+>/g,''), recipient);
+
+  // Always log alerts in-app
+  await logAlert(
+    alertType,
+    subject,
+    htmlBody.replace(/<[^>]+>/g, ''),
+    recipient
+  );
+
   await loadAlertLog();
-  if (!ALERT_EDGE_FN_URL && !forceEmail) return { success: true, method: 'in-app-only' };
+
+  // If no Edge Function configured, keep alerts in-app only
+  if (!ALERT_EDGE_FN_URL && !forceEmail) {
+    return { success: true, method: 'in-app-only' };
+  }
+
   try {
-    const res = await fetch(ALERT_EDGE_FN_URL || '', {
+    const res = await fetch(ALERT_EDGE_FN_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      body: JSON.stringify({ to: recipient, subject, html: htmlBody })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      },
+      body: JSON.stringify({
+        to: recipient,
+        subject,
+        html: htmlBody
+      })
     });
-    return { success: res.ok, method: 'edge-function' };
-  } catch (err) { return { success: false, error: err.message }; }
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    return {
+      success: true,
+      method: 'edge-function'
+    };
+
+  } catch (err) {
+    console.error('Alert email failed:', err);
+
+    return {
+      success: false,
+      error: err.message
+    };
+  }
 }
 
 function buildAlertEmailHtml(title, intro, items, color) {
