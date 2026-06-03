@@ -1424,8 +1424,77 @@
               </div>
             </div>
           </div>
+      </div>
 
+        <!-- ADD CONTACT MODAL -->
+<div class="modal-overlay" id="modal-add-contact">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header">
+      <h3>➕ Add New Contact</h3>
+      <button class="btn-close" onclick="closeModal('modal-add-contact')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Contact Name *</label>
+          <input type="text" id="nc-name" placeholder="e.g. Dr. Jane Smith">
         </div>
+        <div class="field span2">
+          <label>Title / Role</label>
+          <input type="text" id="nc-title" placeholder="e.g. Case Manager, Consulting Nurse">
+        </div>
+        <div class="field span2">
+          <label>Organization</label>
+          <input type="text" id="nc-org" placeholder="e.g. DSHS, Lincoln Pharmacy">
+        </div>
+        <div class="field">
+          <label>Phone / Cell</label>
+          <input type="text" id="nc-phone" placeholder="e.g. 360-555-0100">
+        </div>
+        <div class="field">
+          <label>Fax</label>
+          <input type="text" id="nc-fax" placeholder="e.g. 360-555-0199">
+        </div>
+        <div class="field span2">
+          <label>Primary Email</label>
+          <input type="email" id="nc-email1" placeholder="e.g. name@example.com">
+        </div>
+        <div class="field span2">
+          <label>Secondary Email</label>
+          <input type="email" id="nc-email2" placeholder="Optional second email">
+        </div>
+        <div class="field span2">
+          <label>Address</label>
+          <input type="text" id="nc-address" placeholder="e.g. 123 Main St, Chehalis, WA 98532">
+        </div>
+        <div class="field span2">
+          <label>Notes</label>
+          <input type="text" id="nc-notes" placeholder="e.g. After-hours line, primary contact for refills">
+        </div>
+        <div class="field span2">
+          <label>Card Accent Color</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <button type="button" class="nc-color-btn" data-color="#1a4a8a:#2563eb" onclick="selectContactColor(this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1a4a8a,#2563eb);border:2px solid transparent;cursor:pointer;" title="Blue"></button>
+            <button type="button" class="nc-color-btn" data-color="#1a5e3a:#22863a" onclick="selectContactColor(this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1a5e3a,#22863a);border:2px solid transparent;cursor:pointer;" title="Green"></button>
+            <button type="button" class="nc-color-btn" data-color="#6b1a8a:#9333ea" onclick="selectContactColor(this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6b1a8a,#9333ea);border:2px solid transparent;cursor:pointer;" title="Purple"></button>
+            <button type="button" class="nc-color-btn" data-color="#1a3a5c:#1e6091" onclick="selectContactColor(this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1a3a5c,#1e6091);border:2px solid transparent;cursor:pointer;" title="Navy"></button>
+            <button type="button" class="nc-color-btn" data-color="#6b1a1a:#c0392b" onclick="selectContactColor(this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6b1a1a,#c0392b);border:2px solid transparent;cursor:pointer;" title="Red"></button>
+            <button type="button" class="nc-color-btn" data-color="#5a3a00:#d68910" onclick="selectContactColor(this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#5a3a00,#d68910);border:2px solid transparent;cursor:pointer;" title="Gold"></button>
+            <button type="button" class="nc-color-btn" data-color="#1a1a1a:#b8860b" onclick="selectContactColor(this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1a1a1a,#b8860b);border:2px solid transparent;cursor:pointer;" title="Dark Gold"></button>
+            <button type="button" class="nc-color-btn" data-color="#003366:#0056b3" onclick="selectContactColor(this)" style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#003366,#0056b3);border:2px solid transparent;cursor:pointer;" title="Dark Blue"></button>
+          </div>
+          <input type="hidden" id="nc-color" value="#1a4a8a:#2563eb">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-contact')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewContact()">Save Contact</button>
+    </div>
+  </div>
+</div>
 
         <!-- ALL INCIDENTS -->
         <div class="page" id="page-incidents">
@@ -1830,6 +1899,13 @@
 
       <!-- QUICK CONTACTS -->
         <div class="page" id="page-contacts">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+            <button onclick="openAddContact()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add Contact
+            </button>
+          </div>
+          <div id="dynamic-contacts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;"></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
 
             <div class="card">
@@ -1934,6 +2010,50 @@
             </div>
 
             <div class="card">
+              <div class="card-header" style="background:linear-gradient(135deg,#6b3a1f,#c47c2b);border-radius:10px 10px 0 0;">
+                <h3 style="color:#fff;font-family:'DM Serif Display',serif;font-size:16px;">🏥 Rose Mbote BSN,RN, RND, PDN — CEO</h3>
+              </div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">🏢</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Organization</div><div style="font-size:14px;font-weight:600;color:var(--text);">Golden Years Home Health Supported Living LLC</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">📱</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Phone</div><a href="tel:2064369751" style="font-size:15px;font-weight:700;color:#c47c2b;text-decoration:none;">206-436-9751</a></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">📧</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Work Email</div><a href="mailto:rose.mbote@goldenyearshomehealthllc.com" style="font-size:13px;font-weight:600;color:#c47c2b;text-decoration:none;">rose.mbote@goldenyearshomehealthllc.com</a></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:#fdf6e3;border-radius:8px;">
+                  <span style="font-size:20px;">📧</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Personal Email</div><a href="mailto:rosiembote@gmail.com" style="font-size:13px;font-weight:600;color:#c47c2b;text-decoration:none;">rosiembote@gmail.com</a></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header" style="background:linear-gradient(135deg,#1a5e3a,#2e8b57);border-radius:10px 10px 0 0;">
+                <h3 style="color:#fff;font-family:'DM Serif Display',serif;font-size:16px;">🏛️ Ann Jacobson — DSHS</h3>
+              </div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">🏢</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Organization</div><div style="font-size:14px;font-weight:600;color:var(--text);">Washington State DSHS</div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
+                  <span style="font-size:20px;">📱</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Phone</div><a href="tel:+13609184329" style="font-size:15px;font-weight:700;color:#2e8b57;text-decoration:none;">+1 (360) 918-4329</a></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px;background:#e6f4ea;border-radius:8px;">
+                  <span style="font-size:20px;">📧</span>
+                  <div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Email</div><a href="mailto:anne.jacobson@dshs.wa.gov" style="font-size:13px;font-weight:600;color:#2e8b57;text-decoration:none;">anne.jacobson@dshs.wa.gov</a></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
               <div class="card-header" style="background:linear-gradient(135deg,#0a4a6e,#0d7fb5);border-radius:10px 10px 0 0;">
                 <h3 style="color:#fff;font-family:'DM Serif Display',serif;font-size:16px;">🧠 AJ Psychiatry PLLC</h3>
               </div>
@@ -1961,7 +2081,8 @@
               </div>
             </div>
 
-          </div>
+         </div>
+          </div><!-- close static contacts grid -->
         </div>
 
       </div>
@@ -3281,10 +3402,51 @@
       <p style="font-size:11.5px;color:var(--text3);margin-top:14px;line-height:1.6;">
         💡 These figures are used only for balance tracking and alerts. Only amounts actually recorded as paid count as expenses.
       </p>
+      <!-- Add Staff Member -->
+      <div id="add-staff-form" style="display:none;margin-top:16px;border:1.5px dashed var(--accent);border-radius:10px;padding:16px 18px;background:var(--accent-light);">
+        <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;">New Staff Member</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div class="field" style="margin:0;grid-column:span 2;">
+            <label style="font-size:11px;">Full Name *</label>
+            <input type="text" id="new-staff-name" placeholder="e.g. Grace Mwangi">
+          </div>
+          <div class="field" style="margin:0;">
+            <label style="font-size:11px;">Email Address *</label>
+            <input type="email" id="new-staff-email" placeholder="e.g. grace@harmonylivinghouse.com">
+          </div>
+          <div class="field" style="margin:0;">
+            <label style="font-size:11px;">Temporary Password *</label>
+            <input type="text" id="new-staff-password" placeholder="e.g. staff2026">
+          </div>
+          <div class="field" style="margin:0;">
+            <label style="font-size:11px;">Expected Amount Per Period ($)</label>
+            <input type="number" id="new-staff-amount" placeholder="e.g. 800.00" step="0.01" min="0">
+          </div>
+          <div class="field" style="margin:0;">
+            <label style="font-size:11px;">Pay Frequency</label>
+            <select id="new-staff-freq">
+              <option value="monthly">Monthly</option>
+              <option value="biweekly">Bi-weekly</option>
+              <option value="weekly">Weekly</option>
+              <option value="sunday_only">Sunday Only</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="registerNewStaff()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex:1;">✅ Register Staff Member</button>
+          <button onclick="document.getElementById('add-staff-form').style.display='none'" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">Cancel</button>
+        </div>
+      </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('modal-salary-config')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveSalaryConfig()">Save Salary Settings</button>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <button onclick="document.getElementById('add-staff-form').style.display='block';document.getElementById('new-staff-name').focus();" style="background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Staff Member
+      </button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-salary-config')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSalaryConfig()">Save Salary Settings</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3842,10 +4004,38 @@ function initApp() {
   document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
   refreshDashboard();
   renderResidentTable();
-  populateResidentFilter(); // pre-load all dropdowns immediately on login
+  populateResidentFilter();
   startNotifScheduler();
   startMaintenancePoller();
   subscribeMaintenanceRealtime();
+  seedExistingStaff();
+}
+
+async function seedExistingStaff() {
+  // Seed login-capable staff from USERS array
+  const loginStaff = [
+    { id: 'seed-penninah', name: 'Penninah Nyandia', email: 'hello@harmonylivinghouse.com', password_plain: 'harmony2026', salary_amount: null, salary_freq: 'monthly', role: 'Admin' },
+    { id: 'seed-githaiga', name: 'Githaiga Njoroge', email: 'josegithaigajose6218@gmail.com', password_plain: 'staff2026', salary_amount: null, salary_freq: 'monthly', role: 'Staff' },
+  ];
+
+  // Seed salary-tracked caregivers (from KNOWN_STAFF / salary config)
+  const cfg = getSalaryConfig();
+  const caregivers = [
+    { id: 'seed-james',  name: 'James',  email: '', password_plain: '', salary_amount: cfg.james?.amount  || null, salary_freq: cfg.james?.freq  || 'monthly', role: 'Caregiver' },
+    { id: 'seed-alvan',  name: 'Alvan',  email: '', password_plain: '', salary_amount: cfg.alvan?.amount  || null, salary_freq: cfg.alvan?.freq  || 'monthly', role: 'Caregiver' },
+    { id: 'seed-ketty',  name: 'Ketty',  email: '', password_plain: '', salary_amount: cfg.ketty?.amount  || null, salary_freq: cfg.ketty?.freq  || 'sunday_only', role: 'Caregiver' },
+    { id: 'seed-joseph', name: 'Joseph', email: '', password_plain: '', salary_amount: cfg.joseph?.amount || null, salary_freq: cfg.joseph?.freq || 'monthly', role: 'Caregiver' },
+  ];
+
+  const allSeed = [...loginStaff, ...caregivers];
+
+  for (const s of allSeed) {
+    // upsert with onConflict on id so re-running never creates duplicates
+    await db.from('staff_members').upsert(
+      { ...s, is_active: true, created_at: new Date().toISOString(), created_by: 'System (seed)' },
+      { onConflict: 'id' }
+    );
+  }
 }
 
 // Login on Enter key
@@ -3879,6 +4069,7 @@ async function showPage(name) {
   }
   if (name === 'staffdocs') { initStaffDocsPage(); }
   if (name === 'alerts') { renderAlertsPage(); }
+  if (name === 'contacts') { renderDynamicContacts(); }
 }
 
 // ══════════════════════════════════
@@ -10301,6 +10492,94 @@ async function renderAlertsPage() {
 }
 
 // ══════════════════════════════════
+// DYNAMIC QUICK CONTACTS
+// ══════════════════════════════════
+
+let selectedContactColor = '#1a4a8a:#2563eb';
+
+function selectContactColor(btn) {
+  document.querySelectorAll('.nc-color-btn').forEach(b => b.style.border = '2px solid transparent');
+  btn.style.border = '3px solid var(--text)';
+  selectedContactColor = btn.getAttribute('data-color');
+  document.getElementById('nc-color').value = selectedContactColor;
+}
+
+function openAddContact() {
+  ['nc-name','nc-title','nc-org','nc-phone','nc-fax','nc-email1','nc-email2','nc-address','nc-notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  selectedContactColor = '#1a4a8a:#2563eb';
+  document.getElementById('nc-color').value = selectedContactColor;
+  document.querySelectorAll('.nc-color-btn').forEach(b => b.style.border = '2px solid transparent');
+  document.querySelector('.nc-color-btn').style.border = '3px solid var(--text)';
+  openModal('modal-add-contact');
+}
+
+async function saveNewContact() {
+  const name = document.getElementById('nc-name').value.trim();
+  if (!name) { toast('Please enter a contact name'); return; }
+  const contact = {
+    id: uid(),
+    name,
+    title: document.getElementById('nc-title').value.trim(),
+    org: document.getElementById('nc-org').value.trim(),
+    phone: document.getElementById('nc-phone').value.trim(),
+    fax: document.getElementById('nc-fax').value.trim(),
+    email1: document.getElementById('nc-email1').value.trim(),
+    email2: document.getElementById('nc-email2').value.trim(),
+    address: document.getElementById('nc-address').value.trim(),
+    notes: document.getElementById('nc-notes').value.trim(),
+    color: document.getElementById('nc-color').value,
+    created_at: new Date().toISOString(),
+    created_by: currentUser ? currentUser.name : ''
+  };
+  const { error } = await db.from('quick_contacts').insert(contact);
+  if (error) { toast('Error saving contact: ' + error.message); return; }
+  closeModal('modal-add-contact');
+  toast(`✅ ${name} added to Quick Contacts`);
+  renderDynamicContacts();
+}
+
+async function deleteQuickContact(id) {
+  if (!confirm('Remove this contact?')) return;
+  await db.from('quick_contacts').delete().eq('id', id);
+  toast('Contact removed');
+  renderDynamicContacts();
+}
+
+async function renderDynamicContacts() {
+  const grid = document.getElementById('dynamic-contacts-grid');
+  if (!grid) return;
+  const { data, error } = await db.from('quick_contacts').select('*').order('created_at', { ascending: true });
+  if (error || !data || !data.length) { grid.innerHTML = ''; return; }
+
+  grid.innerHTML = data.map(c => {
+    const colors = (c.color || '#1a4a8a:#2563eb').split(':');
+    const c1 = colors[0], c2 = colors[1] || colors[0];
+    const initials = c.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const rows = [
+      c.org    ? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;"><span style="font-size:20px;">🏢</span><div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Organization</div><div style="font-size:14px;font-weight:600;color:var(--text);">${c.org}</div></div></div>` : '',
+      c.phone  ? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;"><span style="font-size:20px;">📱</span><div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Phone</div><a href="tel:${c.phone.replace(/\D/g,'')}" style="font-size:15px;font-weight:700;color:${c2};text-decoration:none;">${c.phone}</a></div></div>` : '',
+      c.fax    ? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;"><span style="font-size:20px;">📠</span><div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Fax</div><div style="font-size:15px;font-weight:700;color:var(--text);">${c.fax}</div></div></div>` : '',
+      c.email1 ? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;"><span style="font-size:20px;">📧</span><div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Email</div><a href="mailto:${c.email1}" style="font-size:13px;font-weight:600;color:${c2};text-decoration:none;">${c.email1}</a></div></div>` : '',
+      c.email2 ? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:#f8f4ff;border-radius:8px;"><span style="font-size:20px;">📧</span><div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Alt Email</div><a href="mailto:${c.email2}" style="font-size:13px;font-weight:600;color:${c2};text-decoration:none;">${c.email2}</a></div></div>` : '',
+      c.address? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;"><span style="font-size:20px;">📍</span><div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Address</div><div style="font-size:14px;font-weight:600;color:var(--text);">${c.address}</div></div></div>` : '',
+      c.notes  ? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:#fffdf5;border-radius:8px;"><span style="font-size:20px;">💬</span><div style="font-size:12px;font-style:italic;color:#555;line-height:1.6;">${c.notes}</div></div>` : '',
+    ].filter(Boolean).join('');
+
+    return `<div class="card">
+      <div class="card-header" style="background:linear-gradient(135deg,${c1},${c2});border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:space-between;">
+        <h3 style="color:#fff;font-family:'DM Serif Display',serif;font-size:15px;">
+          ${initials[0] === initials[0].toUpperCase() ? '👤' : '🏢'} ${c.name}${c.title ? ' — ' + c.title : ''}
+        </h3>
+        <button onclick="deleteQuickContact('${c.id}')" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;" title="Remove contact">✕</button>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">${rows}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════
 // INIT
 // ══════════════════════════════════
 checkSession();
@@ -10429,6 +10708,109 @@ function viewSavedStaffDocs() {
     if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
     else window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   }, 80);
+}
+
+// ══════════════════════════════════
+// REGISTER NEW STAFF MEMBER
+// ══════════════════════════════════
+async function registerNewStaff() {
+  const name = document.getElementById('new-staff-name').value.trim();
+  const email = document.getElementById('new-staff-email').value.trim().toLowerCase();
+  const password = document.getElementById('new-staff-password').value.trim();
+  const amount = parseFloat(document.getElementById('new-staff-amount').value || 0);
+  const freq = document.getElementById('new-staff-freq').value;
+
+  if (!name || !email || !password) {
+    toast('Please fill in Name, Email, and Password');
+    return;
+  }
+
+  // 1. Register in Supabase Auth
+  const { data: authData, error: authError } = await db.auth.admin
+    ? await db.auth.admin.createUser({ email, password, email_confirm: true })
+    : await db.auth.signUp({ email, password });
+
+  if (authError && !authError.message.includes('already registered')) {
+    // Non-fatal: Supabase anon key can't create auth users — store in staff_members table instead
+    console.warn('Auth creation skipped (anon key):', authError.message);
+  }
+
+  // 2. Save to staff_members table in Supabase
+  const staffRecord = {
+    id: uid(),
+    name,
+    email,
+    password_plain: password, // stored for login lookup (matches USERS array pattern)
+    salary_amount: amount || null,
+    salary_freq: freq,
+    is_active: true,
+    created_at: new Date().toISOString(),
+    created_by: currentUser ? currentUser.name : ''
+  };
+
+  const { error: dbError } = await db.from('staff_members').upsert(staffRecord);
+  if (dbError) {
+    // Table may not exist yet — still add to in-memory USERS array so login works this session
+    console.warn('staff_members table error:', dbError.message);
+  }
+
+  // 3. Add to in-memory USERS array so they can log in immediately this session
+  USERS.push({ email, password, name });
+
+  // 4. Save salary config for this staff member
+  if (amount > 0) {
+    const cfg = getSalaryConfig();
+    const key = name.split(' ')[0].toLowerCase();
+    cfg[key] = { amount, freq, name };
+    localStorage.setItem(SALARY_CONFIG_KEY, JSON.stringify(cfg));
+  }
+
+  // 5. Add a card for them in the salary config modal
+  const salaryGrid = document.querySelector('#modal-salary-config .modal-body > div[style*="flex-direction:column"]');
+  if (salaryGrid) {
+    const colors = ['#e8f0fe:#1a73e8', '#f3e8fd:#7c3aed', '#fce4ec:#e91e63', '#e6f4ea:#1e7e34', '#fff3cd:#d68910'];
+    const pick = colors[Math.floor(Math.random() * colors.length)].split(':');
+    const initials = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const key = name.split(' ')[0].toLowerCase();
+    const newCard = document.createElement('div');
+    newCard.id = `salary-card-${key}`;
+    newCard.style.cssText = `padding:16px 18px;border-top:1px solid var(--border);background:${pick[0]}22;`;
+    newCard.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <div style="width:38px;height:38px;border-radius:50%;background:${pick[0]};border:2px solid ${pick[1]};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:${pick[1]};flex-shrink:0;">${initials}</div>
+        <div style="font-weight:700;font-size:15px;color:#1a2332;">${name}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="field" style="margin:0;">
+          <label style="font-size:11px;">Expected Amount Per Period ($)</label>
+          <input type="number" id="salary-${key}-amount" value="${amount || ''}" placeholder="e.g. 800.00" step="0.01" min="0">
+        </div>
+        <div class="field" style="margin:0;">
+          <label style="font-size:11px;">Pay Frequency</label>
+          <select id="salary-${key}-freq">
+            <option value="monthly" ${freq==='monthly'?'selected':''}>Monthly</option>
+            <option value="biweekly" ${freq==='biweekly'?'selected':''}>Bi-weekly</option>
+            <option value="weekly" ${freq==='weekly'?'selected':''}>Weekly</option>
+            <option value="sunday_only" ${freq==='sunday_only'?'selected':''}>Sunday Only</option>
+          </select>
+        </div>
+      </div>`;
+    salaryGrid.insertBefore(newCard, salaryGrid.lastElementChild);
+  }
+
+  // 6. Also update KNOWN_STAFF so balance tracking works
+  if (!KNOWN_STAFF.includes(name.split(' ')[0])) {
+    KNOWN_STAFF.push(name.split(' ')[0]);
+    STAFF_COLORS[name.split(' ')[0]] = { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568', dot:'#8a9ab0' };
+  }
+
+  // 7. Clear form + hide it
+  ['new-staff-name','new-staff-email','new-staff-password','new-staff-amount'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('add-staff-form').style.display = 'none';
+
+  toast(`✅ ${name} registered! They can now log in with their email and password.`);
 }
 
 // ══════════════════════════════════
