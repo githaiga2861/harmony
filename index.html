@@ -10326,9 +10326,10 @@ async function sendAlertEmail(alertType, subject, htmlBody, forceEmail = false) 
     const res = await fetch(ALERT_EDGE_FN_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPABASE_KEY}`
-      },
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'apikey': SUPABASE_KEY
+    },
       body: JSON.stringify({
         to: recipient,
         subject,
