@@ -10821,8 +10821,16 @@ async function deleteQuickContact(id) {
 async function renderDynamicContacts() {
   const grid = document.getElementById('dynamic-contacts-grid');
   if (!grid) return;
+  grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;">Loading contacts…</div>';
   const { data, error } = await db.from('quick_contacts').select('*').order('created_at', { ascending: true });
-  if (error || !data || !data.length) { grid.innerHTML = ''; return; }
+  if (error) {
+    grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--danger);font-size:13px;">Error loading contacts: ${error.message}</div>`;
+    return;
+  }
+  if (!data || !data.length) {
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;">No contacts found. Click "Add Contact" to add one.</div>';
+    return;
+  }
 
   grid.innerHTML = data.map(c => {
     const colors = (c.color || '#1a4a8a:#2563eb').split(':');
