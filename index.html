@@ -1166,6 +1166,14 @@
         <!-- PAYMENTS TRACKER -->
         <div class="page" id="page-payments">
 
+          <!-- Monthly Summary Button -->
+          <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+            <button onclick="openMonthlySummary()" style="background:linear-gradient(135deg,#1a1a1a,#b8860b);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(184,134,11,0.3);">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              📊 View Monthly Summaries
+            </button>
+          </div>
+
           <!-- Tab Toggle -->
           <div style="display:flex;gap:0;margin-bottom:24px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:6px;box-shadow:var(--shadow);">
             <button id="fin-tab-income" onclick="switchFinTab('income')"
@@ -1206,13 +1214,25 @@
               <div class="value" id="pay-stat-net-month">$0</div>
               <div class="sub">Income minus expenses</div>
             </div>
-            <div class="stat-card">
-              <div class="stat-icon warn" style="float:right">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <div class="stat-card" style="padding:0;overflow:hidden;">
+              <div style="padding:14px 16px 10px;border-bottom:1px solid var(--border);">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                  <div class="label" style="color:#1e7e34;">↑ Income This Month</div>
+                  <div style="width:28px;height:28px;border-radius:8px;background:#e8f5e9;display:flex;align-items:center;justify-content:center;">
+                    <svg width="14" height="14" fill="none" stroke="#1e7e34" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                  </div>
+                </div>
+                <div class="value" id="pay-stat-month-income-card" style="font-size:22px;color:#1e7e34;margin:0;">$0</div>
               </div>
-              <div class="label">Paying Residents</div>
-              <div class="value" id="pay-stat-residents">0</div>
-              <div class="sub">Unique payers</div>
+              <div style="padding:10px 16px 14px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                  <div class="label" style="color:#c0392b;">↓ Expenses This Month</div>
+                  <div style="width:28px;height:28px;border-radius:8px;background:#fdf0ef;display:flex;align-items:center;justify-content:center;">
+                    <svg width="14" height="14" fill="none" stroke="#c0392b" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+                  </div>
+                </div>
+                <div class="value" id="pay-stat-month-exp-card" style="font-size:22px;color:#c0392b;margin:0;">$0</div>
+              </div>
             </div>
           </div>
 
@@ -1966,9 +1986,7 @@
               </div>
             </div>
 
-            <div style="display:none !important;"><div class="card">
-              <div class="card-header" style="background:linear-gradient(135deg,#1a4a8a,#2563eb);border-radius:10px 10px 0 0;">
-                <h3 style="color:#fff;font-family:'DM Serif Display',serif;font-size:16px;">🩺 Home Doctor — Dominic Keya</h3>
+            <div style="display:none !important;">
               </div>
               <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
                 <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;">
@@ -2117,7 +2135,8 @@
                   <div style="font-size:12px;font-style:italic;color:#555;line-height:1.6;">"Mental health is a journey, and every day you choose yourself is a victory."</div>
                 </div>
               </div>
-            </div></div><!-- end hidden hardcoded cards -->
+            </div>
+            </div><!-- end hidden hardcoded contacts -->
 
          </div>
           </div><!-- close static contacts grid -->
@@ -3225,6 +3244,36 @@
   </div>
 </div>
 
+<!-- MODAL: Monthly Financial Summary -->
+<div class="modal-overlay" id="modal-monthly-summary">
+  <div class="modal modal-lg" style="max-width:860px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#1a1a1a,#b8860b);border-radius:14px 14px 0 0;">
+      <h3 style="color:#fff;font-family:'DM Serif Display',serif;font-size:18px;">📊 Monthly Financial Summaries</h3>
+      <button class="btn-close" onclick="closeModal('modal-monthly-summary')" style="color:#fff;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" style="padding:0;">
+
+      <!-- Month selector strip -->
+      <div style="padding:18px 24px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="font-size:13px;font-weight:700;color:var(--text2);">Select Month:</div>
+        <div id="month-selector-pills" style="display:flex;gap:8px;flex-wrap:wrap;flex:1;"></div>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+          <button onclick="printMonthlySummaryReport()" style="background:#1a1a1a;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;">
+            🖨️ Print Full Report
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary content -->
+      <div id="monthly-summary-content" style="padding:24px;">
+        <div style="text-align:center;color:var(--text3);padding:40px;font-size:13px;">Select a month above to view its financial summary.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Record Payment -->
 <div class="modal-overlay" id="modal-payment">
   <div class="modal">
@@ -4052,6 +4101,19 @@ function initApp() {
 
 async function seedHardcodedContacts() {
   const hardcoded = [
+    {
+      id: 'contact-penninah',
+      name: 'Penninah Nyandia',
+      title: 'Administrator / Owner',
+      org: 'Harmony Living House Adult Family LLC',
+      phone: '360-557-3937',
+      fax: '360-648-9890',
+      email1: 'hello@harmonylivinghouse.com',
+      email2: '',
+      address: '120 Newaukum Village Dr, Chehalis, WA 98532',
+      notes: '',
+      color: '#1a1a1a:#b8860b',
+    },
     {
       id: 'contact-harmony-house',
       name: 'Harmony House',
@@ -7415,7 +7477,15 @@ async function renderPaymentsPage() {
   }
   const payMonthEl = document.getElementById('pay-stat-month');
   if (payMonthEl) payMonthEl.textContent = '$' + monthTotal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-  document.getElementById('pay-stat-residents').textContent = uniquePayers;
+  const monthIncomeCardEl = document.getElementById('pay-stat-month-income-card');
+  if (monthIncomeCardEl) monthIncomeCardEl.textContent = '$' + monthTotal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const monthExpCardEl = document.getElementById('pay-stat-month-exp-card');
+  if (monthExpCardEl) {
+    const { data: _expForCard } = await db.from('expenses').select('amount, exp_date');
+    const _thisMonth = new Date().toISOString().slice(0,7);
+    const _monthExp = (_expForCard||[]).filter(e => e.exp_date && e.exp_date.startsWith(_thisMonth)).reduce((s,e) => s + parseFloat(e.amount||0), 0);
+    monthExpCardEl.textContent = '$' + _monthExp.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
   const payCountEl = document.getElementById('pay-stat-count');
   if (payCountEl) payCountEl.textContent = (allPayments||[]).length;
   // Net this month = income this month minus expenses this month
@@ -7491,6 +7561,313 @@ async function renderPaymentsPage() {
       ${p.received_by ? `<div class="note-preview" style="font-size:12px;color:var(--text3);">Received by: ${p.received_by}</div>` : ''}
     </div>`;
   }).join('');
+}
+
+// ══════════════════════════════════
+// MONTHLY FINANCIAL SUMMARY
+// ══════════════════════════════════
+
+const FINANCIALS_START = { year: 2026, month: 5 }; // May 2026
+
+function getAvailableMonths() {
+  const months = [];
+  const now = new Date();
+  let y = FINANCIALS_START.year;
+  let m = FINANCIALS_START.month;
+  while (y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth() + 1)) {
+    months.push({ year: y, month: m, key: `${y}-${String(m).padStart(2,'0')}` });
+    m++;
+    if (m > 12) { m = 1; y++; }
+  }
+  return months.reverse(); // most recent first
+}
+
+let activeSummaryMonth = null;
+
+async function openMonthlySummary() {
+  const months = getAvailableMonths();
+  const pillsEl = document.getElementById('month-selector-pills');
+  const monthNames = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  pillsEl.innerHTML = months.map(m => `
+    <button onclick="selectSummaryMonth('${m.key}')" id="pill-${m.key}"
+      style="padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);
+             background:var(--surface);color:var(--text2);font-family:inherit;
+             font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;">
+      ${monthNames[m.month]} ${m.year}
+    </button>`).join('');
+  // Default to current month
+  const now = new Date();
+  const defaultKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  openModal('modal-monthly-summary');
+  await selectSummaryMonth(defaultKey);
+}
+
+async function selectSummaryMonth(monthKey) {
+  activeSummaryMonth = monthKey;
+  // Update pill styles
+  document.querySelectorAll('[id^="pill-"]').forEach(btn => {
+    const isActive = btn.id === `pill-${monthKey}`;
+    btn.style.background = isActive ? 'linear-gradient(135deg,#1a1a1a,#b8860b)' : 'var(--surface)';
+    btn.style.color = isActive ? '#fff' : 'var(--text2)';
+    btn.style.borderColor = isActive ? '#b8860b' : 'var(--border)';
+  });
+  const contentEl = document.getElementById('monthly-summary-content');
+  contentEl.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;">Loading ${monthKey}…</div>`;
+
+  const [y, m] = monthKey.split('-').map(Number);
+  const monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+  const monthLabel = `${monthNames[m]} ${y}`;
+
+  // Fetch data
+  const { data: payments } = await db.from('payments').select('*').ilike('pay_date', `${monthKey}%`).order('pay_date');
+  const { data: expenses } = await db.from('expenses').select('*').ilike('exp_date', `${monthKey}%`).order('exp_date');
+  const { data: billRecs } = await db.from('bill_month_records').select('*').eq('month_key', monthKey);
+  const residents = await getResidents();
+
+  const pList = payments || [];
+  const eList = expenses || [];
+  const bList = billRecs || [];
+
+  const totalIncome = pList.reduce((s,p) => s + parseFloat(p.amount||0), 0);
+
+  // Expenses: rows + any bill payments not dual-written
+  const expFromRows = eList.reduce((s,e) => s + parseFloat(e.amount||0), 0);
+  const billAlreadyCounted = eList.filter(e => e.expense_type==='bill').reduce((s,e) => s + parseFloat(e.amount||0), 0);
+  const billRecTotal = bList.reduce((s,r) => s + parseFloat(r.amount_paid||0), 0);
+  const totalExpenses = expFromRows + Math.max(0, billRecTotal - billAlreadyCounted);
+
+  const netProfit = totalIncome - totalExpenses;
+
+  // Category breakdown for expenses
+  const byCat = {};
+  eList.forEach(e => {
+    const cat = e.category || 'Other';
+    if (!byCat[cat]) byCat[cat] = 0;
+    byCat[cat] += parseFloat(e.amount||0);
+  });
+
+  // Income by resident
+  const byRes = {};
+  pList.forEach(p => {
+    const res = residents.find(r => r.id === p.resident_id);
+    const name = res ? res.name : 'Unknown';
+    if (!byRes[name]) byRes[name] = 0;
+    byRes[name] += parseFloat(p.amount||0);
+  });
+
+  const fmt = (n) => '$' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const netColor = netProfit >= 0 ? '#1e7e34' : '#c0392b';
+  const netBg = netProfit >= 0 ? '#e8f5e9' : '#fdf0ef';
+  const netLabel = netProfit >= 0 ? '✅ Net Profit' : '⚠️ Net Loss';
+
+  contentEl.innerHTML = `
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);">${monthLabel}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px;">Financial Summary · Harmony Living House Adult Family LLC</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="printMonthlyDetailedReport('${monthKey}')" style="background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🖨️ Print Income Report</button>
+        <button onclick="printMonthlyExpenseReport('${monthKey}')" style="background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🖨️ Print Expense Report</button>
+      </div>
+    </div>
+
+    <!-- 3 KPI cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:22px;">
+      <div style="background:#e8f5e9;border:1.5px solid #a8d5b0;border-radius:12px;padding:18px 20px;">
+        <div style="font-size:11px;font-weight:700;color:#1e7e34;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Total Income</div>
+        <div style="font-size:28px;font-weight:800;color:#1e7e34;">${fmt(totalIncome)}</div>
+        <div style="font-size:12px;color:#1e7e34;margin-top:3px;">${pList.length} payment${pList.length!==1?'s':''} received</div>
+      </div>
+      <div style="background:#fdf0ef;border:1.5px solid #f5c0bb;border-radius:12px;padding:18px 20px;">
+        <div style="font-size:11px;font-weight:700;color:#c0392b;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Total Expenses</div>
+        <div style="font-size:28px;font-weight:800;color:#c0392b;">${fmt(totalExpenses)}</div>
+        <div style="font-size:12px;color:#c0392b;margin-top:3px;">${eList.length} expense record${eList.length!==1?'s':''}</div>
+      </div>
+      <div style="background:${netBg};border:1.5px solid ${netColor}40;border-radius:12px;padding:18px 20px;">
+        <div style="font-size:11px;font-weight:700;color:${netColor};text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">${netLabel}</div>
+        <div style="font-size:28px;font-weight:800;color:${netColor};">${netProfit < 0 ? '-' : ''}${fmt(netProfit)}</div>
+        <div style="font-size:12px;color:${netColor};margin-top:3px;">Income minus expenses</div>
+      </div>
+    </div>
+
+    <!-- Two column breakdown -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px;">
+
+      <!-- Income by resident -->
+      <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+        <div style="background:#1e7e34;padding:11px 16px;">
+          <div style="color:#fff;font-weight:700;font-size:13px;">💰 Income by Resident</div>
+        </div>
+        <div style="padding:0;">
+          ${Object.keys(byRes).length ? Object.entries(byRes).sort((a,b)=>b[1]-a[1]).map(([name,amt]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;">
+              <span style="color:var(--text);font-weight:500;">${name}</span>
+              <span style="font-weight:700;color:#1e7e34;">${fmt(amt)}</span>
+            </div>`).join('') + `
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;font-size:13px;background:var(--surface2);">
+              <span style="font-weight:700;color:var(--text);">Total</span>
+              <span style="font-weight:800;color:#1e7e34;">${fmt(totalIncome)}</span>
+            </div>`
+          : '<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px;font-style:italic;">No income recorded this month</div>'}
+        </div>
+      </div>
+
+      <!-- Expenses by category -->
+      <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+        <div style="background:#c0392b;padding:11px 16px;">
+          <div style="color:#fff;font-weight:700;font-size:13px;">🧾 Expenses by Category</div>
+        </div>
+        <div style="padding:0;">
+          ${Object.keys(byCat).length ? Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cat,amt]) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;">
+              <span style="color:var(--text);font-weight:500;">${cat}</span>
+              <span style="font-weight:700;color:#c0392b;">${fmt(amt)}</span>
+            </div>`).join('') + `
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;font-size:13px;background:var(--surface2);">
+              <span style="font-weight:700;color:var(--text);">Total</span>
+              <span style="font-weight:800;color:#c0392b;">${fmt(totalExpenses)}</span>
+            </div>`
+          : '<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px;font-style:italic;">No expenses recorded this month</div>'}
+        </div>
+      </div>
+    </div>
+
+    <!-- Individual payment rows -->
+    ${pList.length ? `
+    <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:18px;">
+      <div style="background:#1a3d1a;padding:11px 16px;"><div style="color:#fff;font-weight:700;font-size:13px;">📋 Payment Details — ${monthLabel}</div></div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr style="background:var(--surface2);">
+            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Date</th>
+            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Resident</th>
+            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Method</th>
+            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Source</th>
+            <th style="padding:9px 12px;text-align:right;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Amount</th>
+          </tr></thead>
+          <tbody>
+            ${pList.map(p => {
+              const res = residents.find(r => r.id === p.resident_id);
+              return `<tr>
+                <td style="padding:9px 12px;border-bottom:1px solid var(--border);">${fmtDate(p.pay_date)}</td>
+                <td style="padding:9px 12px;border-bottom:1px solid var(--border);font-weight:600;">${res ? res.name : '—'}</td>
+                <td style="padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2);">${p.method||'—'}</td>
+                <td style="padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2);font-size:11px;">${p.classification||'—'}</td>
+                <td style="padding:9px 12px;border-bottom:1px solid var(--border);text-align:right;font-weight:700;color:#1e7e34;">${fmt(parseFloat(p.amount||0))}</td>
+              </tr>`;
+            }).join('')}
+            <tr style="background:var(--surface2);">
+              <td colspan="4" style="padding:10px 12px;font-weight:700;font-size:13px;">Total Income</td>
+              <td style="padding:10px 12px;text-align:right;font-weight:800;font-size:14px;color:#1e7e34;">${fmt(totalIncome)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>` : ''}
+
+    <!-- Individual expense rows -->
+    ${eList.length ? `
+    <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <div style="background:#6b1a1a;padding:11px 16px;"><div style="color:#fff;font-weight:700;font-size:13px;">🧾 Expense Details — ${monthLabel}</div></div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr style="background:var(--surface2);">
+            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Date</th>
+            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Category</th>
+            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Description</th>
+            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Paid By</th>
+            <th style="padding:9px 12px;text-align:right;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Amount</th>
+          </tr></thead>
+          <tbody>
+            ${eList.map(e => `<tr>
+              <td style="padding:9px 12px;border-bottom:1px solid var(--border);">${fmtDate(e.exp_date)}</td>
+              <td style="padding:9px 12px;border-bottom:1px solid var(--border);"><span style="background:var(--danger-light);color:var(--danger);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;">${e.category||'Other'}</span></td>
+              <td style="padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2);">${e.description||'—'}</td>
+              <td style="padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text3);">${e.paid_by||'—'}</td>
+              <td style="padding:9px 12px;border-bottom:1px solid var(--border);text-align:right;font-weight:700;color:#c0392b;">${fmt(parseFloat(e.amount||0))}</td>
+            </tr>`).join('')}
+            <tr style="background:var(--surface2);">
+              <td colspan="4" style="padding:10px 12px;font-weight:700;font-size:13px;">Total Expenses</td>
+              <td style="padding:10px 12px;text-align:right;font-weight:800;font-size:14px;color:#c0392b;">${fmt(totalExpenses)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>` : ''}
+
+    ${!pList.length && !eList.length ? `<div style="text-align:center;padding:48px;color:var(--text3);font-size:14px;"><div style="font-size:40px;margin-bottom:12px;">📭</div><div style="font-weight:600;margin-bottom:6px;">No financial records for ${monthLabel}</div><div style="font-size:12px;">Payments and expenses recorded in this month will appear here.</div></div>` : ''}
+  `;
+}
+
+async function printMonthlySummaryReport() {
+  if (activeSummaryMonth) await printMonthlyDetailedReport(activeSummaryMonth);
+}
+
+async function printMonthlyDetailedReport(monthKey) {
+  const [y, m] = monthKey.split('-').map(Number);
+  const monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+  const monthLabel = `${monthNames[m]} ${y}`;
+  const { data: payments } = await db.from('payments').select('*').ilike('pay_date', `${monthKey}%`).order('pay_date');
+  const residents = await getResidents();
+  const pList = payments || [];
+  const total = pList.reduce((s,p) => s + parseFloat(p.amount||0), 0);
+  const fmt2 = (n) => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  const rows = pList.map((p,i) => {
+    const res = residents.find(r => r.id === p.resident_id);
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${fmtDate(p.pay_date)}</td>
+      <td>${res ? res.name : '—'}</td>
+      <td>${p.method||'—'}</td>
+      <td>${p.period||'—'}</td>
+      <td>${p.classification||'—'}</td>
+      <td>${p.received_by||'—'}</td>
+      <td>${p.receipt_num||'—'}</td>
+      <td style="text-align:right;font-weight:bold;">${fmt2(parseFloat(p.amount||0))}</td>
+    </tr>`;
+  }).join('');
+
+  const html = `${buildReportHeader(`Income Register — ${monthLabel}`, `All payments received during ${monthLabel}`)}
+    <table>
+      <thead><tr><th>#</th><th>Date</th><th>Resident</th><th>Method</th><th>Period</th><th>Source</th><th>Received By</th><th>Receipt</th><th>Amount</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr class="total-row"><td colspan="8" style="text-align:right;">TOTAL INCOME — ${monthLabel.toUpperCase()}</td><td style="text-align:right;">${fmt2(total)}</td></tr></tfoot>
+    </table>
+    <div class="footer-note">Harmony Living House Adult Family LLC · 120 Newaukum Village Dr, Chehalis, WA 98532 · WAC 388-76 / RCW 70.128</div>`;
+  openReportWindow(html, `Income Report — ${monthLabel}`);
+}
+
+async function printMonthlyExpenseReport(monthKey) {
+  const [y, m] = monthKey.split('-').map(Number);
+  const monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+  const monthLabel = `${monthNames[m]} ${y}`;
+  const { data: expenses } = await db.from('expenses').select('*').ilike('exp_date', `${monthKey}%`).order('exp_date');
+  const eList = expenses || [];
+  const total = eList.reduce((s,e) => s + parseFloat(e.amount||0), 0);
+  const fmt2 = (n) => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  const rows = eList.map((e,i) => `<tr>
+    <td>${i+1}</td>
+    <td>${fmtDate(e.exp_date)}</td>
+    <td>${e.category||'—'}</td>
+    <td>${e.description||'—'}</td>
+    <td>${e.vendor||'—'}</td>
+    <td>${e.method||'—'}</td>
+    <td>${e.paid_by||'—'}</td>
+    <td style="text-align:right;font-weight:bold;">${fmt2(parseFloat(e.amount||0))}</td>
+  </tr>`).join('');
+
+  const html = `${buildReportHeader(`Expense Register — ${monthLabel}`, `All expenses recorded during ${monthLabel}`)}
+    <table>
+      <thead><tr><th>#</th><th>Date</th><th>Category</th><th>Description</th><th>Vendor</th><th>Method</th><th>Paid By</th><th>Amount</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr class="total-row"><td colspan="7" style="text-align:right;">TOTAL EXPENSES — ${monthLabel.toUpperCase()}</td><td style="text-align:right;">${fmt2(total)}</td></tr></tfoot>
+    </table>
+    <div class="footer-note">Harmony Living House Adult Family LLC · 120 Newaukum Village Dr, Chehalis, WA 98532 · WAC 388-76 / RCW 70.128</div>`;
+  openReportWindow(html, `Expense Report — ${monthLabel}`);
 }
 
 async function openAddPayment() {
