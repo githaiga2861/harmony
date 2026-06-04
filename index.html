@@ -9820,53 +9820,74 @@ let cursor = new Date(effectiveStart + 'T00:00:00');
   return periods;
 }
 
-// Track selected period per staff for the wage balance strip
-const _wageStripPeriods = {};
+// Track selected month for wage balance strip
+let _wageStripMonth = null;
 
-function _getMonthsSince(startYYYYMM) {
+function _getWageMonths() {
   const months = [];
-  const [sy, sm] = startYYYYMM.split('-').map(Number);
+  const start = new Date(2026, 4, 1); // May 2026
   const now = new Date();
-  let y = sy, m = sm;
+  let y = 2026, m = 5; // May = month 5
   while (y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth() + 1)) {
     months.push(`${y}-${String(m).padStart(2,'0')}`);
-    m++; if (m > 12) { m = 1; y++; }
+    m++; if (m > 13) { m = 1; y++; }
   }
   return months.reverse(); // most recent first
 }
 
-function _getPeriodsSince(freq, startDate) {
-  // Returns all periods from startDate up to and including current period
-  return generateExpectedPeriods(freq, startDate);
-}
-
-async function renderWageBalanceStrip(selectedPeriods) {
+async function renderWageBalanceStrip() {
   const strip = document.getElementById('wage-balance-strip');
   if (!strip) return;
   const cfg = getSalaryConfig();
 
-  // Also pull any dynamically registered staff from Supabase
+  // Pull dynamically registered staff from Supabase
   const { data: dbStaff } = await db.from('staff_members')
     .select('name, salary_amount, salary_freq')
     .eq('is_active', true);
   const dynamicStaff = (dbStaff || []).filter(s =>
-    s.salary_amount && !KNOWN_STAFF.includes(s.name.split(' ')[0])
+    s.salary_amount && !KNOWN_STAFF.map(n => n.toLowerCase()).includes(s.name.split(' ')[0].toLowerCase())
   );
-
-  // Build full staff list: KNOWN_STAFF + any dynamic ones
-  const allStaffNames = [...KNOWN_STAFF];
   dynamicStaff.forEach(s => {
     const firstName = s.name.split(' ')[0];
-    if (!allStaffNames.includes(firstName)) allStaffNames.push(firstName);
     if (!cfg[firstName.toLowerCase()]) {
-      cfg[firstName.toLowerCase()] = { amount: s.salary_amount, freq: s.salary_freq || 'monthly', name: s.name };
+      cfg[firstName.toLowerCase()] = { amount: parseFloat(s.salary_amount), freq: 'monthly', name: s.name };
     }
     if (!STAFF_COLORS[firstName]) {
       STAFF_COLORS[firstName] = { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568' };
     }
   });
 
+  // Build full staff list
+  const allStaffNames = [...KNOWN_STAFF];
+  dynamicStaff.forEach(s => {
+    const firstName = s.name.split(' ')[0];
+    if (!allStaffNames.includes(firstName)) allStaffNames.push(firstName);
+  });
+
   if (!Object.keys(cfg).length) { strip.style.display = 'none'; return; }
+
+  // Available months starting May 2026
+  const allMonths = _getWageMonths();
+  if (!_wageStripMonth || !allMonths.includes(_wageStripMonth)) {
+    _wageStripMonth = allMonths[0]; // default to most recent
+  }
+
+  const [selY, selM] = _wageStripMonth.split('-').map(Number);
+  const monthStart = `${_wageStripMonth}-01`;
+  const lastDay = new Date(selY, selM, 0).getDate();
+  const monthEnd = `${_wageStripMonth}-${String(lastDay).padStart(2,'0')}`;
+
+  // Month dropdown HTML
+  const mn = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const monthDropdown = `<select onchange="_wageStripMonth=this.value;renderWageBalanceStrip()"
+    style="font-size:11px;font-weight:700;color:var(--text);background:var(--surface);border:1.5px solid var(--border);border-radius:6px;padding:3px 8px;cursor:pointer;font-family:inherit;">
+    ${allMonths.map(mk => {
+      const [my, mm] = mk.split('-').map(Number);
+      return `<option value="${mk}" ${mk === _wageStripMonth ? 'selected' : ''}>${mn[mm]} ${my}</option>`;
+    }).join('')}
+  </select>`;
+
+  const today = new Date().toISOString().split('T')[0];
 
   let cards = '';
   let anyOverdue = false;
@@ -9877,8 +9898,6 @@ async function renderWageBalanceStrip(selectedPeriods) {
     const staffCfg = cfg[key];
     if (!staffCfg || !staffCfg.amount) continue;
     const colors = STAFF_COLORS[staffName] || { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568' };
-    const freq = staffCfg.freq || 'monthly';
-    const freqLabel = getFrequencyLabel(freq);
 
     const { data: allPayments } = await db.from('expenses')
       .select('amount, wage_period_start, wage_period_end, exp_date')
@@ -9887,219 +9906,91 @@ async function renderWageBalanceStrip(selectedPeriods) {
       .order('wage_period_start', { ascending: true });
     const payments = allPayments || [];
 
-    const today = new Date().toISOString().split('T')[0];
-
-    // ── KETTY: Sunday-only special logic ──
-    if (freq === 'sunday_only') {
-      const allSundays = getAllSundaysSince('2026-05-01');
-      const { data: daysOff } = await db.from('staff_days_off')
-        .select('day_date').eq('staff_name', staffName);
-      const daysOffSet = new Set((daysOff || []).map(d => d.day_date));
-      const paidDates = new Set(payments.map(p => p.wage_period_start).filter(Boolean));
-
-      let staffOverdue = [];
-      for (const sunday of allSundays) {
-        if (sunday >= today) continue;
-        if (daysOffSet.has(sunday)) continue;
-        if (paidDates.has(sunday)) continue;
-        staffOverdue.push(sunday);
-      }
-
-      const currentSunday = allSundays[allSundays.length - 1];
-      const paidThisSunday = paidDates.has(currentSunday);
-      const offThisSunday = daysOffSet.has(currentSunday);
-      const isFullyPaid = paidThisSunday || offThisSunday;
-      const totalOverdue = staffOverdue.length;
-      if (totalOverdue > 0) anyOverdue = true;
-
-      // ── Period dropdown for Sunday staff — list of months ──
-      const allMonths = _getMonthsSince('2026-05');
-      const selKey = `${staffName}_sunday`;
-      if (!_wageStripPeriods[selKey]) _wageStripPeriods[selKey] = allMonths[0];
-      const selMonth = _wageStripPeriods[selKey];
-
-      // Sundays in selected month
-      const sundaysInMonth = allSundays.filter(s => s.startsWith(selMonth));
-      const paidInMonth = sundaysInMonth.filter(s => paidDates.has(s)).length;
-      const offInMonth = sundaysInMonth.filter(s => daysOffSet.has(s)).length;
-      const unpaidInMonth = sundaysInMonth.filter(s => !paidDates.has(s) && !daysOffSet.has(s) && s < today).length;
-      const totalPaidAmt = paidInMonth * staffCfg.amount;
-      const totalOwedAmt = unpaidInMonth * staffCfg.amount;
-
-      const monthDropdown = `<select onchange="_wageStripPeriods['${selKey}']=this.value;renderWageBalanceStrip()"
-        style="font-size:10px;font-weight:700;color:${colors.text};background:${colors.bg};border:1px solid ${colors.border};border-radius:6px;padding:2px 6px;cursor:pointer;font-family:inherit;margin-top:2px;">
-        ${allMonths.map(mk => {
-          const [my, mm] = mk.split('-').map(Number);
-          const mn = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-          return `<option value="${mk}" ${mk === selMonth ? 'selected' : ''}>${mn[mm]} ${my}</option>`;
-        }).join('')}
-      </select>`;
-
-      cards += `
-        <div style="background:#fff;border:1.5px solid ${colors.border};border-radius:8px;padding:10px 13px;min-width:0;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-            <div style="width:30px;height:30px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:${colors.text};flex-shrink:0;">${staffName.charAt(0)}</div>
-            <div style="flex:1;min-width:0;">
-              <div style="font-weight:700;font-size:13px;color:#1a2332;line-height:1.2;">${staffName}</div>
-              <div style="font-size:10px;color:${colors.text};font-weight:600;">Sunday Only · $${staffCfg.amount.toFixed(2)}/Sunday</div>
-              ${monthDropdown}
-            </div>
-            ${isFullyPaid
-              ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;white-space:nowrap;align-self:flex-start;">${offThisSunday ? '— Day Off' : '✅ This Sunday Paid'}</span>`
-              : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;white-space:nowrap;align-self:flex-start;">Unpaid this Sunday</span>`}
-          </div>
-          <div style="font-size:10.5px;color:#888;margin-bottom:4px;">
-            ${sundaysInMonth.length} Sunday${sundaysInMonth.length!==1?'s':''} in selected month ·
-            <strong style="color:#1e7e34;">${paidInMonth} paid</strong> ·
-            <strong style="color:#888;">${offInMonth} day off</strong>
-            ${unpaidInMonth > 0 ? ` · <strong style="color:#c0392b;">${unpaidInMonth} unpaid ($${totalOwedAmt.toFixed(2)})</strong>` : ''}
-          </div>
-          ${unpaidInMonth > 0
-            ? `<div style="background:#fdf0ef;border:1px solid #f5c0bb;border-radius:6px;padding:4px 8px;font-size:10.5px;color:#c0392b;font-weight:700;margin-bottom:5px;">⚠️ $${totalOwedAmt.toFixed(2)} unpaid for selected month</div>`
-            : `<div style="background:#e6f4ea;border:1px solid #a8d5b0;border-radius:6px;padding:4px 8px;font-size:10.5px;color:#1e7e34;font-weight:700;margin-bottom:5px;">✅ All accounted for selected month</div>`}
-          <button onclick="openKettyManager('${staffName}')" style="width:100%;background:${colors.bg};color:${colors.text};border:1.5px solid ${colors.border};border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
-            📅 Manage Sundays (${totalOverdue > 0 ? `⚠️ ${totalOverdue} overdue` : 'all clear'})
-          </button>
-        </div>`;
-
-      if (totalOverdue > 0) {
-        overdueAlertHtml += `
-          <div style="margin-bottom:8px;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-              <div style="width:22px;height:22px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:${colors.text};flex-shrink:0;">${staffName.charAt(0)}</div>
-              <span style="font-weight:700;font-size:13px;color:${colors.text};">${staffName}</span>
-              <span style="font-size:11px;color:#888;">(Sunday Only)</span>
-              <span style="margin-left:auto;font-size:12px;font-weight:700;color:#c0392b;">${totalOverdue} Sunday${totalOverdue!==1?'s':''} unaccounted</span>
-            </div>
-            ${staffOverdue.map(d => `
-              <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px 4px 30px;font-size:11.5px;border-bottom:1px solid #fde8e5;">
-                <span style="color:#555;">${fmtDate(d)} (Sunday)</span>
-                <span style="color:#c0392b;font-weight:700;">No payment or day-off recorded</span>
-              </div>`).join('')}
-            <div style="padding:6px 8px 4px 30px;">
-              <button onclick="openKettyManager('${staffName}')" style="background:#fdf0ef;color:#c0392b;border:1px solid #f5c0bb;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">📅 Resolve now →</button>
-            </div>
-          </div>`;
-      }
-      continue;
-    }
-
-    // ── REGULAR STAFF ──
-    // Build list of all periods since first payment or May 2026
-    const earliest = payments.length ? payments[0].wage_period_start : '2026-05-01';
-    const allPeriods = generateExpectedPeriods(freq, earliest);
-    const currentPeriod = getCurrentPeriodForFreq(freq);
-
-    // Period dropdown
-    const selKey = staffName;
-    if (!_wageStripPeriods[selKey]) _wageStripPeriods[selKey] = `${currentPeriod.start}|${currentPeriod.end}`;
-    const selVal = _wageStripPeriods[selKey];
-    const [selStart, selEnd] = selVal.split('|');
-
-    // Build dropdown options from all periods
-    const periodOptions = allPeriods.map(p => {
-      const label = freq === 'monthly'
-        ? fmtDate(p.start).replace(/\d+,\s*/, '') // "May 2026"
-        : `${fmtDate(p.start)} – ${fmtDate(p.end)}`;
-      const val = `${p.start}|${p.fullEnd}`;
-      const isCurrent = p.start === currentPeriod.start;
-      return `<option value="${val}" ${val === selVal ? 'selected' : ''}>${isCurrent ? '▶ ' : ''}${label}</option>`;
-    }).reverse().join(''); // most recent first
-
-    const periodDropdown = `<select onchange="_wageStripPeriods['${selKey}']=this.value;renderWageBalanceStrip()"
-      style="font-size:10px;font-weight:700;color:${colors.text};background:${colors.bg};border:1px solid ${colors.border};border-radius:6px;padding:2px 6px;cursor:pointer;font-family:inherit;margin-top:2px;max-width:100%;">
-      ${periodOptions}
-    </select>`;
-
-    // Payments for selected period
-    const selectedPayments = payments.filter(p =>
-      p.wage_period_start && p.wage_period_end &&
-      p.wage_period_start <= selEnd &&
-      p.wage_period_end >= selStart
-    );
-    const paidSelectedPeriod = selectedPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
-    const balanceSelectedPeriod = Math.max(0, staffCfg.amount - paidSelectedPeriod);
-    const pct = Math.min(100, Math.round((paidSelectedPeriod / staffCfg.amount) * 100));
-    const barColor = pct >= 100 ? '#1e7e34' : pct >= 50 ? '#d68910' : '#c0392b';
-    const isFullyPaid = balanceSelectedPeriod <= 0.005;
-
-    // Also compute current period status for badge
-    const currentPayments = payments.filter(p =>
-      p.wage_period_start && p.wage_period_end &&
-      p.wage_period_start <= currentPeriod.end &&
-      p.wage_period_end >= currentPeriod.start
-    );
-    const paidCurrentPeriod = currentPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
-    const currentBalance = Math.max(0, staffCfg.amount - paidCurrentPeriod);
-    const isCurrentPaid = currentBalance <= 0.005;
-
-    // Overdue: all past periods with unpaid balance
-    let staffOverdue = [];
-    allPeriods.forEach(period => {
-      if (period.fullEnd >= today) return;
-      if (period.fullEnd < '2026-05-01') return;
-      const periodPayments = payments.filter(p =>
-        p.wage_period_start && p.wage_period_end &&
-        p.wage_period_start <= period.end &&
-        p.wage_period_end >= period.start
-      );
-      const paid = periodPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
-      const owed = staffCfg.amount - paid;
-      if (owed > 0.005) staffOverdue.push({ start: period.start, end: period.end, paid, owed });
+    // Payments that overlap with selected month — a payment belongs to a month if
+    // its period_start falls within the month OR the period spans into the month
+    const monthPayments = payments.filter(p => {
+      if (!p.wage_period_start) return false;
+      // Period start is within the month
+      const startInMonth = p.wage_period_start >= monthStart && p.wage_period_start <= monthEnd;
+      // Period spans into this month (e.g. Apr 30 – May 31 counts as May)
+      const spanIntoMonth = p.wage_period_start < monthStart &&
+        p.wage_period_end && p.wage_period_end >= monthStart;
+      return startInMonth || spanIntoMonth;
     });
 
-    const totalOverdue = staffOverdue.reduce((s,p) => s + p.owed, 0);
-    if (totalOverdue > 0.005) anyOverdue = true;
+    const paidThisMonth = monthPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
+    const balance = Math.max(0, staffCfg.amount - paidThisMonth);
+    const pct = Math.min(100, Math.round((paidThisMonth / staffCfg.amount) * 100));
+    const barColor = pct >= 100 ? '#1e7e34' : pct >= 50 ? '#d68910' : '#c0392b';
+    const isFullyPaid = balance <= 0.005;
+    const isPastMonth = monthEnd < today;
+    const isOverdue = isPastMonth && !isFullyPaid;
+    if (isOverdue) anyOverdue = true;
 
-    // Is the selected period in the past (overdue)?
-    const isPastPeriod = selEnd < today;
-    const isSelectedOverdue = isPastPeriod && balanceSelectedPeriod > 0.005;
+    // All past months with unpaid balance (for overdue banner)
+    const allMonthsAsc = [...allMonths].reverse();
+    let staffOverdue = [];
+    for (const mk of allMonthsAsc) {
+      const [my, mm] = mk.split('-').map(Number);
+      const mStart = `${mk}-01`;
+      const mEnd = `${mk}-${String(new Date(my, mm, 0).getDate()).padStart(2,'0')}`;
+      if (mEnd >= today) continue; // skip current and future months
+      const mPayments = payments.filter(p => {
+        if (!p.wage_period_start) return false;
+        const startIn = p.wage_period_start >= mStart && p.wage_period_start <= mEnd;
+        const spanIn = p.wage_period_start < mStart && p.wage_period_end && p.wage_period_end >= mStart;
+        return startIn || spanIn;
+      });
+      const mPaid = mPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
+      const mOwed = staffCfg.amount - mPaid;
+      if (mOwed > 0.005) {
+        staffOverdue.push({ mk, mStart, mEnd, paid: mPaid, owed: mOwed });
+        anyOverdue = true;
+      }
+    }
 
     cards += `
-      <div style="background:#fff;border:1.5px solid ${isSelectedOverdue ? '#f5c0bb' : colors.border};border-radius:8px;padding:10px 13px;min-width:0;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-          <div style="width:30px;height:30px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:${colors.text};flex-shrink:0;">${staffName.charAt(0)}</div>
+      <div style="background:#fff;border:1.5px solid ${isOverdue ? '#f5c0bb' : colors.border};border-radius:8px;padding:10px 13px;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:${colors.text};flex-shrink:0;">${staffName.charAt(0)}</div>
           <div style="flex:1;min-width:0;">
-            <div style="font-weight:700;font-size:13px;color:#1a2332;line-height:1.2;">${staffName}</div>
-            <div style="font-size:10px;color:${colors.text};font-weight:600;">${freqLabel} · $${staffCfg.amount.toFixed(2)}/period</div>
-            ${periodDropdown}
+            <div style="font-weight:700;font-size:13px;color:#1a2332;">${staffName}</div>
+            <div style="font-size:10px;color:${colors.text};font-weight:600;">Monthly · $${staffCfg.amount.toFixed(2)}/month</div>
           </div>
-          ${isCurrentPaid
-            ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;white-space:nowrap;align-self:flex-start;">✅ Current Paid</span>`
-            : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;white-space:nowrap;align-self:flex-start;">Owed $${currentBalance.toFixed(2)}</span>`}
+          <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;
+            ${isFullyPaid ? 'color:#1e7e34;background:#e6f4ea;' : isOverdue ? 'color:#c0392b;background:#fdf0ef;' : 'color:#856404;background:#fff3cd;'}">
+            ${isFullyPaid ? '✅ Paid' : isOverdue ? `⚠️ Overdue $${balance.toFixed(2)}` : `Owed $${balance.toFixed(2)}`}
+          </span>
         </div>
-        <div style="font-size:10.5px;color:#888;margin-bottom:4px;">
-          ${isSelectedOverdue ? '⚠️ Past period — ' : ''}Paid: <strong>$${paidSelectedPeriod.toFixed(2)}</strong> / $${staffCfg.amount.toFixed(2)}
+        <div style="font-size:11px;color:#888;margin-bottom:5px;">
+          Paid: <strong style="color:#1e7e34;">$${paidThisMonth.toFixed(2)}</strong> of $${staffCfg.amount.toFixed(2)}
         </div>
-        <div style="background:#e8e8e8;border-radius:20px;height:5px;overflow:hidden;margin-bottom:4px;">
+        <div style="background:#e8e8e8;border-radius:20px;height:6px;overflow:hidden;margin-bottom:3px;">
           <div style="width:${pct}%;background:${barColor};height:100%;border-radius:20px;transition:width 0.4s;"></div>
         </div>
-        <div style="font-size:10px;color:#aaa;text-align:right;margin-bottom:4px;">${pct}% paid</div>
-        ${isSelectedOverdue
-          ? `<div style="background:#fdf0ef;border:1px solid #f5c0bb;border-radius:6px;padding:4px 8px;font-size:10.5px;color:#c0392b;font-weight:700;">⚠️ $${balanceSelectedPeriod.toFixed(2)} still owed for this period</div>`
-          : isFullyPaid
-            ? `<div style="background:#e6f4ea;border:1px solid #a8d5b0;border-radius:6px;padding:4px 8px;font-size:10.5px;color:#1e7e34;font-weight:700;">✅ Fully paid for selected period</div>`
-            : `<div style="background:#fff3cd;border:1px solid #ffe08a;border-radius:6px;padding:4px 8px;font-size:10.5px;color:#856404;font-weight:700;">$${balanceSelectedPeriod.toFixed(2)} remaining this period</div>`}
-        ${totalOverdue > 0.005
-          ? `<div style="background:#fdf0ef;border:1px solid #f5c0bb;border-radius:6px;padding:4px 8px;font-size:10px;color:#c0392b;font-weight:600;margin-top:4px;">⚠️ Total overdue across all periods: $${totalOverdue.toFixed(2)}</div>`
-          : ''}
+        <div style="font-size:10px;color:#aaa;text-align:right;">${pct}% paid</div>
+        ${staffOverdue.length > 0 ? `
+          <div style="margin-top:6px;background:#fdf0ef;border:1px solid #f5c0bb;border-radius:6px;padding:4px 8px;font-size:10px;color:#c0392b;font-weight:700;">
+            ⚠️ ${staffOverdue.length} past month${staffOverdue.length!==1?'s':''} overdue · $${staffOverdue.reduce((s,o)=>s+o.owed,0).toFixed(2)} total
+          </div>` : ''}
       </div>`;
 
     if (staffOverdue.length) {
       overdueAlertHtml += `
-        <div style="margin-bottom:8px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
             <div style="width:22px;height:22px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:${colors.text};flex-shrink:0;">${staffName.charAt(0)}</div>
             <span style="font-weight:700;font-size:13px;color:${colors.text};">${staffName}</span>
-            <span style="font-size:11px;color:#888;">(${freqLabel})</span>
-            <span style="margin-left:auto;font-size:12px;font-weight:700;color:#c0392b;">Total overdue: $${staffOverdue.reduce((s,p)=>s+p.owed,0).toFixed(2)}</span>
+            <span style="margin-left:auto;font-size:12px;font-weight:700;color:#c0392b;">
+              Total overdue: $${staffOverdue.reduce((s,o)=>s+o.owed,0).toFixed(2)}
+            </span>
           </div>
-          ${staffOverdue.map(p => `
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px 4px 30px;font-size:11.5px;border-bottom:1px solid #fde8e5;">
-              <span style="color:#555;">${fmtDate(p.start)} – ${fmtDate(p.end)}</span>
+          ${staffOverdue.map(o => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px 5px 30px;font-size:11.5px;border-bottom:1px solid #fde8e5;">
+              <span style="color:#555;">${mn[parseInt(o.mk.split('-')[1])]} ${o.mk.split('-')[0]}</span>
               <span style="display:flex;gap:12px;">
-                <span style="color:#888;">Paid: <strong style="color:#1e7e34;">$${p.paid.toFixed(2)}</strong></span>
-                <span style="color:#c0392b;font-weight:700;">Unpaid: $${p.owed.toFixed(2)}</span>
+                <span style="color:#888;">Paid: <strong style="color:#1e7e34;">$${o.paid.toFixed(2)}</strong></span>
+                <span style="color:#c0392b;font-weight:700;">Owed: $${o.owed.toFixed(2)}</span>
               </span>
             </div>`).join('')}
         </div>`;
@@ -10113,7 +10004,7 @@ async function renderWageBalanceStrip(selectedPeriods) {
       <div style="background:linear-gradient(90deg,#7b1a1a,#c0392b);padding:9px 14px;display:flex;align-items:center;gap:8px;">
         <span style="font-size:16px;">⚠️</span>
         <span style="color:#fff;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.06em;">Overdue Wage Payments</span>
-        <span style="color:rgba(255,255,255,0.7);font-size:11px;margin-left:4px;">— past periods with unpaid balances</span>
+        <span style="color:rgba(255,255,255,0.7);font-size:11px;margin-left:4px;">— past months with unpaid balances</span>
         <button onclick="openSalaryConfig()" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:5px;padding:3px 9px;cursor:pointer;font-family:inherit;font-weight:700;">⚙️ Setup</button>
       </div>
       <div style="padding:12px 14px;">${overdueAlertHtml}</div>
@@ -10121,8 +10012,11 @@ async function renderWageBalanceStrip(selectedPeriods) {
 
   strip.innerHTML = `
     ${overdueBanner}
-    <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;">👤 Staff Wage Balances</div>
+    <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;">👤 Staff Wage Balances</div>
+        ${monthDropdown}
+      </div>
       <button onclick="openSalaryConfig()" style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;">Edit Setup ⚙️</button>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:14px;">${cards}</div>`;
