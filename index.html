@@ -7312,9 +7312,11 @@ async function selectSummaryMonth(monthKey) {
   const monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
   const monthLabel = `${monthNames[m]} ${y}`;
 
-  // Fetch data — use date range since pay_date/exp_date are date columns not text
+  // Fetch data using proper last-day-of-month calculation
+  const [my, mm] = monthKey.split('-').map(Number);
   const monthStart = `${monthKey}-01`;
-  const monthEnd = `${monthKey}-31`;
+  const lastDay = new Date(my, mm, 0).getDate();
+  const monthEnd = `${monthKey}-${String(lastDay).padStart(2,'0')}`;
   const { data: payments } = await db.from('payments').select('*').gte('pay_date', monthStart).lte('pay_date', monthEnd).order('pay_date');
   const { data: expenses } = await db.from('expenses').select('*').gte('exp_date', monthStart).lte('exp_date', monthEnd).order('exp_date');
   const { data: billRecs } = await db.from('bill_month_records').select('*').eq('month_key', monthKey);
@@ -7505,7 +7507,8 @@ async function printMonthlyDetailedReport(monthKey) {
   const [y, m] = monthKey.split('-').map(Number);
   const monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
   const monthLabel = `${monthNames[m]} ${y}`;
-  const { data: payments } = await db.from('payments').select('*').gte('pay_date', `${monthKey}-01`).lte('pay_date', `${monthKey}-31`).order('pay_date');
+  const [_py, _pm] = monthKey.split('-').map(Number);
+  const { data: payments } = await db.from('payments').select('*').gte('pay_date', `${monthKey}-01`).lte('pay_date', `${monthKey}-${String(new Date(_py, _pm, 0).getDate()).padStart(2,'0')}`).order('pay_date');
   const residents = await getResidents();
   const pList = payments || [];
   const total = pList.reduce((s,p) => s + parseFloat(p.amount||0), 0);
@@ -7540,7 +7543,8 @@ async function printMonthlyExpenseReport(monthKey) {
   const [y, m] = monthKey.split('-').map(Number);
   const monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
   const monthLabel = `${monthNames[m]} ${y}`;
-  const { data: expenses } = await db.from('expenses').select('*').gte('exp_date', `${monthKey}-01`).lte('exp_date', `${monthKey}-31`).order('exp_date');
+  const [_ey, _em] = monthKey.split('-').map(Number);
+  const { data: expenses } = await db.from('expenses').select('*').gte('exp_date', `${monthKey}-01`).lte('exp_date', `${monthKey}-${String(new Date(_ey, _em, 0).getDate()).padStart(2,'0')}`).order('exp_date');
   const eList = expenses || [];
   const total = eList.reduce((s,e) => s + parseFloat(e.amount||0), 0);
   const fmt2 = (n) => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -9816,17 +9820,59 @@ let cursor = new Date(effectiveStart + 'T00:00:00');
   return periods;
 }
 
-async function renderWageBalanceStrip() {
+// Track selected period per staff for the wage balance strip
+const _wageStripPeriods = {};
+
+function _getMonthsSince(startYYYYMM) {
+  const months = [];
+  const [sy, sm] = startYYYYMM.split('-').map(Number);
+  const now = new Date();
+  let y = sy, m = sm;
+  while (y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth() + 1)) {
+    months.push(`${y}-${String(m).padStart(2,'0')}`);
+    m++; if (m > 12) { m = 1; y++; }
+  }
+  return months.reverse(); // most recent first
+}
+
+function _getPeriodsSince(freq, startDate) {
+  // Returns all periods from startDate up to and including current period
+  return generateExpectedPeriods(freq, startDate);
+}
+
+async function renderWageBalanceStrip(selectedPeriods) {
   const strip = document.getElementById('wage-balance-strip');
   if (!strip) return;
   const cfg = getSalaryConfig();
+
+  // Also pull any dynamically registered staff from Supabase
+  const { data: dbStaff } = await db.from('staff_members')
+    .select('name, salary_amount, salary_freq')
+    .eq('is_active', true);
+  const dynamicStaff = (dbStaff || []).filter(s =>
+    s.salary_amount && !KNOWN_STAFF.includes(s.name.split(' ')[0])
+  );
+
+  // Build full staff list: KNOWN_STAFF + any dynamic ones
+  const allStaffNames = [...KNOWN_STAFF];
+  dynamicStaff.forEach(s => {
+    const firstName = s.name.split(' ')[0];
+    if (!allStaffNames.includes(firstName)) allStaffNames.push(firstName);
+    if (!cfg[firstName.toLowerCase()]) {
+      cfg[firstName.toLowerCase()] = { amount: s.salary_amount, freq: s.salary_freq || 'monthly', name: s.name };
+    }
+    if (!STAFF_COLORS[firstName]) {
+      STAFF_COLORS[firstName] = { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568' };
+    }
+  });
+
   if (!Object.keys(cfg).length) { strip.style.display = 'none'; return; }
 
   let cards = '';
   let anyOverdue = false;
   let overdueAlertHtml = '';
 
-  for (const staffName of KNOWN_STAFF) {
+  for (const staffName of allStaffNames) {
     const key = staffName.toLowerCase();
     const staffCfg = cfg[key];
     if (!staffCfg || !staffCfg.amount) continue;
@@ -9841,55 +9887,77 @@ async function renderWageBalanceStrip() {
       .order('wage_period_start', { ascending: true });
     const payments = allPayments || [];
 
+    const today = new Date().toISOString().split('T')[0];
+
     // ── KETTY: Sunday-only special logic ──
     if (freq === 'sunday_only') {
       const allSundays = getAllSundaysSince('2026-05-01');
-      const today = new Date().toISOString().split('T')[0];
-
-      // Fetch days Ketty was marked as not working
       const { data: daysOff } = await db.from('staff_days_off')
-        .select('day_date')
-        .eq('staff_name', staffName);
+        .select('day_date').eq('staff_name', staffName);
       const daysOffSet = new Set((daysOff || []).map(d => d.day_date));
-
-      // Payments recorded (keyed by the sunday date = period_start)
       const paidDates = new Set(payments.map(p => p.wage_period_start).filter(Boolean));
 
-      // Determine overdue Sundays
       let staffOverdue = [];
       for (const sunday of allSundays) {
-        if (sunday >= today) continue; // Don't count current Sunday as overdue yet
-        if (daysOffSet.has(sunday)) continue; // Marked as not worked — no payment expected
-        if (paidDates.has(sunday)) continue; // Paid — all good
+        if (sunday >= today) continue;
+        if (daysOffSet.has(sunday)) continue;
+        if (paidDates.has(sunday)) continue;
         staffOverdue.push(sunday);
       }
 
-      // Current Sunday
       const currentSunday = allSundays[allSundays.length - 1];
       const paidThisSunday = paidDates.has(currentSunday);
       const offThisSunday = daysOffSet.has(currentSunday);
       const isFullyPaid = paidThisSunday || offThisSunday;
       const totalOverdue = staffOverdue.length;
-
       if (totalOverdue > 0) anyOverdue = true;
+
+      // ── Period dropdown for Sunday staff — list of months ──
+      const allMonths = _getMonthsSince('2026-05');
+      const selKey = `${staffName}_sunday`;
+      if (!_wageStripPeriods[selKey]) _wageStripPeriods[selKey] = allMonths[0];
+      const selMonth = _wageStripPeriods[selKey];
+
+      // Sundays in selected month
+      const sundaysInMonth = allSundays.filter(s => s.startsWith(selMonth));
+      const paidInMonth = sundaysInMonth.filter(s => paidDates.has(s)).length;
+      const offInMonth = sundaysInMonth.filter(s => daysOffSet.has(s)).length;
+      const unpaidInMonth = sundaysInMonth.filter(s => !paidDates.has(s) && !daysOffSet.has(s) && s < today).length;
+      const totalPaidAmt = paidInMonth * staffCfg.amount;
+      const totalOwedAmt = unpaidInMonth * staffCfg.amount;
+
+      const monthDropdown = `<select onchange="_wageStripPeriods['${selKey}']=this.value;renderWageBalanceStrip()"
+        style="font-size:10px;font-weight:700;color:${colors.text};background:${colors.bg};border:1px solid ${colors.border};border-radius:6px;padding:2px 6px;cursor:pointer;font-family:inherit;margin-top:2px;">
+        ${allMonths.map(mk => {
+          const [my, mm] = mk.split('-').map(Number);
+          const mn = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+          return `<option value="${mk}" ${mk === selMonth ? 'selected' : ''}>${mn[mm]} ${my}</option>`;
+        }).join('')}
+      </select>`;
 
       cards += `
         <div style="background:#fff;border:1.5px solid ${colors.border};border-radius:8px;padding:10px 13px;min-width:0;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
             <div style="width:30px;height:30px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:${colors.text};flex-shrink:0;">${staffName.charAt(0)}</div>
-            <div>
+            <div style="flex:1;min-width:0;">
               <div style="font-weight:700;font-size:13px;color:#1a2332;line-height:1.2;">${staffName}</div>
               <div style="font-size:10px;color:${colors.text};font-weight:600;">Sunday Only · $${staffCfg.amount.toFixed(2)}/Sunday</div>
+              ${monthDropdown}
             </div>
             ${isFullyPaid
-              ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;white-space:nowrap;">${offThisSunday ? '— Day Off' : '✅ Paid'}</span>`
-              : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;white-space:nowrap;">Unpaid this Sunday</span>`}
+              ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;white-space:nowrap;align-self:flex-start;">${offThisSunday ? '— Day Off' : '✅ This Sunday Paid'}</span>`
+              : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;white-space:nowrap;align-self:flex-start;">Unpaid this Sunday</span>`}
           </div>
           <div style="font-size:10.5px;color:#888;margin-bottom:4px;">
-            This Sunday (${fmtDate(currentSunday)}): 
-            ${paidThisSunday ? `<strong style="color:#1e7e34;">$${staffCfg.amount.toFixed(2)} paid</strong>` : offThisSunday ? '<strong style="color:#888;">Day off — no payment expected</strong>' : `<strong style="color:#c0392b;">$${staffCfg.amount.toFixed(2)} not yet recorded</strong>`}
+            ${sundaysInMonth.length} Sunday${sundaysInMonth.length!==1?'s':''} in selected month ·
+            <strong style="color:#1e7e34;">${paidInMonth} paid</strong> ·
+            <strong style="color:#888;">${offInMonth} day off</strong>
+            ${unpaidInMonth > 0 ? ` · <strong style="color:#c0392b;">${unpaidInMonth} unpaid ($${totalOwedAmt.toFixed(2)})</strong>` : ''}
           </div>
-          <button onclick="openKettyManager('${staffName}')" style="width:100%;margin-top:6px;background:${colors.bg};color:${colors.text};border:1.5px solid ${colors.border};border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
+          ${unpaidInMonth > 0
+            ? `<div style="background:#fdf0ef;border:1px solid #f5c0bb;border-radius:6px;padding:4px 8px;font-size:10.5px;color:#c0392b;font-weight:700;margin-bottom:5px;">⚠️ $${totalOwedAmt.toFixed(2)} unpaid for selected month</div>`
+            : `<div style="background:#e6f4ea;border:1px solid #a8d5b0;border-radius:6px;padding:4px 8px;font-size:10.5px;color:#1e7e34;font-weight:700;margin-bottom:5px;">✅ All accounted for selected month</div>`}
+          <button onclick="openKettyManager('${staffName}')" style="width:100%;background:${colors.bg};color:${colors.text};border:1.5px solid ${colors.border};border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
             📅 Manage Sundays (${totalOverdue > 0 ? `⚠️ ${totalOverdue} overdue` : 'all clear'})
           </button>
         </div>`;
@@ -9901,7 +9969,7 @@ async function renderWageBalanceStrip() {
               <div style="width:22px;height:22px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:${colors.text};flex-shrink:0;">${staffName.charAt(0)}</div>
               <span style="font-weight:700;font-size:13px;color:${colors.text};">${staffName}</span>
               <span style="font-size:11px;color:#888;">(Sunday Only)</span>
-              <span style="margin-left:auto;font-size:12px;font-weight:700;color:#c0392b;">${totalOverdue} Sunday${totalOverdue !== 1 ? 's' : ''} unaccounted</span>
+              <span style="margin-left:auto;font-size:12px;font-weight:700;color:#c0392b;">${totalOverdue} Sunday${totalOverdue!==1?'s':''} unaccounted</span>
             </div>
             ${staffOverdue.map(d => `
               <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px 4px 30px;font-size:11.5px;border-bottom:1px solid #fde8e5;">
@@ -9913,11 +9981,49 @@ async function renderWageBalanceStrip() {
             </div>
           </div>`;
       }
-      continue; // Skip the rest of the loop for Ketty
+      continue;
     }
 
-    // ── REGULAR STAFF: existing logic ──
+    // ── REGULAR STAFF ──
+    // Build list of all periods since first payment or May 2026
+    const earliest = payments.length ? payments[0].wage_period_start : '2026-05-01';
+    const allPeriods = generateExpectedPeriods(freq, earliest);
     const currentPeriod = getCurrentPeriodForFreq(freq);
+
+    // Period dropdown
+    const selKey = staffName;
+    if (!_wageStripPeriods[selKey]) _wageStripPeriods[selKey] = `${currentPeriod.start}|${currentPeriod.end}`;
+    const selVal = _wageStripPeriods[selKey];
+    const [selStart, selEnd] = selVal.split('|');
+
+    // Build dropdown options from all periods
+    const periodOptions = allPeriods.map(p => {
+      const label = freq === 'monthly'
+        ? fmtDate(p.start).replace(/\d+,\s*/, '') // "May 2026"
+        : `${fmtDate(p.start)} – ${fmtDate(p.end)}`;
+      const val = `${p.start}|${p.fullEnd}`;
+      const isCurrent = p.start === currentPeriod.start;
+      return `<option value="${val}" ${val === selVal ? 'selected' : ''}>${isCurrent ? '▶ ' : ''}${label}</option>`;
+    }).reverse().join(''); // most recent first
+
+    const periodDropdown = `<select onchange="_wageStripPeriods['${selKey}']=this.value;renderWageBalanceStrip()"
+      style="font-size:10px;font-weight:700;color:${colors.text};background:${colors.bg};border:1px solid ${colors.border};border-radius:6px;padding:2px 6px;cursor:pointer;font-family:inherit;margin-top:2px;max-width:100%;">
+      ${periodOptions}
+    </select>`;
+
+    // Payments for selected period
+    const selectedPayments = payments.filter(p =>
+      p.wage_period_start && p.wage_period_end &&
+      p.wage_period_start <= selEnd &&
+      p.wage_period_end >= selStart
+    );
+    const paidSelectedPeriod = selectedPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
+    const balanceSelectedPeriod = Math.max(0, staffCfg.amount - paidSelectedPeriod);
+    const pct = Math.min(100, Math.round((paidSelectedPeriod / staffCfg.amount) * 100));
+    const barColor = pct >= 100 ? '#1e7e34' : pct >= 50 ? '#d68910' : '#c0392b';
+    const isFullyPaid = balanceSelectedPeriod <= 0.005;
+
+    // Also compute current period status for badge
     const currentPayments = payments.filter(p =>
       p.wage_period_start && p.wage_period_end &&
       p.wage_period_start <= currentPeriod.end &&
@@ -9925,14 +10031,9 @@ async function renderWageBalanceStrip() {
     );
     const paidCurrentPeriod = currentPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
     const currentBalance = Math.max(0, staffCfg.amount - paidCurrentPeriod);
-    const pct = Math.min(100, Math.round((paidCurrentPeriod / staffCfg.amount) * 100));
-    const barColor = pct >= 100 ? '#1e7e34' : pct >= 50 ? '#d68910' : '#c0392b';
-    const isFullyPaid = currentBalance <= 0.005;
+    const isCurrentPaid = currentBalance <= 0.005;
 
-    const earliest = payments.length ? payments[0].wage_period_start : null;
-    const allPeriods = earliest ? generateExpectedPeriods(freq, earliest) : [];
-    const today = new Date().toISOString().split('T')[0];
-
+    // Overdue: all past periods with unpaid balance
     let staffOverdue = [];
     allPeriods.forEach(period => {
       if (period.fullEnd >= today) return;
@@ -9944,38 +10045,43 @@ async function renderWageBalanceStrip() {
       );
       const paid = periodPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
       const owed = staffCfg.amount - paid;
-      if (owed > 0.005) {
-        staffOverdue.push({ start: period.start, end: period.end, paid, owed });
-      }
+      if (owed > 0.005) staffOverdue.push({ start: period.start, end: period.end, paid, owed });
     });
 
     const totalOverdue = staffOverdue.reduce((s,p) => s + p.owed, 0);
     if (totalOverdue > 0.005) anyOverdue = true;
 
+    // Is the selected period in the past (overdue)?
+    const isPastPeriod = selEnd < today;
+    const isSelectedOverdue = isPastPeriod && balanceSelectedPeriod > 0.005;
+
     cards += `
-      <div style="background:#fff;border:1.5px solid ${colors.border};border-radius:8px;padding:10px 13px;min-width:0;">
+      <div style="background:#fff;border:1.5px solid ${isSelectedOverdue ? '#f5c0bb' : colors.border};border-radius:8px;padding:10px 13px;min-width:0;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
           <div style="width:30px;height:30px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:${colors.text};flex-shrink:0;">${staffName.charAt(0)}</div>
-          <div>
+          <div style="flex:1;min-width:0;">
             <div style="font-weight:700;font-size:13px;color:#1a2332;line-height:1.2;">${staffName}</div>
             <div style="font-size:10px;color:${colors.text};font-weight:600;">${freqLabel} · $${staffCfg.amount.toFixed(2)}/period</div>
+            ${periodDropdown}
           </div>
-          ${isFullyPaid
-            ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;white-space:nowrap;">✅ Paid</span>`
-            : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;white-space:nowrap;">Owed $${currentBalance.toFixed(2)}</span>`}
+          ${isCurrentPaid
+            ? `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#1e7e34;background:#e6f4ea;border-radius:20px;padding:2px 7px;white-space:nowrap;align-self:flex-start;">✅ Current Paid</span>`
+            : `<span style="margin-left:auto;font-size:10px;font-weight:700;color:#c0392b;background:#fdf0ef;border-radius:20px;padding:2px 7px;white-space:nowrap;align-self:flex-start;">Owed $${currentBalance.toFixed(2)}</span>`}
         </div>
         <div style="font-size:10.5px;color:#888;margin-bottom:4px;">
-          ${freqLabel === 'Weekly' ? 'This week' : freqLabel === 'Bi-weekly' ? 'This fortnight' : 'This month'}:
-          <strong>$${paidCurrentPeriod.toFixed(2)}</strong> / $${staffCfg.amount.toFixed(2)}
+          ${isSelectedOverdue ? '⚠️ Past period — ' : ''}Paid: <strong>$${paidSelectedPeriod.toFixed(2)}</strong> / $${staffCfg.amount.toFixed(2)}
         </div>
         <div style="background:#e8e8e8;border-radius:20px;height:5px;overflow:hidden;margin-bottom:4px;">
           <div style="width:${pct}%;background:${barColor};height:100%;border-radius:20px;transition:width 0.4s;"></div>
         </div>
-        <div style="font-size:10px;color:#aaa;text-align:right;margin-bottom:${totalOverdue > 0.005 ? '5px' : '0'};">${pct}% paid this period</div>
+        <div style="font-size:10px;color:#aaa;text-align:right;margin-bottom:4px;">${pct}% paid</div>
+        ${isSelectedOverdue
+          ? `<div style="background:#fdf0ef;border:1px solid #f5c0bb;border-radius:6px;padding:4px 8px;font-size:10.5px;color:#c0392b;font-weight:700;">⚠️ $${balanceSelectedPeriod.toFixed(2)} still owed for this period</div>`
+          : isFullyPaid
+            ? `<div style="background:#e6f4ea;border:1px solid #a8d5b0;border-radius:6px;padding:4px 8px;font-size:10.5px;color:#1e7e34;font-weight:700;">✅ Fully paid for selected period</div>`
+            : `<div style="background:#fff3cd;border:1px solid #ffe08a;border-radius:6px;padding:4px 8px;font-size:10.5px;color:#856404;font-weight:700;">$${balanceSelectedPeriod.toFixed(2)} remaining this period</div>`}
         ${totalOverdue > 0.005
-          ? `<div style="background:#fdf0ef;border:1px solid #f5c0bb;border-radius:6px;padding:5px 8px;font-size:10.5px;color:#c0392b;font-weight:700;">
-               ⚠️ Overdue from past periods: $${totalOverdue.toFixed(2)}
-             </div>`
+          ? `<div style="background:#fdf0ef;border:1px solid #f5c0bb;border-radius:6px;padding:4px 8px;font-size:10px;color:#c0392b;font-weight:600;margin-top:4px;">⚠️ Total overdue across all periods: $${totalOverdue.toFixed(2)}</div>`
           : ''}
       </div>`;
 
@@ -10002,7 +10108,6 @@ async function renderWageBalanceStrip() {
 
   if (!cards) { strip.style.display = 'none'; return; }
 
-  // ── Overdue banner (only if there are overdue periods) ──
   const overdueBanner = anyOverdue ? `
     <div style="margin-bottom:12px;background:#fff5f5;border:1.5px solid #f5c0bb;border-radius:10px;overflow:hidden;">
       <div style="background:linear-gradient(90deg,#7b1a1a,#c0392b);padding:9px 14px;display:flex;align-items:center;gap:8px;">
@@ -10011,18 +10116,16 @@ async function renderWageBalanceStrip() {
         <span style="color:rgba(255,255,255,0.7);font-size:11px;margin-left:4px;">— past periods with unpaid balances</span>
         <button onclick="openSalaryConfig()" style="margin-left:auto;font-size:11px;color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:5px;padding:3px 9px;cursor:pointer;font-family:inherit;font-weight:700;">⚙️ Setup</button>
       </div>
-      <div style="padding:12px 14px;">
-        ${overdueAlertHtml}
-      </div>
+      <div style="padding:12px 14px;">${overdueAlertHtml}</div>
     </div>` : '';
 
   strip.innerHTML = `
     ${overdueBanner}
     <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
-      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;">👤 Staff Wage Balances — Current Period</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;">👤 Staff Wage Balances</div>
       <button onclick="openSalaryConfig()" style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-family:inherit;font-weight:700;">Edit Setup ⚙️</button>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">${cards}</div>`;
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-bottom:14px;">${cards}</div>`;
   strip.style.display = 'block';
 }
 
