@@ -3938,11 +3938,52 @@ async function seedExistingStaff() {
   const allSeed = [...loginStaff, ...caregivers];
 
   for (const s of allSeed) {
-    // upsert with onConflict on id so re-running never creates duplicates
     await db.from('staff_members').upsert(
       { ...s, is_active: true, created_at: new Date().toISOString(), created_by: 'System (seed)' },
       { onConflict: 'id' }
     );
+  }
+
+  // ── Reload dynamically registered staff from Supabase into localStorage on every login ──
+  const { data: dynamicStaff } = await db.from('staff_members')
+    .select('name, salary_amount, salary_freq, salary_start_month')
+    .eq('is_active', true);
+
+  if (dynamicStaff && dynamicStaff.length) {
+    const knownSeeds = new Set(['penninah nyandia','githaiga njoroge','james','alvan','ketty','joseph']);
+    const currentCfg = getSalaryConfig();
+    let changed = false;
+
+    dynamicStaff.forEach(s => {
+      if (!s.name) return;
+      const nameLower = s.name.toLowerCase();
+      const firstName = s.name.split(' ')[0];
+      const firstLower = firstName.toLowerCase();
+
+      // Skip the four hardcoded caregivers and login staff
+      if (knownSeeds.has(nameLower) || knownSeeds.has(firstLower)) return;
+      if (!s.salary_amount) return;
+
+      if (!currentCfg[firstLower] || currentCfg[firstLower].amount !== parseFloat(s.salary_amount)) {
+        currentCfg[firstLower] = {
+          amount: parseFloat(s.salary_amount),
+          freq: s.salary_freq || 'monthly',
+          name: s.name,
+          start_month: s.salary_start_month || null
+        };
+        changed = true;
+      }
+
+      // Register in KNOWN_STAFF and STAFF_COLORS if missing
+      if (!KNOWN_STAFF.includes(firstName)) {
+        KNOWN_STAFF.push(firstName);
+        STAFF_COLORS[firstName] = { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568', dot:'#8a9ab0' };
+      }
+    });
+
+    if (changed) {
+      localStorage.setItem(SALARY_CONFIG_KEY, JSON.stringify(currentCfg));
+    }
   }
 }
 
@@ -10645,9 +10686,9 @@ async function checkPaymentAlerts(sendEmail) {
     const earliest = payments.length ? payments.reduce((min,p) => (!p.wage_period_start || p.wage_period_start > min) ? min : p.wage_period_start, payments[0].wage_period_start) : null;
     // Use the later of: earliest recorded payment, configured start month, or global floor
     const staffFloor = staffCfg?.start_month || '2026-05-01';
-    const effectiveEarliest = !earliest || earliest < staffFloor ? staffFloor : earliest;
+    const effectiveEarliest = staffFloor; // always start from configured start month, never before
     generateExpectedPeriods(staffCfg.freq || 'monthly', effectiveEarliest).forEach(period => {
-      if (period.fullEnd >= today || period.fullEnd < staffFloor) return;
+      if (period.fullEnd >= today || period.start < staffFloor) return;
       const paid = payments.filter(p => p.wage_period_start && p.wage_period_end && p.wage_period_start <= period.end && p.wage_period_end >= period.start).reduce((s,p) => s + parseFloat(p.amount||0), 0);
       const owed = staffCfg.amount - paid;
       if (owed > 0.005) overdueItems.push({ label: `👤 ${staffName} Wages`, detail: `$${owed.toFixed(2)} owed for ${fmtDate(period.start)} – ${fmtDate(period.end)}` });
@@ -11005,6 +11046,8 @@ async function registerNewStaff() {
   }
 
   // Save to staff_members table in Supabase
+  const startMonthFull = startMonth + '-01'; // e.g. "2026-06-01"
+
   const staffRecord = {
     id: uid(),
     name,
@@ -11012,7 +11055,7 @@ async function registerNewStaff() {
     password_plain: '',
     salary_amount: amount || null,
     salary_freq: freq,
-    salary_start_month: startMonth + '-01', // store as full date string e.g. "2026-05-01"
+    salary_start_month: startMonthFull,
     is_active: true,
     created_at: new Date().toISOString(),
     created_by: currentUser ? currentUser.name : ''
@@ -11020,7 +11063,6 @@ async function registerNewStaff() {
 
   const { error: dbError } = await db.from('staff_members').upsert(staffRecord);
   if (dbError) {
-    // Table may not exist yet — still add to in-memory USERS array so login works this session
     console.warn('staff_members table error:', dbError.message);
   }
 
@@ -11030,7 +11072,7 @@ async function registerNewStaff() {
   // 4. Save salary config for this staff member (start_month prevents retroactive overdue alerts)
   const salaryKey = name.split(' ')[0].toLowerCase();
   const cfg2 = getSalaryConfig();
-  cfg2[salaryKey] = { amount: amount || 0, freq, name, start_month: startMonth + '-01' };
+  cfg2[salaryKey] = { amount: amount || 0, freq, name, start_month: startMonthFull };
   localStorage.setItem(SALARY_CONFIG_KEY, JSON.stringify(cfg2));
 
   // 5. Add a card for them in the salary config modal
