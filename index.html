@@ -9879,51 +9879,37 @@ function _getWageMonths() {
 async function renderWageBalanceStrip() {
   const strip = document.getElementById('wage-balance-strip');
   if (!strip) return;
-  const cfg = getSalaryConfig();
 
-  // Pull dynamically registered staff from Supabase
+  // ── Pull ALL salary-tracked staff directly from Supabase ──
   const { data: dbStaff } = await db.from('staff_members')
-    .select('name, salary_amount, salary_freq')
-    .eq('is_active', true);
-  const dynamicStaff = (dbStaff || []).filter(s =>
-    s.salary_amount && !KNOWN_STAFF.map(n => n.toLowerCase()).includes(s.name.split(' ')[0].toLowerCase())
-  );
-  dynamicStaff.forEach(s => {
+    .select('name, salary_amount, salary_freq, salary_start_month')
+    .eq('is_active', true)
+    .not('salary_amount', 'is', null);
+
+  const allStaffRows = (dbStaff || []).filter(s => s.salary_amount && parseFloat(s.salary_amount) > 0);
+
+  if (!allStaffRows.length) { strip.style.display = 'none'; return; }
+
+  // Build a live config map directly from Supabase — no localStorage dependency
+  const cfg = {};
+  allStaffRows.forEach(s => {
     const firstName = s.name.split(' ')[0];
-    if (!cfg[firstName.toLowerCase()]) {
-      cfg[firstName.toLowerCase()] = { amount: parseFloat(s.salary_amount), freq: 'monthly', name: s.name };
-    }
+    const key = firstName.toLowerCase();
+    cfg[key] = {
+      amount: parseFloat(s.salary_amount),
+      freq: s.salary_freq || 'monthly',
+      name: s.name,
+      start_month: s.salary_start_month || null
+    };
     if (!STAFF_COLORS[firstName]) {
-      STAFF_COLORS[firstName] = { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568' };
+      STAFF_COLORS[firstName] = { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568', dot:'#8a9ab0' };
     }
   });
 
-  // Build full staff list
-  const allStaffNames = [...KNOWN_STAFF];
-  // Also add any staff from Supabase that may not yet be in KNOWN_STAFF
-  if (dbStaff) {
-    dbStaff.forEach(s => {
-      if (!s.name || !s.salary_amount) return;
-      const firstName = s.name.split(' ')[0];
-      const firstLower = firstName.toLowerCase();
-      const knownSeedNames = new Set(['penninah nyandia','githaiga njoroge','james','alvan','ketty','joseph']);
-      if (knownSeedNames.has(s.name.toLowerCase()) || knownSeedNames.has(firstLower)) return;
-      if (!allStaffNames.includes(firstName)) allStaffNames.push(firstName);
-      // Ensure salary config is populated for this session
-      const cfg3 = getSalaryConfig();
-      if (!cfg3[firstLower]) {
-        cfg3[firstLower] = {
-          amount: parseFloat(s.salary_amount),
-          freq: s.salary_freq || 'monthly',
-          name: s.name,
-          start_month: s.salary_start_month || null
-        };
-        localStorage.setItem(SALARY_CONFIG_KEY, JSON.stringify(cfg3));
-      }
-    });
-  }
+  // Use staff names from Supabase directly — ignore KNOWN_STAFF
+  const allStaffNames = allStaffRows.map(s => s.name.split(' ')[0]);
 
-  if (!Object.keys(cfg).length) { strip.style.display = 'none'; return; }
+  if (!allStaffNames.length) { strip.style.display = 'none'; return; }
 
   // Available months starting May 2026
   const allMonths = _getWageMonths();
