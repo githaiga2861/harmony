@@ -3321,13 +3321,10 @@
             <label style="font-size:11px;">Full Name *</label>
             <input type="text" id="new-staff-name" placeholder="e.g. Grace Mwangi">
           </div>
-          <div class="field" style="margin:0;">
-            <label style="font-size:11px;">Email Address *</label>
-            <input type="email" id="new-staff-email" placeholder="e.g. grace@harmonylivinghouse.com">
-          </div>
-          <div class="field" style="margin:0;">
-            <label style="font-size:11px;">Temporary Password *</label>
-            <input type="text" id="new-staff-password" placeholder="e.g. staff2026">
+          <div class="field" style="margin:0;grid-column:span 2;">
+            <label style="font-size:11px;">Month They Started Working *</label>
+            <input type="month" id="new-staff-start-month" placeholder="e.g. 2026-05">
+            <div style="font-size:11px;color:var(--text3);margin-top:3px;">The system will only track wages from this month forward — no overdue alerts before this date.</div>
           </div>
           <div class="field" style="margin:0;">
             <label style="font-size:11px;">Expected Amount Per Period ($)</label>
@@ -9776,8 +9773,8 @@ function generateExpectedPeriods(freq, earliestDateStr) {
   if (!earliestDateStr) return periods;
 
   // Financial tracking started May 1 2026 — never count anything before this as overdue
-const TRACKING_START = '2026-05-01';
-const effectiveStart = earliestDateStr < TRACKING_START ? TRACKING_START : earliestDateStr;
+  const TRACKING_START = '2026-05-01';
+  const effectiveStart = earliestDateStr < TRACKING_START ? TRACKING_START : earliestDateStr;
 let cursor = new Date(effectiveStart + 'T00:00:00');
   if (freq === 'weekly') {
     const day = cursor.getDay();
@@ -9929,12 +9926,15 @@ async function renderWageBalanceStrip() {
 
     // All past months with unpaid balance (for overdue banner)
     const allMonthsAsc = [...allMonths].reverse();
+    // Respect the staff member's start month — don't flag months before they joined
+    const staffStartFloor = staffCfg?.start_month || '2026-05-01';
     let staffOverdue = [];
     for (const mk of allMonthsAsc) {
       const [my, mm] = mk.split('-').map(Number);
       const mStart = `${mk}-01`;
       const mEnd = `${mk}-${String(new Date(my, mm, 0).getDate()).padStart(2,'0')}`;
       if (mEnd >= today) continue; // skip current and future months
+      if (mStart < staffStartFloor) continue; // skip months before staff joined
       const mPayments = payments.filter(p => {
         if (!p.wage_period_start) return false;
         const startIn = p.wage_period_start >= mStart && p.wage_period_start <= mEnd;
@@ -10644,7 +10644,10 @@ async function checkPaymentAlerts(sendEmail) {
     const payments = allPayments || [];
     const earliest = payments.length ? payments.reduce((min,p) => (!p.wage_period_start || p.wage_period_start > min) ? min : p.wage_period_start, payments[0].wage_period_start) : null;
     if (!earliest) continue;
-    generateExpectedPeriods(staffCfg.freq || 'monthly', earliest).forEach(period => {
+    // Use the later of: earliest recorded payment OR the staff member's configured start month
+    const staffFloor = staffCfg?.start_month || earliest;
+    const effectiveEarliest = earliest < staffFloor ? staffFloor : earliest;
+    generateExpectedPeriods(staffCfg.freq || 'monthly', effectiveEarliest).forEach(period => {
       if (period.fullEnd >= today || period.fullEnd < '2026-05-01') return;
       const paid = payments.filter(p => p.wage_period_start && p.wage_period_end && p.wage_period_start <= period.end && p.wage_period_end >= period.start).reduce((s,p) => s + parseFloat(p.amount||0), 0);
       const owed = staffCfg.amount - paid;
@@ -10993,34 +10996,24 @@ function viewSavedStaffDocs() {
 // ══════════════════════════════════
 async function registerNewStaff() {
   const name = document.getElementById('new-staff-name').value.trim();
-  const email = document.getElementById('new-staff-email').value.trim().toLowerCase();
-  const password = document.getElementById('new-staff-password').value.trim();
+  const startMonth = document.getElementById('new-staff-start-month').value.trim(); // e.g. "2026-05"
   const amount = parseFloat(document.getElementById('new-staff-amount').value || 0);
   const freq = document.getElementById('new-staff-freq').value;
 
-  if (!name || !email || !password) {
-    toast('Please fill in Name, Email, and Password');
+  if (!name || !startMonth) {
+    toast('Please fill in Name and Month Started Working');
     return;
   }
 
-  // 1. Register in Supabase Auth
-  const { data: authData, error: authError } = await db.auth.admin
-    ? await db.auth.admin.createUser({ email, password, email_confirm: true })
-    : await db.auth.signUp({ email, password });
-
-  if (authError && !authError.message.includes('already registered')) {
-    // Non-fatal: Supabase anon key can't create auth users — store in staff_members table instead
-    console.warn('Auth creation skipped (anon key):', authError.message);
-  }
-
-  // 2. Save to staff_members table in Supabase
+  // Save to staff_members table in Supabase
   const staffRecord = {
     id: uid(),
     name,
-    email,
-    password_plain: password, // stored for login lookup (matches USERS array pattern)
+    email: '',
+    password_plain: '',
     salary_amount: amount || null,
     salary_freq: freq,
+    salary_start_month: startMonth + '-01', // store as full date string e.g. "2026-05-01"
     is_active: true,
     created_at: new Date().toISOString(),
     created_by: currentUser ? currentUser.name : ''
@@ -11035,10 +11028,10 @@ async function registerNewStaff() {
   // 3. Add to in-memory USERS array so they can log in immediately this session
   USERS.push({ email, password, name });
 
-  // 4. Save salary config for this staff member
+  // 4. Save salary config for this staff member (start_month prevents retroactive overdue alerts)
   const salaryKey = name.split(' ')[0].toLowerCase();
   const cfg2 = getSalaryConfig();
-  cfg2[salaryKey] = { amount: amount || 0, freq, name };
+  cfg2[salaryKey] = { amount: amount || 0, freq, name, start_month: startMonth + '-01' };
   localStorage.setItem(SALARY_CONFIG_KEY, JSON.stringify(cfg2));
 
   // 5. Add a card for them in the salary config modal
@@ -11081,7 +11074,7 @@ async function registerNewStaff() {
   }
 
   // 7. Clear form + hide it
-  ['new-staff-name','new-staff-email','new-staff-password','new-staff-amount'].forEach(id => {
+  ['new-staff-name','new-staff-start-month','new-staff-amount'].forEach(id => {
     document.getElementById(id).value = '';
   });
   document.getElementById('add-staff-form').style.display = 'none';
