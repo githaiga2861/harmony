@@ -3927,12 +3927,11 @@ async function seedExistingStaff() {
   ];
 
   // Seed salary-tracked caregivers (from KNOWN_STAFF / salary config)
-  const cfg = getSalaryConfig();
   const caregivers = [
-    { id: 'seed-james',  name: 'James',  email: '', password_plain: '', salary_amount: cfg.james?.amount  || null, salary_freq: cfg.james?.freq  || 'monthly', role: 'Caregiver' },
-    { id: 'seed-alvan',  name: 'Alvan',  email: '', password_plain: '', salary_amount: cfg.alvan?.amount  || null, salary_freq: cfg.alvan?.freq  || 'monthly', role: 'Caregiver' },
-    { id: 'seed-ketty',  name: 'Ketty',  email: '', password_plain: '', salary_amount: cfg.ketty?.amount  || null, salary_freq: cfg.ketty?.freq  || 'sunday_only', role: 'Caregiver' },
-    { id: 'seed-joseph', name: 'Joseph', email: '', password_plain: '', salary_amount: cfg.joseph?.amount || null, salary_freq: cfg.joseph?.freq || 'monthly', role: 'Caregiver' },
+    { id: 'seed-james',  name: 'James',  email: '', password_plain: '', role: 'Caregiver' },
+    { id: 'seed-alvan',  name: 'Alvan',  email: '', password_plain: '', role: 'Caregiver' },
+    { id: 'seed-ketty',  name: 'Ketty',  email: '', password_plain: '', role: 'Caregiver' },
+    { id: 'seed-joseph', name: 'Joseph', email: '', password_plain: '', role: 'Caregiver' },
   ];
 
   const allSeed = [...loginStaff, ...caregivers];
@@ -9941,6 +9940,8 @@ async function renderWageBalanceStrip() {
     if (!staffCfg || !staffCfg.amount) continue;
     const colors = STAFF_COLORS[staffName] || { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568' };
 
+    const staffFloor = staffCfg?.start_month || '2026-05-01';
+
     const { data: allPayments } = await db.from('expenses')
       .select('amount, wage_period_start, wage_period_end, exp_date')
       .eq('expense_type', 'wage')
@@ -9948,8 +9949,7 @@ async function renderWageBalanceStrip() {
       .order('wage_period_start', { ascending: true });
     const payments = allPayments || [];
 
-    // Payments that overlap with selected month — a payment belongs to a month if
-    // its period_start falls within the month OR the period spans into the month
+    // Payments that overlap with selected month
     const monthPayments = payments.filter(p => {
       if (!p.wage_period_start) return false;
       // Period start is within the month
@@ -9974,12 +9974,13 @@ async function renderWageBalanceStrip() {
     // Respect the staff member's start month — don't flag months before they joined
     const staffStartFloor = staffCfg?.start_month || '2026-05-01';
     let staffOverdue = [];
-    for (const mk of allMonthsAsc) {
-      const [my, mm] = mk.split('-').map(Number);
-      const mStart = `${mk}-01`;
-      const mEnd = `${mk}-${String(new Date(my, mm, 0).getDate()).padStart(2,'0')}`;
-      if (mEnd >= today) continue; // skip current and future months
-        if (mStart < staffFloor) continue; // skip any month that starts before staff joined
+      const staffFloorOverdue = staffCfg?.start_month || '2026-05-01';
+      for (const mk of allMonthsAsc) {
+        const [my, mm] = mk.split('-').map(Number);
+        const mStart = `${mk}-01`;
+        const mEnd = `${mk}-${String(new Date(my, mm, 0).getDate()).padStart(2,'0')}`;
+        if (mEnd >= today) continue; // skip current and future months
+        if (mStart < staffFloorOverdue) continue; // skip any month that starts before staff joined
       const mPayments = payments.filter(p => {
         if (!p.wage_period_start) return false;
         const startIn = p.wage_period_start >= mStart && p.wage_period_start <= mEnd;
