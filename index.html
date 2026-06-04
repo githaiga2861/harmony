@@ -3944,6 +3944,10 @@ async function seedExistingStaff() {
     );
   }
 
+  // Load any dynamically registered staff from Supabase so they survive refreshes
+  await loadDynamicStaffFromSupabase();
+}
+
   // ── Reload dynamically registered staff from Supabase into localStorage on every login ──
   const { data: dynamicStaff } = await db.from('staff_members')
     .select('name, salary_amount, salary_freq, salary_start_month')
@@ -9975,7 +9979,7 @@ async function renderWageBalanceStrip() {
       const mStart = `${mk}-01`;
       const mEnd = `${mk}-${String(new Date(my, mm, 0).getDate()).padStart(2,'0')}`;
       if (mEnd >= today) continue; // skip current and future months
-      if (mStart < staffStartFloor || mEnd < staffStartFloor) continue; // skip months before staff joined
+        if (mStart < staffFloor) continue; // skip any month that starts before staff joined
       const mPayments = payments.filter(p => {
         if (!p.wage_period_start) return false;
         const startIn = p.wage_period_start >= mStart && p.wage_period_start <= mEnd;
@@ -11036,7 +11040,7 @@ function viewSavedStaffDocs() {
 // ══════════════════════════════════
 async function registerNewStaff() {
   const name = document.getElementById('new-staff-name').value.trim();
-  const startMonth = document.getElementById('new-staff-start-month').value.trim(); // e.g. "2026-05"
+  const startMonth = document.getElementById('new-staff-start-month').value.trim(); // e.g. "2026-06"
   const amount = parseFloat(document.getElementById('new-staff-amount').value || 0);
   const freq = document.getElementById('new-staff-freq').value || 'monthly';
 
@@ -11045,9 +11049,9 @@ async function registerNewStaff() {
     return;
   }
 
-  // Save to staff_members table in Supabase
   const startMonthFull = startMonth + '-01'; // e.g. "2026-06-01"
 
+  // 1. Save to Supabase staff_members — this is the single source of truth
   const staffRecord = {
     id: uid(),
     name,
@@ -11063,25 +11067,27 @@ async function registerNewStaff() {
 
   const { error: dbError } = await db.from('staff_members').upsert(staffRecord);
   if (dbError) {
-    console.warn('staff_members table error:', dbError.message);
+    toast('❌ Error saving to database: ' + dbError.message);
+    return;
   }
 
-  // 3. Add to in-memory USERS array so they can log in immediately this session
-  USERS.push({ email: '', password: '', name });
+  // 2. Add to in-memory KNOWN_STAFF and STAFF_COLORS so balance tracking works this session
+  const firstName = name.split(' ')[0];
+  if (!KNOWN_STAFF.includes(firstName)) {
+    KNOWN_STAFF.push(firstName);
+    STAFF_COLORS[firstName] = { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568', dot:'#8a9ab0' };
+  }
 
-  // 4. Save salary config for this staff member (start_month prevents retroactive overdue alerts)
-  const salaryKey = name.split(' ')[0].toLowerCase();
-  const cfg2 = getSalaryConfig();
-  cfg2[salaryKey] = { amount: amount || 0, freq, name, start_month: startMonthFull };
-  localStorage.setItem(SALARY_CONFIG_KEY, JSON.stringify(cfg2));
+  // 3. Reload all dynamic staff from Supabase into salary config (replaces localStorage approach)
+  await loadDynamicStaffFromSupabase();
 
-  // 5. Add a card for them in the salary config modal
+  // 4. Add a card for them in the salary config modal
   const salaryGrid = document.querySelector('#modal-salary-config .modal-body > div[style*="flex-direction:column"]');
   if (salaryGrid) {
     const colors = ['#e8f0fe:#1a73e8', '#f3e8fd:#7c3aed', '#fce4ec:#e91e63', '#e6f4ea:#1e7e34', '#fff3cd:#d68910'];
     const pick = colors[Math.floor(Math.random() * colors.length)].split(':');
-    const initials = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-    const key = name.split(' ')[0].toLowerCase();
+    const initials = firstName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const key = firstName.toLowerCase();
     const newCard = document.createElement('div');
     newCard.id = `salary-card-${key}`;
     newCard.style.cssText = `padding:16px 18px;border-top:1px solid var(--border);background:${pick[0]}22;`;
@@ -11108,19 +11114,51 @@ async function registerNewStaff() {
     salaryGrid.insertBefore(newCard, salaryGrid.lastElementChild);
   }
 
-  // 6. Also update KNOWN_STAFF so balance tracking works
-  if (!KNOWN_STAFF.includes(name.split(' ')[0])) {
-    KNOWN_STAFF.push(name.split(' ')[0]);
-    STAFF_COLORS[name.split(' ')[0]] = { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568', dot:'#8a9ab0' };
-  }
-
-  // 7. Clear form + hide it
+  // 5. Clear form + hide it
   ['new-staff-name','new-staff-start-month','new-staff-amount'].forEach(id => {
     document.getElementById(id).value = '';
   });
   document.getElementById('add-staff-form').style.display = 'none';
 
-  toast(`✅ ${name} registered successfully!`);
+  toast(`✅ ${name} registered and saved successfully!`);
+  renderExpensesPanel();
+}
+
+// ── Load all dynamic staff from Supabase into in-memory salary config ──
+// Called on login and after registering new staff
+async function loadDynamicStaffFromSupabase() {
+  const { data: allStaff } = await db.from('staff_members')
+    .select('name, salary_amount, salary_freq, salary_start_month')
+    .eq('is_active', true);
+
+  if (!allStaff || !allStaff.length) return;
+
+  const knownSeeds = new Set(['penninah nyandia','githaiga njoroge','james','alvan','ketty','joseph']);
+  const currentCfg = getSalaryConfig();
+
+  allStaff.forEach(s => {
+    if (!s.name || !s.salary_amount) return;
+    const nameLower = s.name.toLowerCase();
+    const firstName = s.name.split(' ')[0];
+    const firstLower = firstName.toLowerCase();
+
+    // Skip the hardcoded four caregivers and login staff
+    if (knownSeeds.has(nameLower) || knownSeeds.has(firstLower)) return;
+
+    currentCfg[firstLower] = {
+      amount: parseFloat(s.salary_amount),
+      freq: s.salary_freq || 'monthly',
+      name: s.name,
+      start_month: s.salary_start_month || null
+    };
+
+    if (!KNOWN_STAFF.includes(firstName)) {
+      KNOWN_STAFF.push(firstName);
+      STAFF_COLORS[firstName] = { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568', dot:'#8a9ab0' };
+    }
+  });
+
+  localStorage.setItem(SALARY_CONFIG_KEY, JSON.stringify(currentCfg));
 }
 
 // ══════════════════════════════════
