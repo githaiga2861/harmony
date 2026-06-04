@@ -9900,10 +9900,28 @@ async function renderWageBalanceStrip() {
 
   // Build full staff list
   const allStaffNames = [...KNOWN_STAFF];
-  dynamicStaff.forEach(s => {
-    const firstName = s.name.split(' ')[0];
-    if (!allStaffNames.includes(firstName)) allStaffNames.push(firstName);
-  });
+  // Also add any staff from Supabase that may not yet be in KNOWN_STAFF
+  if (dbStaff) {
+    dbStaff.forEach(s => {
+      if (!s.name || !s.salary_amount) return;
+      const firstName = s.name.split(' ')[0];
+      const firstLower = firstName.toLowerCase();
+      const knownSeedNames = new Set(['penninah nyandia','githaiga njoroge','james','alvan','ketty','joseph']);
+      if (knownSeedNames.has(s.name.toLowerCase()) || knownSeedNames.has(firstLower)) return;
+      if (!allStaffNames.includes(firstName)) allStaffNames.push(firstName);
+      // Ensure salary config is populated for this session
+      const cfg3 = getSalaryConfig();
+      if (!cfg3[firstLower]) {
+        cfg3[firstLower] = {
+          amount: parseFloat(s.salary_amount),
+          freq: s.salary_freq || 'monthly',
+          name: s.name,
+          start_month: s.salary_start_month || null
+        };
+        localStorage.setItem(SALARY_CONFIG_KEY, JSON.stringify(cfg3));
+      }
+    });
+  }
 
   if (!Object.keys(cfg).length) { strip.style.display = 'none'; return; }
 
@@ -11153,8 +11171,12 @@ async function loadDynamicStaffFromSupabase() {
       start_month: s.salary_start_month || null
     };
 
+    // Always push to KNOWN_STAFF — even if already in config, may be missing from array
     if (!KNOWN_STAFF.includes(firstName)) {
       KNOWN_STAFF.push(firstName);
+    }
+    // Always set STAFF_COLORS so the card renders correctly
+    if (!STAFF_COLORS[firstName]) {
       STAFF_COLORS[firstName] = { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568', dot:'#8a9ab0' };
     }
   });
