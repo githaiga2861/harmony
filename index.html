@@ -9934,7 +9934,7 @@ async function renderWageBalanceStrip() {
       const mStart = `${mk}-01`;
       const mEnd = `${mk}-${String(new Date(my, mm, 0).getDate()).padStart(2,'0')}`;
       if (mEnd >= today) continue; // skip current and future months
-      if (mStart < staffStartFloor) continue; // skip months before staff joined
+      if (mStart < staffStartFloor || mEnd < staffStartFloor) continue; // skip months before staff joined
       const mPayments = payments.filter(p => {
         if (!p.wage_period_start) return false;
         const startIn = p.wage_period_start >= mStart && p.wage_period_start <= mEnd;
@@ -10643,12 +10643,11 @@ async function checkPaymentAlerts(sendEmail) {
     const { data: allPayments } = await db.from('expenses').select('amount, wage_period_start, wage_period_end').eq('expense_type','wage').eq('wage_staff', staffName);
     const payments = allPayments || [];
     const earliest = payments.length ? payments.reduce((min,p) => (!p.wage_period_start || p.wage_period_start > min) ? min : p.wage_period_start, payments[0].wage_period_start) : null;
-    if (!earliest) continue;
-    // Use the later of: earliest recorded payment OR the staff member's configured start month
-    const staffFloor = staffCfg?.start_month || earliest;
-    const effectiveEarliest = earliest < staffFloor ? staffFloor : earliest;
+    // Use the later of: earliest recorded payment, configured start month, or global floor
+    const staffFloor = staffCfg?.start_month || '2026-05-01';
+    const effectiveEarliest = !earliest || earliest < staffFloor ? staffFloor : earliest;
     generateExpectedPeriods(staffCfg.freq || 'monthly', effectiveEarliest).forEach(period => {
-      if (period.fullEnd >= today || period.fullEnd < '2026-05-01') return;
+      if (period.fullEnd >= today || period.fullEnd < staffFloor) return;
       const paid = payments.filter(p => p.wage_period_start && p.wage_period_end && p.wage_period_start <= period.end && p.wage_period_end >= period.start).reduce((s,p) => s + parseFloat(p.amount||0), 0);
       const owed = staffCfg.amount - paid;
       if (owed > 0.005) overdueItems.push({ label: `👤 ${staffName} Wages`, detail: `$${owed.toFixed(2)} owed for ${fmtDate(period.start)} – ${fmtDate(period.end)}` });
