@@ -9883,33 +9883,29 @@ async function renderWageBalanceStrip() {
   // ── Pull ALL salary-tracked staff directly from Supabase ──
   const { data: dbStaff } = await db.from('staff_members')
     .select('name, salary_amount, salary_freq, salary_start_month')
-    .eq('is_active', true)
-    .not('salary_amount', 'is', null);
+    .eq('is_active', true);
 
-  const allStaffRows = (dbStaff || []).filter(s => s.salary_amount && parseFloat(s.salary_amount) > 0);
-
-  if (!allStaffRows.length) { strip.style.display = 'none'; return; }
-
-  // Build a live config map directly from Supabase — no localStorage dependency
+  // Build config map from Supabase — any staff with a salary_amount set will render
   const cfg = {};
-  allStaffRows.forEach(s => {
+  (dbStaff || []).forEach(s => {
+    if (!s.name || !s.salary_amount || parseFloat(s.salary_amount) <= 0) return;
     const firstName = s.name.split(' ')[0];
     const key = firstName.toLowerCase();
     cfg[key] = {
       amount: parseFloat(s.salary_amount),
       freq: s.salary_freq || 'monthly',
       name: s.name,
-      start_month: s.salary_start_month || null
+      start_month: s.salary_start_month || '2026-05-01'
     };
     if (!STAFF_COLORS[firstName]) {
       STAFF_COLORS[firstName] = { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568', dot:'#8a9ab0' };
     }
   });
 
-  // Use staff names from Supabase directly — ignore KNOWN_STAFF
-  const allStaffNames = allStaffRows.map(s => s.name.split(' ')[0]);
+  
 
-  if (!allStaffNames.length) { strip.style.display = 'none'; return; }
+  // Staff names to render — pulled from Supabase, not KNOWN_STAFF
+  const allStaffNames = Object.values(cfg).map(c => c.name.split(' ')[0]);
 
   // Available months starting May 2026
   const allMonths = _getWageMonths();
@@ -10667,7 +10663,21 @@ async function checkVitalsAlerts(sendEmail) {
 async function checkPaymentAlerts(sendEmail) {
   const bodyEl = document.getElementById('alert-exp-body');
   const badgeEl = document.getElementById('alert-exp-badge');
-  const cfg2 = getSalaryConfig();
+  // Pull salary config live from Supabase so all staff including Vivian are checked
+  const { data: payAlertStaff } = await db.from('staff_members')
+    .select('name, salary_amount, salary_freq, salary_start_month')
+    .eq('is_active', true);
+  const cfg2 = {};
+  (payAlertStaff || []).forEach(s => {
+    if (!s.name || !s.salary_amount || parseFloat(s.salary_amount) <= 0) return;
+    const key = s.name.split(' ')[0].toLowerCase();
+    cfg2[key] = {
+      amount: parseFloat(s.salary_amount),
+      freq: s.salary_freq || 'monthly',
+      name: s.name,
+      start_month: s.salary_start_month || '2026-05-01'
+    };
+  });
   const currentMK = getCurrentMonthKey();
   const today = new Date().toISOString().split('T')[0];
   const overdueItems = [];
@@ -10685,7 +10695,7 @@ async function checkPaymentAlerts(sendEmail) {
       overdueItems.push({ label: `🏠 ${b.name}`, detail: `$${(amtDue - amtPaid).toFixed(2)} remaining (due ${ordinal(b.due_day)} of month)` });
     }
   });
-  const allTrackedStaff = [...new Set([...KNOWN_STAFF, ...Object.values(cfg2).map(v => v.name).filter(Boolean)])];
+  const allTrackedStaff = Object.values(cfg2).map(v => v.name);
   for (const staffName of allTrackedStaff) {
     const key = staffName.split(' ')[0].toLowerCase();
     const staffCfg = cfg2[key];
