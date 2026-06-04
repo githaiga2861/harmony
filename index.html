@@ -3948,7 +3948,7 @@ async function seedExistingStaff() {
   await loadDynamicStaffFromSupabase();
 }
 
-  // ── Reload dynamically registered staff from Supabase into localStorage on every login ──
+async function loadDynamicStaffFromSupabase() {
   const { data: dynamicStaff } = await db.from('staff_members')
     .select('name, salary_amount, salary_freq, salary_start_month')
     .eq('is_active', true);
