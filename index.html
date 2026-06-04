@@ -10998,7 +10998,7 @@ async function registerNewStaff() {
   const name = document.getElementById('new-staff-name').value.trim();
   const startMonth = document.getElementById('new-staff-start-month').value.trim(); // e.g. "2026-05"
   const amount = parseFloat(document.getElementById('new-staff-amount').value || 0);
-  const freq = document.getElementById('new-staff-freq').value;
+  const freq = document.getElementById('new-staff-freq').value || 'monthly';
 
   if (!name || !startMonth) {
     toast('Please fill in Name and Month Started Working');
@@ -11026,7 +11026,7 @@ async function registerNewStaff() {
   }
 
   // 3. Add to in-memory USERS array so they can log in immediately this session
-  USERS.push({ email, password, name });
+  USERS.push({ email: '', password: '', name });
 
   // 4. Save salary config for this staff member (start_month prevents retroactive overdue alerts)
   const salaryKey = name.split(' ')[0].toLowerCase();
@@ -11079,7 +11079,7 @@ async function registerNewStaff() {
   });
   document.getElementById('add-staff-form').style.display = 'none';
 
-  toast(`✅ ${name} registered! They can now log in with their email and password.`);
+  toast(`✅ ${name} registered successfully!`);
 }
 
 // ══════════════════════════════════
