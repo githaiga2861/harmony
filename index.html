@@ -7312,9 +7312,11 @@ async function selectSummaryMonth(monthKey) {
   const monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
   const monthLabel = `${monthNames[m]} ${y}`;
 
-  // Fetch data
-  const { data: payments } = await db.from('payments').select('*').ilike('pay_date', `${monthKey}%`).order('pay_date');
-  const { data: expenses } = await db.from('expenses').select('*').ilike('exp_date', `${monthKey}%`).order('exp_date');
+  // Fetch data — use date range since pay_date/exp_date are date columns not text
+  const monthStart = `${monthKey}-01`;
+  const monthEnd = `${monthKey}-31`;
+  const { data: payments } = await db.from('payments').select('*').gte('pay_date', monthStart).lte('pay_date', monthEnd).order('pay_date');
+  const { data: expenses } = await db.from('expenses').select('*').gte('exp_date', monthStart).lte('exp_date', monthEnd).order('exp_date');
   const { data: billRecs } = await db.from('bill_month_records').select('*').eq('month_key', monthKey);
   const residents = await getResidents();
 
@@ -7503,7 +7505,7 @@ async function printMonthlyDetailedReport(monthKey) {
   const [y, m] = monthKey.split('-').map(Number);
   const monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
   const monthLabel = `${monthNames[m]} ${y}`;
-  const { data: payments } = await db.from('payments').select('*').ilike('pay_date', `${monthKey}%`).order('pay_date');
+  const { data: payments } = await db.from('payments').select('*').gte('pay_date', `${monthKey}-01`).lte('pay_date', `${monthKey}-31`).order('pay_date');
   const residents = await getResidents();
   const pList = payments || [];
   const total = pList.reduce((s,p) => s + parseFloat(p.amount||0), 0);
@@ -7538,7 +7540,7 @@ async function printMonthlyExpenseReport(monthKey) {
   const [y, m] = monthKey.split('-').map(Number);
   const monthNames = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
   const monthLabel = `${monthNames[m]} ${y}`;
-  const { data: expenses } = await db.from('expenses').select('*').ilike('exp_date', `${monthKey}%`).order('exp_date');
+  const { data: expenses } = await db.from('expenses').select('*').gte('exp_date', `${monthKey}-01`).lte('exp_date', `${monthKey}-31`).order('exp_date');
   const eList = expenses || [];
   const total = eList.reduce((s,e) => s + parseFloat(e.amount||0), 0);
   const fmt2 = (n) => '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
