@@ -9906,9 +9906,8 @@ async function renderWageBalanceStrip() {
     strip.style.display = 'none';
     return;
   }
-    .select('name, salary_amount, salary_freq, salary_start_month')
-    .eq('is_active', true);
 
+  const allMonths = _getWageMonths();
   if (!_wageStripMonth || !allMonths.includes(_wageStripMonth)) {
     _wageStripMonth = allMonths[0];
   }
