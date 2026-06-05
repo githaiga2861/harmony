@@ -9884,6 +9884,7 @@ async function renderWageBalanceStrip() {
     return;
   }
 
+  const today = new Date().toISOString().split('T')[0];
   const allMonths = _getWageMonths();
   if (!_wageStripMonth || !allMonths.includes(_wageStripMonth)) {
     _wageStripMonth = allMonths[0];
