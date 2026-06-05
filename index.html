@@ -9878,10 +9878,34 @@ function _getWageMonths() {
 
 async function renderWageBalanceStrip() {
   const strip = document.getElementById('wage-balance-strip');
-  if (!strip) return;
+  if (!strip) { console.log('WAGE STRIP: element not found'); return; }
 
-  // Pull all staff with salary data directly from Supabase
-  const { data: dbStaff } = await db.from('staff_members')
+  const { data: dbStaff, error: staffErr } = await db.from('staff_members')
+    .select('name, salary_amount, salary_freq, salary_start_month')
+    .eq('is_active', true);
+
+  console.log('WAGE STRIP: dbStaff =', dbStaff, 'error =', staffErr);
+
+  if (!dbStaff || !dbStaff.length) {
+    console.log('WAGE STRIP: no staff returned from Supabase');
+    strip.style.display = 'none';
+    return;
+  }
+
+  const staffRows = dbStaff.filter(s =>
+    s.name &&
+    s.salary_amount &&
+    parseFloat(s.salary_amount) > 0 &&
+    s.name.split(' ')[0].toLowerCase() !== 'ketty'
+  );
+
+  console.log('WAGE STRIP: staffRows after filter =', staffRows);
+
+  if (!staffRows.length) {
+    console.log('WAGE STRIP: no staff after filtering');
+    strip.style.display = 'none';
+    return;
+  }
     .select('name, salary_amount, salary_freq, salary_start_month')
     .eq('is_active', true);
 
