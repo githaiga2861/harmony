@@ -3920,30 +3920,7 @@ function initApp() {
 }
 
 async function seedExistingStaff() {
-  // Seed login-capable staff from USERS array
-  const loginStaff = [
-    { id: 'seed-penninah', name: 'Penninah Nyandia', email: 'hello@harmonylivinghouse.com', password_plain: 'harmony2026', salary_amount: null, salary_freq: 'monthly', role: 'Admin' },
-    { id: 'seed-githaiga', name: 'Githaiga Njoroge', email: 'josegithaigajose6218@gmail.com', password_plain: 'staff2026', salary_amount: null, salary_freq: 'monthly', role: 'Staff' },
-  ];
-
-  // Seed salary-tracked caregivers (from KNOWN_STAFF / salary config)
-  const caregivers = [
-    { id: 'seed-james',  name: 'James',  email: '', password_plain: '', role: 'Caregiver' },
-    { id: 'seed-alvan',  name: 'Alvan',  email: '', password_plain: '', role: 'Caregiver' },
-    { id: 'seed-ketty',  name: 'Ketty',  email: '', password_plain: '', role: 'Caregiver' },
-    { id: 'seed-joseph', name: 'Joseph', email: '', password_plain: '', role: 'Caregiver' },
-  ];
-
-  const allSeed = [...loginStaff, ...caregivers];
-
-  for (const s of allSeed) {
-    await db.from('staff_members').upsert(
-      { ...s, is_active: true, created_at: new Date().toISOString(), created_by: 'System (seed)' },
-      { onConflict: 'id' }
-    );
-  }
-
-  // Load any dynamically registered staff from Supabase so they survive refreshes
+  // Staff data is managed entirely in Supabase — just load it into memory
   await loadDynamicStaffFromSupabase();
 }
 
