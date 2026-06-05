@@ -9857,32 +9857,22 @@ async function renderWageBalanceStrip() {
   const strip = document.getElementById('wage-balance-strip');
   if (!strip) { console.log('WAGE STRIP: element not found'); return; }
 
-  const { data: dbStaff, error: staffErr } = await db.from('staff_members')
+  const { data: dbStaff } = await db.from('staff_members')
     .select('name, salary_amount, salary_freq, salary_start_month')
     .eq('is_active', true);
 
-  console.log('WAGE STRIP: dbStaff =', dbStaff, 'error =', staffErr);
+  if (!dbStaff || !dbStaff.length) { strip.style.display = 'none'; return; }
 
-  if (!dbStaff || !dbStaff.length) {
-    console.log('WAGE STRIP: no staff returned from Supabase');
-    strip.style.display = 'none';
-    return;
-  }
+  const staffRows = dbStaff.filter(s => {
+    if (!s.name || !s.salary_amount || parseFloat(s.salary_amount) <= 0) return false;
+    if (s.name.split(' ')[0].toLowerCase() === 'ketty') return false;
+    // Only show staff whose start month is on or before the selected month
+    const startMonth = s.salary_start_month || '2026-05-01';
+    const staffStartMK = startMonth.slice(0, 7); // e.g. "2026-06"
+    return _wageStripMonth >= staffStartMK;
+  });
 
-  const staffRows = dbStaff.filter(s =>
-    s.name &&
-    s.salary_amount &&
-    parseFloat(s.salary_amount) > 0 &&
-    s.name.split(' ')[0].toLowerCase() !== 'ketty'
-  );
-
-  console.log('WAGE STRIP: staffRows after filter =', staffRows);
-
-  if (!staffRows.length) {
-    console.log('WAGE STRIP: no staff after filtering');
-    strip.style.display = 'none';
-    return;
-  }
+  if (!staffRows.length) { strip.style.display = 'none'; return; }
 
   const today = new Date().toISOString().split('T')[0];
   const allMonths = _getWageMonths();
