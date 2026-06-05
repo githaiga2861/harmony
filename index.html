@@ -9863,6 +9863,12 @@ async function renderWageBalanceStrip() {
 
   if (!dbStaff || !dbStaff.length) { strip.style.display = 'none'; return; }
 
+  const today = new Date().toISOString().split('T')[0];
+  const allMonths = _getWageMonths();
+  if (!_wageStripMonth || !allMonths.includes(_wageStripMonth)) {
+    _wageStripMonth = allMonths[0];
+  }
+
   const staffRows = dbStaff.filter(s => {
     if (!s.name || !s.salary_amount || parseFloat(s.salary_amount) <= 0) return false;
     if (s.name.split(' ')[0].toLowerCase() === 'ketty') return false;
@@ -9873,12 +9879,6 @@ async function renderWageBalanceStrip() {
   });
 
   if (!staffRows.length) { strip.style.display = 'none'; return; }
-
-  const today = new Date().toISOString().split('T')[0];
-  const allMonths = _getWageMonths();
-  if (!_wageStripMonth || !allMonths.includes(_wageStripMonth)) {
-    _wageStripMonth = allMonths[0];
-  }
 
   const [selY, selM] = _wageStripMonth.split('-').map(Number);
   const monthStart = `${_wageStripMonth}-01`;
