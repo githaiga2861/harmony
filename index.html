@@ -9909,20 +9909,6 @@ async function renderWageBalanceStrip() {
     .select('name, salary_amount, salary_freq, salary_start_month')
     .eq('is_active', true);
 
-  if (!dbStaff || !dbStaff.length) { strip.style.display = 'none'; return; }
-
-  // Only include staff who have a salary amount AND are not Ketty
-  const staffRows = dbStaff.filter(s =>
-    s.name &&
-    s.salary_amount &&
-    parseFloat(s.salary_amount) > 0 &&
-    s.name.split(' ')[0].toLowerCase() !== 'ketty'
-  );
-
-  if (!staffRows.length) { strip.style.display = 'none'; return; }
-
-  const today = new Date().toISOString().split('T')[0];
-  const allMonths = _getWageMonths();
   if (!_wageStripMonth || !allMonths.includes(_wageStripMonth)) {
     _wageStripMonth = allMonths[0];
   }
