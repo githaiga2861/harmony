@@ -2081,17 +2081,17 @@
         <!-- ══ ORIENTATION CHECKLIST ══ -->
         <div id="staffdoc-tab-orientation">
           <div class="card">
-            <div class="card-header" style="background:linear-gradient(135deg,#1a1a1a,#b8860b);border-radius:10px 10px 0 0;padding:16px 22px;">
+            <div class="card-header" style="background:linear-gradient(135deg,#1a1a1a,#b8860b);border-radius:10px 10px 0 0;padding:16px 22px;flex-direction:column;align-items:flex-start;gap:4px;">
               <div>
                 <div style="color:#fff;font-family:'DM Serif Display',serif;font-size:17px;">Staff New Employee Orientation Checklist</div>
                 <div style="color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;">Harmony Living House Adult Family LLC · 120 Newaukum Village Dr, Chehalis, WA 98532</div>
               </div>
-              <div style="display:flex;gap:8px;">
-                <button onclick="printOrientationForm()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🖨️ Print</button>
-                <button onclick="exportOrientationPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⬇️ PDF</button>
-                <button onclick="saveOrientationToSupabase()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save</button>
-                <button onclick="openSavedOrientationsList()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📋 View Saved</button>
-                <button onclick="clearOrientationForm()" style="background:rgba(255,0,0,0.15);color:#ffaaaa;border:1px solid rgba(255,100,100,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Clear</button>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-top:8px;">
+                <button onclick="printOrientationForm()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">🖨️ Print</button>
+                <button onclick="exportOrientationPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">⬇️ PDF</button>
+                <button onclick="saveOrientationToSupabase()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">💾 Save</button>
+                <button onclick="openSavedOrientationsList()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">📋 Saved</button>
+                <button onclick="clearOrientationForm()" style="background:rgba(255,0,0,0.15);color:#ffaaaa;border:1px solid rgba(255,100,100,0.3);border-radius:6px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">✕ Clear</button>
               </div>
             </div>
             <div class="card-body" style="padding:24px 28px;">
@@ -2181,17 +2181,17 @@
         <!-- ══ CREDENTIALS CHECKLIST ══ -->
         <div id="staffdoc-tab-credentials" style="display:none;">
           <div class="card">
-            <div class="card-header" style="background:linear-gradient(135deg,#1a2a6b,#2563eb);border-radius:10px 10px 0 0;padding:16px 22px;">
+            <div class="card-header" style="background:linear-gradient(135deg,#1a2a6b,#2563eb);border-radius:10px 10px 0 0;padding:16px 22px;flex-direction:column;align-items:flex-start;gap:4px;">
               <div>
                 <div style="color:#fff;font-family:'DM Serif Display',serif;font-size:17px;">Caregiver Credentials Checklist</div>
                 <div style="color:rgba(255,255,255,0.6);font-size:11px;margin-top:2px;">Harmony Living House Adult Family LLC · 120 Newaukum Village Dr, Chehalis, WA 98532</div>
               </div>
-              <div style="display:flex;gap:8px;">
-                <button onclick="printCredentialsForm()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🖨️ Print</button>
-                <button onclick="exportCredentialsPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⬇️ PDF</button>
-                <button onclick="saveCredentialsToSupabase()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">💾 Save</button>
-                <button onclick="openSavedCredentialsList()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📋 View Saved</button>
-                <button onclick="clearCredentialsForm()" style="background:rgba(255,0,0,0.15);color:#ffaaaa;border:1px solid rgba(255,100,100,0.3);border-radius:6px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Clear</button>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;margin-top:8px;">
+                <button onclick="printCredentialsForm()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">🖨️ Print</button>
+                <button onclick="exportCredentialsPDF()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">⬇️ PDF</button>
+                <button onclick="saveCredentialsToSupabase()" style="background:rgba(255,255,255,0.22);color:#fff;border:1px solid rgba(255,255,255,0.5);border-radius:6px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">💾 Save</button>
+                <button onclick="openSavedCredentialsList()" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">📋 Saved</button>
+                <button onclick="clearCredentialsForm()" style="background:rgba(255,0,0,0.15);color:#ffaaaa;border:1px solid rgba(255,100,100,0.3);border-radius:6px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">✕ Clear</button>
               </div>
             </div>
             <div class="card-body" style="padding:24px 28px;">
@@ -7886,20 +7886,35 @@ async function selectSummaryMonth(monthKey) {
 
   const totalIncome = pList.reduce((s,p) => s + parseFloat(p.amount||0), 0);
 
-  // Expenses: rows + any bill payments not dual-written
-  const expFromRows = eList.reduce((s,e) => s + parseFloat(e.amount||0), 0);
-  const billAlreadyCounted = eList.filter(e => e.expense_type==='bill').reduce((s,e) => s + parseFloat(e.amount||0), 0);
-  const billRecTotal = bList.reduce((s,r) => s + parseFloat(r.amount_paid||0), 0);
-  const totalExpenses = expFromRows + Math.max(0, billRecTotal - billAlreadyCounted);
+  // General + wage expenses (exclude bill-type rows to avoid double-count)
+  const nonBillExpenses = eList
+    .filter(e => e.expense_type !== 'bill')
+    .reduce((s,e) => s + parseFloat(e.amount||0), 0);
 
+  // Bills: use bill_month_records as the authoritative source for this month
+  const billsTotal = bList.reduce((s,r) => s + parseFloat(r.amount_paid||0), 0);
+
+  const totalExpenses = nonBillExpenses + billsTotal;
   const netProfit = totalIncome - totalExpenses;
 
-  // Category breakdown for expenses
+  // Category breakdown for expenses (non-bill rows)
   const byCat = {};
-  eList.forEach(e => {
+  eList.filter(e => e.expense_type !== 'bill').forEach(e => {
     const cat = e.category || 'Other';
     if (!byCat[cat]) byCat[cat] = 0;
     byCat[cat] += parseFloat(e.amount||0);
+  });
+
+  // Add bill_month_records into category breakdown by fetching bill names
+  const { data: allBillDefs } = await db.from('recurring_bills').select('id, name, category');
+  const billDefMap = {};
+  (allBillDefs || []).forEach(b => { billDefMap[b.id] = b; });
+  bList.forEach(r => {
+    if (!r.amount_paid || parseFloat(r.amount_paid) <= 0) return;
+    const bill = billDefMap[r.bill_id];
+    const cat = bill?.category || 'Utilities';
+    if (!byCat[cat]) byCat[cat] = 0;
+    byCat[cat] += parseFloat(r.amount_paid);
   });
 
   // Income by resident
@@ -7996,15 +8011,17 @@ async function selectSummaryMonth(monthKey) {
       <div style="background:#1a3d1a;padding:11px 16px;"><div style="color:#fff;font-weight:700;font-size:13px;">📋 Payment Details — ${monthLabel}</div></div>
       <div style="overflow-x:auto;">
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
-          <thead><tr style="background:var(--surface2);">
-            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Date</th>
-            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Resident</th>
-            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Method</th>
-            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Source</th>
-            <th style="padding:9px 12px;text-align:right;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Amount</th>
-          </tr></thead>
+          <thead>
+            <tr style="background:#1a3d1a;">
+              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Date</th>
+              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Resident</th>
+              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Method</th>
+              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Source</th>
+              <th style="padding:9px 12px;text-align:right;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Amount</th>
+            </tr>
+          </thead>
           <tbody>
-            ${pList.map(p => {
+            ${pList.map((p,i) => {
               const res = residents.find(r => r.id === p.resident_id);
               return `<tr>
                 <td style="padding:9px 12px;border-bottom:1px solid var(--border);">${fmtDate(p.pay_date)}</td>
@@ -8024,26 +8041,39 @@ async function selectSummaryMonth(monthKey) {
     </div>` : ''}
 
     <!-- Individual expense rows -->
-    ${eList.length ? `
+    ${(eList.length || bList.some(r => parseFloat(r.amount_paid||0) > 0)) ? `
     <div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;">
       <div style="background:#6b1a1a;padding:11px 16px;"><div style="color:#fff;font-weight:700;font-size:13px;">🧾 Expense Details — ${monthLabel}</div></div>
       <div style="overflow-x:auto;">
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
-          <thead><tr style="background:var(--surface2);">
-            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Date</th>
-            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Category</th>
-            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Description</th>
-            <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Paid By</th>
-            <th style="padding:9px 12px;text-align:right;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Amount</th>
-          </tr></thead>
+          <thead>
+            <tr style="background:#6b1a1a;">
+              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Date</th>
+              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Category</th>
+              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Description</th>
+              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Paid By</th>
+              <th style="padding:9px 12px;text-align:right;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Amount</th>
+            </tr>
+          </thead>
           <tbody>
-            ${eList.map(e => `<tr>
+            ${eList.filter(e => e.expense_type !== 'bill').map(e => `<tr>
               <td style="padding:9px 12px;border-bottom:1px solid var(--border);">${fmtDate(e.exp_date)}</td>
               <td style="padding:9px 12px;border-bottom:1px solid var(--border);"><span style="background:var(--danger-light);color:var(--danger);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;">${e.category||'Other'}</span></td>
               <td style="padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2);">${e.description||'—'}</td>
               <td style="padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text3);">${e.paid_by||'—'}</td>
               <td style="padding:9px 12px;border-bottom:1px solid var(--border);text-align:right;font-weight:700;color:#c0392b;">${fmt(parseFloat(e.amount||0))}</td>
             </tr>`).join('')}
+            ${bList.filter(r => parseFloat(r.amount_paid||0) > 0).map(r => {
+              const bill = billDefMap[r.bill_id];
+              const entries = (() => { try { return JSON.parse(r.payment_entries||'[]'); } catch { return []; } })();
+              return entries.map(entry => `<tr style="background:#f8f5ff;">
+                <td style="padding:9px 12px;border-bottom:1px solid var(--border);">${fmtDate(entry.date||r.month_key+'-01')}</td>
+                <td style="padding:9px 12px;border-bottom:1px solid var(--border);"><span style="background:#e8f0fe;color:#1a73e8;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;">🏠 ${bill?.category||'Utilities'}</span></td>
+                <td style="padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2);">${bill?.name||'Bill'} — ${fmtMonthKey(r.month_key)}${entry.note ? ' · ' + entry.note : ''}</td>
+                <td style="padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text3);">${entry.by||'—'}</td>
+                <td style="padding:9px 12px;border-bottom:1px solid var(--border);text-align:right;font-weight:700;color:#c0392b;">${fmt(parseFloat(entry.amount||0))}</td>
+              </tr>`).join('');
+            }).join('')}
             <tr style="background:var(--surface2);">
               <td colspan="4" style="padding:10px 12px;font-weight:700;font-size:13px;">Total Expenses</td>
               <td style="padding:10px 12px;text-align:right;font-weight:800;font-size:14px;color:#c0392b;">${fmt(totalExpenses)}</td>
@@ -8053,7 +8083,7 @@ async function selectSummaryMonth(monthKey) {
       </div>
     </div>` : ''}
 
-    ${!pList.length && !eList.length ? `<div style="text-align:center;padding:48px;color:var(--text3);font-size:14px;"><div style="font-size:40px;margin-bottom:12px;">📭</div><div style="font-weight:600;margin-bottom:6px;">No financial records for ${monthLabel}</div><div style="font-size:12px;">Payments and expenses recorded in this month will appear here.</div></div>` : ''}
+    ${!pList.length && !eList.length && !bList.some(r => parseFloat(r.amount_paid||0) > 0) ? `<div style="text-align:center;padding:48px;color:var(--text3);font-size:14px;"><div style="font-size:40px;margin-bottom:12px;">📭</div><div style="font-weight:600;margin-bottom:6px;">No financial records for ${monthLabel}</div><div style="font-size:12px;">Payments and expenses recorded in this month will appear here.</div></div>` : ''}
   `;
 }
 
