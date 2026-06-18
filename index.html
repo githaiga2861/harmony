@@ -2479,8 +2479,12 @@
           <input type="text" id="res-room" placeholder="e.g. Room 3A">
         </div>
         <div class="field span2">
-          <label>Primary Diagnosis / Condition</label>
-          <input type="text" id="res-diagnosis" placeholder="e.g. Alcohol use disorder, COPD">
+          <label>Primary Diagnoses / Conditions</label>
+          <div id="res-diagnosis-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px;"></div>
+          <button type="button" onclick="addDiagnosisRow('res-diagnosis-list')"
+            style="display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:6px;border:1.5px dashed var(--accent);background:var(--accent-light);color:var(--accent);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">
+            + Add Diagnosis
+          </button>
         </div>
         <div class="field span2">
           <label>Resident's Own Phone Number</label>
@@ -2536,8 +2540,12 @@
           <input type="text" id="edit-res-room" placeholder="e.g. Room 3A">
         </div>
         <div class="field span2">
-          <label>Primary Diagnosis / Condition</label>
-          <input type="text" id="edit-res-diagnosis" placeholder="e.g. Alcohol use disorder, COPD">
+          <label>Primary Diagnoses / Conditions</label>
+          <div id="edit-res-diagnosis-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px;"></div>
+          <button type="button" onclick="addDiagnosisRow('edit-res-diagnosis-list')"
+            style="display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:6px;border:1.5px dashed var(--accent);background:var(--accent-light);color:var(--accent);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">
+            + Add Diagnosis
+          </button>
         </div>
         <div class="field span2">
           <label>Resident's Own Phone Number</label>
@@ -4336,6 +4344,44 @@ async function deleteIncidentReportFromDb(id) {
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
+// ── MULTI-DIAGNOSIS HELPERS ──
+function addDiagnosisRow(containerId, value) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;align-items:center;gap:6px;';
+  row.innerHTML = `
+    <input type="text" value="${(value||'').replace(/"/g,'&quot;')}" placeholder="e.g. Alcohol use disorder"
+      style="flex:1;padding:7px 11px;border:1.5px solid var(--border);border-radius:6px;
+             font-family:inherit;font-size:13.5px;color:var(--text);background:var(--surface);"
+      oninput="this.style.borderColor='var(--accent2)'"
+      onblur="this.style.borderColor='var(--border)'">
+    <button type="button" onclick="this.parentElement.remove()"
+      style="width:28px;height:28px;border-radius:50%;border:none;background:var(--danger-light);
+             color:var(--danger);font-size:16px;line-height:1;cursor:pointer;flex-shrink:0;
+             display:flex;align-items:center;justify-content:center;font-weight:700;"
+      title="Remove">×</button>`;
+  container.appendChild(row);
+  row.querySelector('input').focus();
+}
+
+function getDiagnoses(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return '';
+  return Array.from(container.querySelectorAll('input'))
+    .map(i => i.value.trim()).filter(Boolean).join('; ');
+}
+
+function setDiagnoses(containerId, diagnosisStr) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  if (!diagnosisStr) { addDiagnosisRow(containerId); return; }
+  // Support both '; ' and ', ' as separators (legacy single-field data)
+  const parts = diagnosisStr.split(/;\s*/).filter(Boolean);
+  parts.forEach(d => addDiagnosisRow(containerId, d));
+}
+
 async function migrateVitalsRecorder() {
   const { data, error } = await db.from('vitals')
     .update({ recorded_by: 'Peninnah Nyandia' })
@@ -4649,9 +4695,11 @@ async function renderResidentTable() {
 }
 
 function openAddResident() {
-  ['res-name','res-dob','res-admitted','res-room','res-diagnosis','res-contact','res-contact2','res-contact3','res-phone'].forEach(id => {
-    document.getElementById(id).value = '';
+  ['res-name','res-dob','res-admitted','res-room','res-contact','res-contact2','res-contact3','res-phone'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
   });
+  setDiagnoses('res-diagnosis-list', '');
   document.getElementById('res-admitted').value = new Date().toISOString().split('T')[0];
   openModal('modal-resident');
 }
@@ -4665,7 +4713,7 @@ async function handleSaveResident() {
     id: uid(), name: name, dob: dob,
     admitted_date: admittedRaw || new Date().toISOString().split('T')[0],
     room: document.getElementById('res-room').value.trim(),
-    diagnosis: document.getElementById('res-diagnosis').value.trim(),
+    diagnosis: getDiagnoses('res-diagnosis-list'),
     emergency_contact: document.getElementById('res-contact').value.trim(),
     emergency_contact2: document.getElementById('res-contact2').value.trim(),
     emergency_contact3: document.getElementById('res-contact3').value.trim(),
@@ -4695,7 +4743,7 @@ async function openEditResident(id) {
   document.getElementById('edit-res-dob').value = r.dob || '';
   document.getElementById('edit-res-admitted').value = r.admitted_date || r.created_at?.split('T')[0] || '';
   document.getElementById('edit-res-room').value = r.room || '';
-  document.getElementById('edit-res-diagnosis').value = r.diagnosis || '';
+  setDiagnoses('edit-res-diagnosis-list', r.diagnosis || '');
   document.getElementById('edit-res-phone').value = r.resident_phone || '';
   document.getElementById('edit-res-contact').value = r.emergency_contact || '';
   document.getElementById('edit-res-contact2').value = r.emergency_contact2 || '';
@@ -4714,7 +4762,7 @@ async function handleUpdateResident() {
     dob,
     admitted_date: document.getElementById('edit-res-admitted').value || dob,
     room: document.getElementById('edit-res-room').value.trim(),
-    diagnosis: document.getElementById('edit-res-diagnosis').value.trim(),
+    diagnosis: getDiagnoses('edit-res-diagnosis-list'),
     resident_phone: document.getElementById('edit-res-phone').value.trim(),
     emergency_contact: document.getElementById('edit-res-contact').value.trim(),
     emergency_contact2: document.getElementById('edit-res-contact2').value.trim(),
