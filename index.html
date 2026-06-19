@@ -2188,6 +2188,38 @@
               </div>
             </div>
 
+            <!-- Significant Change Assessment Card -->
+            <div class="card" style="cursor:pointer;transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+              <div style="background:linear-gradient(135deg,#1a3a5c,#2c6e9f);border-radius:var(--radius) var(--radius) 0 0;padding:20px 22px;">
+                <div style="font-size:32px;margin-bottom:8px;">📋</div>
+                <div style="color:#fff;font-family:'DM Serif Display',serif;font-size:17px;line-height:1.3;">AFH Resident Significant Change<br>Assessment Request</div>
+                <div style="color:rgba(255,255,255,0.55);font-size:11px;margin-top:5px;">DSHS 15-558 (REV. 06/2021) · Washington State DSHS</div>
+              </div>
+              <div class="card-body" style="padding:16px 20px;">
+                <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:16px;">Official DSHS form submitted when a resident's support acuity domain changes. Covers medical, behavioral, mobility, hygiene, toileting, eating, sleep and other domains.</p>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <button onclick="openDocModal('sig-change')"
+                    style="flex:1;background:linear-gradient(135deg,#1a3a5c,#2c6e9f);color:#fff;border:none;
+                           border-radius:8px;padding:10px 16px;font-size:13px;font-weight:700;
+                           cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;">
+                    ✏️ Fill &amp; Generate
+                  </button>
+                  <button onclick="openSavedSigChangeList()"
+                    style="background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);
+                           border-radius:8px;padding:10px 14px;font-size:12px;font-weight:700;
+                           cursor:pointer;font-family:inherit;">
+                    📋 Saved
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Saved Sig Change list anchor -->
+            <div id="saved-sig-change-list-wrap" style="display:none;grid-column:span 2;margin-bottom:10px;">
+              <div style="font-size:13px;font-weight:700;color:#2c6e9f;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #d0e8f8;">Saved Significant Change Requests</div>
+              <div id="saved-sig-change-list"></div>
+            </div>
+
           </div>
         </div>
 
@@ -2865,6 +2897,196 @@
     <div class="modal-footer" style="justify-content:flex-end;gap:8px;">
       <button class="btn btn-secondary" onclick="closeModal('modal-doc-cbhs')">Close</button>
       <button onclick="printCBHSForm()" class="btn btn-primary" style="background:linear-gradient(135deg,#003366,#0056b3);">🖨️ Print Form</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- MODAL: Significant Change Assessment Request   -->
+<!-- ══════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-doc-sig-change">
+  <div class="modal" style="max-width:780px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#1a3a5c,#2c6e9f);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:18px 24px;">
+      <div>
+        <div style="color:#fff;font-family:'DM Serif Display',serif;font-size:18px;">📋 AFH Resident Significant Change Assessment Request</div>
+        <div style="color:rgba(255,255,255,0.55);font-size:11px;margin-top:3px;">DSHS 15-558 (REV. 06/2021) · Washington State DSHS</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button onclick="saveSigChangeToSupabase()" style="background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">💾 Save</button>
+        <button onclick="printSigChangeForm()" style="background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">🖨️ Print</button>
+        <button onclick="clearSigChangeForm()" style="background:rgba(220,50,50,0.25);color:#ffbbbb;border:1px solid rgba(255,100,100,0.3);border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">✕ Clear</button>
+        <button class="btn-close" onclick="closeModal('modal-doc-sig-change')" style="color:#fff;">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body" style="padding:28px;max-height:75vh;overflow-y:auto;">
+
+      <!-- Notice banner -->
+      <div style="background:#fff8e1;border:1px solid #f0c040;border-radius:var(--radius);padding:12px 16px;margin-bottom:20px;font-size:13px;color:#7a5c00;line-height:1.7;">
+        ⚠️ The 30-day clock will not begin until all of the required information below is <strong>completed</strong> and submitted electronically to DSHS with the Negotiated Care Plan.
+      </div>
+
+      <!-- Row 1: Resident + IDs -->
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;color:#2c6e9f;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">Resident Information</div>
+        <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:14px;margin-bottom:14px;">
+          <div class="field" style="margin:0;">
+            <label>Resident (select to auto-fill) *</label>
+            <select id="sc-resident-select" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;" onchange="onSCResidentSelect(this.value)">
+              <option value="">— Select Resident —</option>
+            </select>
+          </div>
+          <div class="field" style="margin:0;">
+            <label>DDA / ADSA ID Number</label>
+            <input type="text" id="sc-dda-id" placeholder="DDA / ADSA ID" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+          <div class="field" style="margin:0;">
+            <label>HCS ACES ID Number</label>
+            <input type="text" id="sc-hcs-id" placeholder="HCS ACES ID" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="field" style="margin:0;">
+            <label>AFH Provider's Name *</label>
+            <input type="text" id="sc-provider-name" value="Harmony Living House Adult Family LLC" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+          <div class="field" style="margin:0;">
+            <label>Provider Phone Number (with Area Code)</label>
+            <input type="text" id="sc-provider-phone" placeholder="e.g. (360) 555-0100" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: Appointment dates + Medical provider -->
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;color:#2c6e9f;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">Date of Most Recent Appointments</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;">
+          <div class="field" style="margin:0;">
+            <label>Medical Appointment</label>
+            <input type="date" id="sc-med-appt" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+          <div class="field" style="margin:0;">
+            <label>Mental Health Appointment (if applicable)</label>
+            <input type="date" id="sc-mh-appt" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+          <div class="field" style="margin:0;">
+            <label>Medication Review (if applicable)</label>
+            <input type="date" id="sc-med-review" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="field" style="margin:0;">
+            <label>Medical Provider's Name</label>
+            <input type="text" id="sc-med-provider" placeholder="Doctor / clinic name" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+          <div class="field" style="margin:0;">
+            <label>Medical Provider Phone Number</label>
+            <input type="text" id="sc-med-phone" placeholder="e.g. (360) 555-0199" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3: Support acuity domains -->
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;color:#2c6e9f;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">Support Acuity Domain(s) That Have Changed <span style="font-weight:400;color:var(--text3);font-style:italic;text-transform:none;">(select all that apply)</span></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px 16px;margin-bottom:14px;">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;transition:all 0.15s;" onmouseover="this.style.borderColor='#2c6e9f'" onmouseout="this.style.borderColor='var(--border)'">
+            <input type="checkbox" id="sc-d-medical" style="accent-color:#2c6e9f;width:15px;height:15px;"> Medical / Behavioral diagnosis
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;transition:all 0.15s;" onmouseover="this.style.borderColor='#2c6e9f'" onmouseout="this.style.borderColor='var(--border)'">
+            <input type="checkbox" id="sc-d-eating" style="accent-color:#2c6e9f;width:15px;height:15px;"> Eating
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;transition:all 0.15s;" onmouseover="this.style.borderColor='#2c6e9f'" onmouseout="this.style.borderColor='var(--border)'">
+            <input type="checkbox" id="sc-d-psych" style="accent-color:#2c6e9f;width:15px;height:15px;"> Psych / Social (behavior)
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;transition:all 0.15s;" onmouseover="this.style.borderColor='#2c6e9f'" onmouseout="this.style.borderColor='var(--border)'">
+            <input type="checkbox" id="sc-d-hygiene" style="accent-color:#2c6e9f;width:15px;height:15px;"> Hygiene
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;transition:all 0.15s;" onmouseover="this.style.borderColor='#2c6e9f'" onmouseout="this.style.borderColor='var(--border)'">
+            <input type="checkbox" id="sc-d-mobility" style="accent-color:#2c6e9f;width:15px;height:15px;"> Mobility
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;transition:all 0.15s;" onmouseover="this.style.borderColor='#2c6e9f'" onmouseout="this.style.borderColor='var(--border)'">
+            <input type="checkbox" id="sc-d-sleep" style="accent-color:#2c6e9f;width:15px;height:15px;"> Sleep
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;transition:all 0.15s;" onmouseover="this.style.borderColor='#2c6e9f'" onmouseout="this.style.borderColor='var(--border)'">
+            <input type="checkbox" id="sc-d-toileting" style="accent-color:#2c6e9f;width:15px;height:15px;"> Toileting
+          </label>
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;white-space:nowrap;">
+              <input type="checkbox" id="sc-d-other" style="accent-color:#2c6e9f;width:15px;height:15px;"> Other:
+            </label>
+            <input type="text" id="sc-d-other-text" placeholder="specify" style="flex:1;border:none;border-bottom:1px solid var(--border);font-family:inherit;font-size:12px;padding:2px 4px;background:transparent;outline:none;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 4: Description -->
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;color:#2c6e9f;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Detailed Description of Change</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:8px;line-height:1.6;">Provide a <strong>detailed</strong> description of when and how the resident's needs changed for <strong>each</strong> area selected above:</div>
+        <div class="field" style="margin:0;">
+          <textarea id="sc-description" rows="6" placeholder="Describe in detail when and how each selected domain changed for this resident..." style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;resize:vertical;line-height:1.7;"></textarea>
+        </div>
+      </div>
+
+      <!-- Row 5: Submitter + Case Manager -->
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;color:#2c6e9f;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">Submitter &amp; DSHS Contact</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="field" style="margin:0;">
+            <label>Name of Person Submitting Request *</label>
+            <input type="text" id="sc-submitter" placeholder="Your full name" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+          <div class="field" style="margin:0;">
+            <label>Name of Resident's DSHS Case Manager or Social Worker</label>
+            <input type="text" id="sc-case-manager" placeholder="Case manager full name" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 6: DSHS Use Only (optional) -->
+      <div style="background:#f0f4f8;border:1px solid #b0c8d8;border-radius:var(--radius);padding:18px 20px;">
+        <div style="font-size:11px;font-weight:700;color:#1a3a5c;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:14px;">For DSHS Use Only <span style="font-weight:400;color:var(--text3);font-style:italic;text-transform:none;">(optional — leave blank if not applicable)</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+          <div class="field" style="margin:0;">
+            <label style="font-size:11px;">Date DSHS Received Complete Written Request</label>
+            <input type="date" id="sc-dshs-received" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+          <div class="field" style="margin:0;">
+            <label style="font-size:11px;">Date(s) AFH Provider Was Contacted to Schedule Assessment</label>
+            <input type="text" id="sc-dshs-contacted" placeholder="e.g. June 1, June 3, 2026" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+          <div class="field" style="margin:0;">
+            <label style="font-size:11px;">Date Assessment Completed</label>
+            <input type="date" id="sc-dshs-assessment-date" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+          <div class="field" style="margin:0;">
+            <label style="font-size:11px;">Completed By</label>
+            <input type="text" id="sc-dshs-completed-by" placeholder="Name of DSHS assessor" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;">Assessment resulted in a change in the resident's daily rate?</div>
+          <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;"><input type="radio" name="sc-rate-change" value="Yes" id="sc-rate-yes" style="accent-color:#2c6e9f;"> Yes</label>
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;"><input type="radio" name="sc-rate-change" value="No" id="sc-rate-no" style="accent-color:#2c6e9f;"> No</label>
+            <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:200px;">
+              <span style="font-size:12px;color:var(--text2);white-space:nowrap;">If "Yes," new daily rate effective date:</span>
+              <input type="date" id="sc-rate-effective" style="flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:12px;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer" style="justify-content:space-between;">
+      <button onclick="openSavedSigChangeList()" class="btn btn-secondary">📋 View Saved</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-doc-sig-change')">Close</button>
+        <button onclick="saveSigChangeToSupabase()" class="btn btn-primary" style="background:linear-gradient(135deg,#1a3a5c,#2c6e9f);">💾 Save</button>
+        <button onclick="printSigChangeForm()" class="btn btn-primary" style="background:linear-gradient(135deg,#1a3a5c,#2c6e9f);">🖨️ Print Official Form</button>
+      </div>
     </div>
   </div>
 </div>
@@ -9942,6 +10164,367 @@ function switchStaffDocTab(tab) {
   // legacy — no-op since tabs are now hidden panels
 }
 
+// ══════════════════════════════════
+// SIGNIFICANT CHANGE ASSESSMENT
+// ══════════════════════════════════
+const DSHS_LOGO_B64 = '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';
+
+async function openSigChangeModal() {
+  const residents = await getResidents();
+  const sel = document.getElementById('sc-resident-select');
+  sel.innerHTML = '<option value="">— Select Resident —</option>';
+  residents.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id; opt.textContent = r.name;
+    sel.appendChild(opt);
+  });
+  document.getElementById('sc-submitter').value = currentUser ? currentUser.name : '';
+  openModal('modal-doc-sig-change');
+}
+
+async function onSCResidentSelect(id) {
+  if (!id) return;
+  const residents = await getResidents();
+  const r = residents.find(x => x.id === id);
+  if (!r) return;
+  // Auto-fill from resident profile — name used in description area hint
+  document.getElementById('sc-submitter').value = currentUser ? currentUser.name : '';
+}
+
+function getSCFormData() {
+  return {
+    residentId: document.getElementById('sc-resident-select').value,
+    residentName: document.getElementById('sc-resident-select').options[document.getElementById('sc-resident-select').selectedIndex]?.text || '',
+    ddaId: document.getElementById('sc-dda-id').value.trim(),
+    hcsId: document.getElementById('sc-hcs-id').value.trim(),
+    providerName: document.getElementById('sc-provider-name').value.trim(),
+    providerPhone: document.getElementById('sc-provider-phone').value.trim(),
+    medAppt: document.getElementById('sc-med-appt').value,
+    mhAppt: document.getElementById('sc-mh-appt').value,
+    medReview: document.getElementById('sc-med-review').value,
+    medProvider: document.getElementById('sc-med-provider').value.trim(),
+    medPhone: document.getElementById('sc-med-phone').value.trim(),
+    dMedical: document.getElementById('sc-d-medical').checked,
+    dEating: document.getElementById('sc-d-eating').checked,
+    dPsych: document.getElementById('sc-d-psych').checked,
+    dHygiene: document.getElementById('sc-d-hygiene').checked,
+    dMobility: document.getElementById('sc-d-mobility').checked,
+    dSleep: document.getElementById('sc-d-sleep').checked,
+    dToileting: document.getElementById('sc-d-toileting').checked,
+    dOther: document.getElementById('sc-d-other').checked,
+    dOtherText: document.getElementById('sc-d-other-text').value.trim(),
+    description: document.getElementById('sc-description').value.trim(),
+    submitter: document.getElementById('sc-submitter').value.trim(),
+    caseManager: document.getElementById('sc-case-manager').value.trim(),
+    dshsReceived: document.getElementById('sc-dshs-received').value,
+    dshsContacted: document.getElementById('sc-dshs-contacted').value.trim(),
+    dshsAssessmentDate: document.getElementById('sc-dshs-assessment-date').value,
+    dshsCompletedBy: document.getElementById('sc-dshs-completed-by').value.trim(),
+    rateChangeYes: document.getElementById('sc-rate-yes').checked,
+    rateChangeNo: document.getElementById('sc-rate-no').checked,
+    rateEffective: document.getElementById('sc-rate-effective').value,
+  };
+}
+
+function setSCFormData(d) {
+  if (!d) return;
+  document.getElementById('sc-dda-id').value = d.ddaId || '';
+  document.getElementById('sc-hcs-id').value = d.hcsId || '';
+  document.getElementById('sc-provider-name').value = d.providerName || 'Harmony Living House Adult Family LLC';
+  document.getElementById('sc-provider-phone').value = d.providerPhone || '';
+  document.getElementById('sc-med-appt').value = d.medAppt || '';
+  document.getElementById('sc-mh-appt').value = d.mhAppt || '';
+  document.getElementById('sc-med-review').value = d.medReview || '';
+  document.getElementById('sc-med-provider').value = d.medProvider || '';
+  document.getElementById('sc-med-phone').value = d.medPhone || '';
+  document.getElementById('sc-d-medical').checked = !!d.dMedical;
+  document.getElementById('sc-d-eating').checked = !!d.dEating;
+  document.getElementById('sc-d-psych').checked = !!d.dPsych;
+  document.getElementById('sc-d-hygiene').checked = !!d.dHygiene;
+  document.getElementById('sc-d-mobility').checked = !!d.dMobility;
+  document.getElementById('sc-d-sleep').checked = !!d.dSleep;
+  document.getElementById('sc-d-toileting').checked = !!d.dToileting;
+  document.getElementById('sc-d-other').checked = !!d.dOther;
+  document.getElementById('sc-d-other-text').value = d.dOtherText || '';
+  document.getElementById('sc-description').value = d.description || '';
+  document.getElementById('sc-submitter').value = d.submitter || '';
+  document.getElementById('sc-case-manager').value = d.caseManager || '';
+  document.getElementById('sc-dshs-received').value = d.dshsReceived || '';
+  document.getElementById('sc-dshs-contacted').value = d.dshsContacted || '';
+  document.getElementById('sc-dshs-assessment-date').value = d.dshsAssessmentDate || '';
+  document.getElementById('sc-dshs-completed-by').value = d.dshsCompletedBy || '';
+  if (d.rateChangeYes) document.getElementById('sc-rate-yes').checked = true;
+  if (d.rateChangeNo) document.getElementById('sc-rate-no').checked = true;
+  document.getElementById('sc-rate-effective').value = d.rateEffective || '';
+}
+
+function clearSigChangeForm() {
+  if (!confirm('Clear all form data?')) return;
+  document.getElementById('sc-resident-select').value = '';
+  setSCFormData({});
+  toast('Form cleared');
+}
+
+async function saveSigChangeToSupabase() {
+  const d = getSCFormData();
+  if (!d.residentId) { toast('Please select a resident before saving'); return; }
+  const record = {
+    id: uid(),
+    resident_id: d.residentId,
+    resident_name: d.residentName,
+    form_data: JSON.stringify(d),
+    created_at: new Date().toISOString(),
+    created_by: currentUser ? currentUser.name : ''
+  };
+  const { error } = await db.from('sig_change_requests').insert(record);
+  if (error) { toast('Error saving: ' + error.message); return; }
+  toast('✅ Significant Change Request saved!');
+  renderSavedSigChangeList();
+}
+
+async function openSavedSigChangeList() {
+  const wrap = document.getElementById('saved-sig-change-list-wrap');
+  if (!wrap) return;
+  const isHidden = wrap.style.display === 'none' || wrap.style.display === '';
+  if (isHidden) {
+    wrap.style.display = 'block';
+    await renderSavedSigChangeList();
+    setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }), 200);
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+async function renderSavedSigChangeList() {
+  const container = document.getElementById('saved-sig-change-list');
+  if (!container) return;
+  const { data, error } = await db.from('sig_change_requests').select('*').order('created_at', { ascending: false });
+  if (error) {
+    container.innerHTML = `<div style="color:var(--danger);font-size:13px;padding:10px;">Error loading records. Run this SQL in Supabase:<br><br>
+    <code style="background:#f4f6f9;padding:8px 12px;display:inline-block;border-radius:6px;font-size:11px;">
+    CREATE TABLE IF NOT EXISTS sig_change_requests (id TEXT PRIMARY KEY, resident_id TEXT, resident_name TEXT, form_data JSONB, created_at TIMESTAMPTZ DEFAULT NOW(), created_by TEXT);
+    </code></div>`;
+    return;
+  }
+  if (!data || !data.length) {
+    container.innerHTML = '<div style="color:var(--text3);font-style:italic;font-size:13px;padding:10px;">No saved requests yet.</div>';
+    return;
+  }
+  container.innerHTML = data.map(r => `
+    <div style="border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <div>
+        <div style="font-weight:700;font-size:14px;color:#2c6e9f;">${r.resident_name || 'Unknown Resident'}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:3px;">
+          Saved: ${fmtDate(r.created_at?.split('T')[0])} &nbsp;·&nbsp; By: ${r.created_by || '—'}
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button class="btn btn-secondary btn-sm" onclick="loadSigChangeRecord('${r.id}')">✏️ Load &amp; Edit</button>
+        <button class="btn btn-secondary btn-sm" onclick="printSigChangeRecord('${r.id}')">🖨️ Print</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteSigChangeRecord('${r.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+async function loadSigChangeRecord(id) {
+  const { data: r } = await db.from('sig_change_requests').select('*').eq('id', id).single();
+  if (!r) return;
+  await openSigChangeModal();
+  const d = typeof r.form_data === 'string' ? JSON.parse(r.form_data) : r.form_data;
+  // Re-select resident in dropdown
+  const sel = document.getElementById('sc-resident-select');
+  if (d.residentId) {
+    for (let opt of sel.options) { if (opt.value === d.residentId) { opt.selected = true; break; } }
+  }
+  setSCFormData(d);
+  toast('Record loaded — edit and save again to update');
+}
+
+async function printSigChangeRecord(id) {
+  const { data: r } = await db.from('sig_change_requests').select('*').eq('id', id).single();
+  if (!r) return;
+  const d = typeof r.form_data === 'string' ? JSON.parse(r.form_data) : r.form_data;
+  printSigChangeFormFromData(d);
+}
+
+async function deleteSigChangeRecord(id) {
+  if (!confirm('Delete this saved request?')) return;
+  await db.from('sig_change_requests').delete().eq('id', id);
+  toast('Deleted');
+  renderSavedSigChangeList();
+}
+
+function printSigChangeForm() {
+  const d = getSCFormData();
+  printSigChangeFormFromData(d);
+}
+
+function printSigChangeFormFromData(d) {
+  const fmtD = (v) => v ? new Date(v + 'T00:00:00').toLocaleDateString('en-US', { month:'2-digit', day:'2-digit', year:'numeric' }) : '';
+  const blank = (val, minW) => `<span style="display:inline-block;border-bottom:1px solid #000;min-width:${minW||120}px;padding:0 3px;font-size:11px;vertical-align:bottom;">${val||''}</span>`;
+  const chk = (checked) => checked ? '&#9745;' : '&#9744;';
+
+  const win = window.open('', '_blank', 'width=900,height:1100');
+  win.document.write(`<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<title>AFH Resident Significant Change Assessment Request</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Times New Roman',Times,serif; background:#fff; color:#000;
+         padding:28px 32px; width:816px; margin:0 auto; font-size:11.5px; }
+  table { width:100%; border-collapse:collapse; }
+  td, th { border:1px solid #000; padding:5px 7px; vertical-align:top; font-size:11.5px; }
+  .bold { font-weight:bold; }
+  .center { text-align:center; }
+  .small { font-size:10px; }
+  .dshs-section { background:#d9d9d9; }
+  @media print { body { padding:20px 28px; } @page { size:letter; margin:0.5in; } }
+</style>
+</head><body>
+
+<!-- HEADER ROW with DSHS logo -->
+<table style="margin-bottom:0;">
+  <tr>
+    <td style="border:none;width:90px;vertical-align:middle;padding:0;">
+      <img src="data:image/png;base64,${DSHS_LOGO_B64}" alt="DSHS" style="width:80px;height:auto;display:block;">
+    </td>
+    <td colspan="2" style="border:none;vertical-align:middle;text-align:center;padding:4px 8px;">
+      <div style="font-size:14px;font-weight:bold;">Adult Family Home (AFH) Resident</div>
+      <div style="font-size:14px;font-weight:bold;">Significant Change Assessment Request</div>
+    </td>
+  </tr>
+</table>
+
+<!-- Notice row -->
+<table style="margin-bottom:0;">
+  <tr>
+    <td colspan="3" style="font-size:11px;line-height:1.6;">
+      The 30-day clock will not begin until all of the required information below is <strong>completed</strong> and submitted electronically to DSHS with the Negotiated Care Plan.
+    </td>
+  </tr>
+</table>
+
+<!-- Row 1: Resident name, DDA ID, HCS ID -->
+<table style="margin-bottom:0;">
+  <tr>
+    <td style="width:40%;"><span class="bold">RESIDENT'S NAME</span><br>${blank(d.residentName, 200)}</td>
+    <td style="width:30%;"><span class="bold">DDA / ADSA ID NUMBER</span><br>${blank(d.ddaId, 120)}</td>
+    <td style="width:30%;"><span class="bold">HCS ACES ID NUMBER</span><br>${blank(d.hcsId, 120)}</td>
+  </tr>
+</table>
+
+<!-- Row 2: AFH Provider -->
+<table style="margin-bottom:0;">
+  <tr>
+    <td style="width:60%;"><span class="bold">AFH PROVIDER'S NAME</span><br>${blank(d.providerName, 260)}</td>
+    <td style="width:40%;"><span class="bold">PHONE NUMBER (WITH AREA CODE)</span><br>${blank(d.providerPhone, 160)}</td>
+  </tr>
+</table>
+
+<!-- Row 3: Most recent appointments -->
+<table style="margin-bottom:0;">
+  <tr>
+    <td colspan="2">
+      <span class="bold">Date of most recent:</span><br>
+      Medical appointment: &nbsp;${blank(fmtD(d.medAppt), 130)} &nbsp;&nbsp;
+      Mental Health appointment (if applicable): &nbsp;${blank(fmtD(d.mhAppt), 130)} &nbsp;&nbsp;
+      Medication Review (if applicable): &nbsp;${blank(fmtD(d.medReview), 130)}
+    </td>
+  </tr>
+</table>
+
+<!-- Row 4: Medical provider -->
+<table style="margin-bottom:0;">
+  <tr>
+    <td style="width:60%;"><span class="bold">MEDICAL PROVIDER'S NAME</span><br>${blank(d.medProvider, 260)}</td>
+    <td style="width:40%;"><span class="bold">PHONE NUMBER (WITH AREA CODE)</span><br>${blank(d.medPhone, 160)}</td>
+  </tr>
+</table>
+
+<!-- Row 5: Domains checkboxes -->
+<table style="margin-bottom:0;">
+  <tr>
+    <td colspan="2" style="line-height:2;">
+      <span class="bold">Select the resident's support acuity domain that has changed (select all that apply):</span><br>
+      <table style="border:none;width:100%;">
+        <tr>
+          <td style="border:none;padding:2px 4px;width:50%;">${chk(d.dMedical)} Medical / Behavioral diagnosis</td>
+          <td style="border:none;padding:2px 4px;width:50%;">${chk(d.dEating)} Eating</td>
+        </tr>
+        <tr>
+          <td style="border:none;padding:2px 4px;">${chk(d.dPsych)} Psych / Social (behavior)</td>
+          <td style="border:none;padding:2px 4px;">${chk(d.dHygiene)} Hygiene</td>
+        </tr>
+        <tr>
+          <td style="border:none;padding:2px 4px;">${chk(d.dMobility)} Mobility</td>
+          <td style="border:none;padding:2px 4px;">${chk(d.dSleep)} Sleep</td>
+        </tr>
+        <tr>
+          <td style="border:none;padding:2px 4px;">${chk(d.dToileting)} Toileting</td>
+          <td style="border:none;padding:2px 4px;">${chk(d.dOther)} Other (please specify): ${blank(d.dOtherText, 140)}</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!-- Row 6: Description -->
+<table style="margin-bottom:0;">
+  <tr>
+    <td colspan="2" style="min-height:120px;">
+      <span class="bold">Provide a <u>detailed</u> description of when and how the resident's needs changed for <u>each</u> area selected above:</span><br>
+      <div style="min-height:100px;padding-top:6px;line-height:1.8;white-space:pre-wrap;">${d.description || ''}</div>
+    </td>
+  </tr>
+</table>
+
+<!-- Row 7: Submitter + Case Manager -->
+<table style="margin-bottom:0;">
+  <tr>
+    <td style="width:50%;"><span class="bold">NAME OF PERSON SUBMITTING REQUEST</span><br>${blank(d.submitter, 220)}</td>
+    <td style="width:50%;"><span class="bold">NAME OF RESIDENT'S DSHS CASE MANAGER OR SOCIAL WORKER</span><br>${blank(d.caseManager, 220)}</td>
+  </tr>
+</table>
+
+<!-- Row 8: DSHS Use Only -->
+<table style="margin-bottom:0;">
+  <tr>
+    <td class="dshs-section" style="line-height:2.1;">
+      <span class="bold">For DSHS Use Only</span><br>
+      Date DSHS received <strong>complete</strong> written request from AFH provider: ${blank(fmtD(d.dshsReceived), 140)}<br>
+      Date(s) the AFH provider was contacted to schedule assessment: ${blank(d.dshsContacted, 200)}<br>
+      Date assessment completed: ${blank(fmtD(d.dshsAssessmentDate), 130)} ; Completed by: ${blank(d.dshsCompletedBy, 160)}<br>
+      Assessment resulted in a change in the resident's daily rate? &nbsp;
+      ${chk(d.rateChangeYes)} Yes &nbsp;&nbsp; ${chk(d.rateChangeNo)} No &nbsp;&nbsp;
+      If "Yes," what is the new daily rate effective date? ${blank(fmtD(d.rateEffective), 130)}
+    </td>
+  </tr>
+</table>
+
+<!-- Row 9: Copies -->
+<table>
+  <tr>
+    <td style="font-size:11px;">Copies: &nbsp; DSHS Client File; AFH Provider</td>
+  </tr>
+</table>
+
+<br>
+<div style="text-align:center;font-size:11px;font-weight:bold;margin-top:6px;">
+  AFH RESIDENT SIGNIFICANT CHANGE ASSESSMENT REQUEST
+</div>
+<div style="text-align:center;font-size:10px;margin-top:4px;">
+  DSHS 15-558 (REV. 06/2021)
+</div>
+
+</body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => {
+    win.print();
+    win.addEventListener('afterprint', () => { win.close(); window.focus(); });
+  }, 700);
+}
+
 // ── DOCUMENT HUB ──
 function switchDocCategory(cat) {
   const isStaff = cat === 'staff';
@@ -9975,6 +10558,7 @@ function openDocModal(type) {
   if (type === 'orientation') openModal('modal-doc-orientation');
   else if (type === 'credentials') openModal('modal-doc-credentials');
   else if (type === 'cbhs') openModal('modal-doc-cbhs');
+  else if (type === 'sig-change') openSigChangeModal();
 }
 
 function buildOrientationChecklist() {
