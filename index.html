@@ -1054,7 +1054,7 @@
 <body>
   
   <!-- MAINTENANCE BANNER -->
-<div id="maintenance-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#7b1a1a,#c0392b);color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.02em;box-shadow:0 2px 12px rgba(0,0,0,0.3);">
+<div id="maintenance-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:99999;background:linear-gradient(90deg,#7b1a1a,#c0392b);color:#fff;padding:10px 20px;align-items:center;justify-content:center;gap:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.02em;box-shadow:0 2px 12px rgba(0,0,0,0.3);">
   <span style="font-size:16px;">🔧</span>
   <span>System is currently under maintenance. Some features may be unavailable.</span>
   <button onclick="document.getElementById('maintenance-banner').style.display='none';document.querySelector('.main').style.paddingTop='';" style="margin-left:16px;background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:6px;padding:4px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✕ Dismiss</button>
@@ -4871,6 +4871,10 @@ function applyMaintenanceState(isOn) {
   const btn = document.getElementById('maintenance-toggle-btn');
 
   if (banner) {
+    // Explicitly set both display and flex properties to avoid conflicts
+    banner.style.cssText = banner.style.cssText
+      .replace(/display\s*:\s*[^;]+;?/g, '')
+      .trim();
     banner.style.display = isOn ? 'flex' : 'none';
     const main = document.querySelector('.main');
     if (main) main.style.paddingTop = isOn ? '44px' : '';
@@ -4887,22 +4891,35 @@ function applyMaintenanceState(isOn) {
 }
 
 async function fetchMaintenanceState() {
-  const { data } = await db.from('system_settings')
-    .select('value')
-    .eq('key', 'maintenance_mode')
-    .single();
-  const isOn = data?.value === 'true';
-  applyMaintenanceState(isOn);
+  try {
+    const { data, error } = await db.from('system_settings')
+      .select('value')
+      .eq('key', 'maintenance_mode')
+      .maybeSingle();
+    // Default to OFF if no record found or any error
+    const isOn = !error && data?.value === 'true';
+    applyMaintenanceState(isOn);
+  } catch {
+    // On any failure, ensure banner stays hidden
+    applyMaintenanceState(false);
+  }
 }
 
 // Poll every 15 seconds so all devices stay in sync
+let _maintenancePollInterval = null;
+
 function startMaintenancePoller() {
-  fetchMaintenanceState(); // immediate check on load
-  setInterval(fetchMaintenanceState, 15000);
+  // Only run after user is authenticated
+  if (!currentUser) return;
+  // Clear any existing interval to avoid duplicates
+  if (_maintenancePollInterval) clearInterval(_maintenancePollInterval);
+  fetchMaintenanceState(); // immediate check on login
+  _maintenancePollInterval = setInterval(fetchMaintenanceState, 15000);
 }
 
 // Subscribe to real-time changes if Supabase real-time is enabled
 function subscribeMaintenanceRealtime() {
+  if (!currentUser) return;
   db.channel('system_settings_changes')
     .on('postgres_changes',
       { event: '*', schema: 'public', table: 'system_settings', filter: 'key=eq.maintenance_mode' },
