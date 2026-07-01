@@ -5311,7 +5311,35 @@ async function showPage(name) {
   }
   if (name === 'staffdocs') { initStaffDocsPage(); }
   if (name === 'alerts') { renderAlertsPage(); }
-  if (name === 'contacts') { renderDynamicContacts(); }
+  if (name === 'contacts') {
+    const contactsGrid = document.getElementById('dynamic-contacts-grid');
+    if (contactsGrid) {
+      contactsGrid.style.display = 'grid';
+      contactsGrid.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:40px;color:var(--text3);">⏳ Loading…</div>';
+    }
+    db.from('quick_contacts').select('*').order('created_at', { ascending: true }).then(({ data, error }) => {
+      if (contactsGrid) {
+        if (error) {
+          contactsGrid.innerHTML = `<div style="grid-column:span 2;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:20px;font-size:13px;color:#b91c1c;">
+            <strong>Supabase Error:</strong> ${JSON.stringify(error)}</div>`;
+        } else if (!data || data.length === 0) {
+          contactsGrid.innerHTML = `<div style="grid-column:span 2;background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:20px;font-size:13px;color:#856404;">
+            <strong>Table exists but returned 0 rows.</strong><br><br>
+            This usually means Row Level Security (RLS) is blocking reads.<br><br>
+            Run this in your Supabase SQL editor:<br>
+            <code style="display:block;margin-top:8px;background:#fff;padding:10px;border-radius:6px;font-size:12px;">ALTER TABLE quick_contacts DISABLE ROW LEVEL SECURITY;</code>
+            <br>OR add a policy:<br>
+            <code style="display:block;margin-top:8px;background:#fff;padding:10px;border-radius:6px;font-size:12px;">CREATE POLICY "allow_all" ON quick_contacts FOR ALL USING (true) WITH CHECK (true);</code>
+          </div>`;
+        } else {
+          contactsGrid.innerHTML = `<div style="grid-column:span 2;background:#e8f5e9;border:1px solid #a5d6a7;border-radius:10px;padding:20px;font-size:12px;color:#1b5e20;">
+            <strong>✅ ${data.length} row(s) found. Raw data:</strong><br><br>
+            <pre style="background:#fff;padding:10px;border-radius:6px;overflow-x:auto;font-size:11px;line-height:1.6;">${JSON.stringify(data, null, 2)}</pre>
+          </div>`;
+        }
+      }
+    });
+  }
 }
 
 // ══════════════════════════════════
