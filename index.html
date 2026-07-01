@@ -2597,22 +2597,24 @@
       </div><!-- /page-staffdocs -->
 
       <!-- QUICK CONTACTS -->
-        <div class="page" id="page-contacts">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
-            <div>
-              <div style="font-size:16px;font-weight:700;color:var(--text);">Quick Contacts</div>
-              <div style="font-size:13px;color:var(--text3);margin-top:2px;">Doctors, case managers, pharmacies and other key contacts.</div>
-            </div>
-            <button onclick="openAddContact()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;">
-              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Add Contact
-            </button>
+      <div class="page" id="page-contacts">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-size:16px;font-weight:700;color:var(--text);">Quick Contacts</div>
+            <div style="font-size:13px;color:var(--text3);margin-top:2px;">Doctors, case managers, pharmacies and other key contacts.</div>
           </div>
-          <div id="dynamic-contacts-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:24px;"></div>
+          <button onclick="openAddContact()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Contact
+          </button>
         </div>
-    </div>
-  </div>
-</div>
+        <div id="dynamic-contacts-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:24px;"></div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+  </div><!-- /layout -->
+</div><!-- /app -->
 
 <!-- ══════════════════════════════════ -->
 <!-- MODAL: Orientation Checklist      -->
@@ -5312,6 +5314,7 @@ async function showPage(name) {
   if (name === 'staffdocs') { initStaffDocsPage(); }
   if (name === 'alerts') { renderAlertsPage(); }
   if (name === 'contacts') {
+    setTimeout(() => {
     const contactsGrid = document.getElementById('dynamic-contacts-grid');
     if (contactsGrid) {
       contactsGrid.style.display = 'grid';
@@ -5339,6 +5342,7 @@ async function showPage(name) {
         }
       }
     });
+    }, 100);
   }
 }
 
