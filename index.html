@@ -5201,6 +5201,38 @@ function doLogout() {
   document.getElementById('app').style.display = 'none';
 }
 
+// Emergency contacts page fix — directly inject content on click
+document.addEventListener('DOMContentLoaded', () => {
+  const navContacts = document.getElementById('nav-contacts');
+  if (navContacts) {
+    navContacts.addEventListener('click', () => {
+      // Force find grid anywhere in document
+      const grid = document.getElementById('dynamic-contacts-grid');
+      if (!grid) {
+        console.error('CONTACTS GRID MISSING FROM DOM ENTIRELY');
+        // Create and inject the page content directly
+        const content = document.querySelector('.content');
+        if (content) {
+          let pg = document.getElementById('page-contacts');
+          if (!pg) {
+            pg = document.createElement('div');
+            pg.className = 'page';
+            pg.id = 'page-contacts';
+            pg.innerHTML = `
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <div><div style="font-size:16px;font-weight:700;">Quick Contacts</div></div>
+                <button onclick="openAddContact()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add Contact</button>
+              </div>
+              <div id="dynamic-contacts-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;"></div>`;
+            content.appendChild(pg);
+            console.log('Injected missing contacts page into DOM');
+          }
+        }
+      }
+    });
+  }
+});
+
 function checkSession() {
   const s = localStorage.getItem('hlh_session');
   if (s) {
