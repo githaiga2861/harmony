@@ -1647,7 +1647,13 @@
         <div class="page" id="page-payments">
 
           <!-- Monthly Summary Button -->
-          <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+            <button onclick="migrateBillPaymentDates()"
+              id="migrate-bill-dates-btn"
+              title="Fix any bill payments recorded in the wrong month due to date entry"
+              style="background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);border-radius:10px;padding:11px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;">
+              🔧 Fix Bill Dates
+            </button>
             <button onclick="openMonthlySummary()" style="background:linear-gradient(135deg,#1a1a1a,#b8860b);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(184,134,11,0.3);">
               <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               📊 View Monthly Summaries
@@ -4888,6 +4894,120 @@ function applyMaintenanceState(isOn) {
     btn.style.background = isOn ? 'var(--danger-light)' : 'var(--surface2)';
     btn.style.color = isOn ? 'var(--danger)' : 'var(--text2)';
   }
+}
+
+// ══════════════════════════════════
+// ONE-TIME BILL PAYMENT DATE MIGRATION
+// ══════════════════════════════════
+async function migrateBillPaymentDates() {
+  toast('🔄 Scanning bill payments for date mismatches…');
+
+  // 1. Find all expense rows of type 'bill' where exp_date month ≠ bill_month_key
+  const { data: billExpenses, error: expErr } = await db.from('expenses')
+    .select('*')
+    .eq('expense_type', 'bill');
+
+  if (expErr) { toast('Error fetching expenses: ' + expErr.message); return; }
+
+  const mismatched = (billExpenses || []).filter(e => {
+    if (!e.exp_date || !e.bill_id) return false;
+    const expMonth = e.exp_date.slice(0, 7);
+    const recordedMonth = e.bill_month_key || '';
+    return expMonth !== recordedMonth && recordedMonth !== '';
+  });
+
+  if (!mismatched.length) {
+    toast('✅ No mismatched bill payments found — all dates are correct.');
+    return;
+  }
+
+  toast(`Found ${mismatched.length} mismatched payment(s) — fixing…`);
+
+  let fixed = 0;
+  let errors = 0;
+
+  for (const exp of mismatched) {
+    const correctMonthKey = exp.exp_date.slice(0, 7);   // e.g. "2025-05"
+    const wrongMonthKey   = exp.bill_month_key;          // e.g. "2025-06"
+    const billId          = exp.bill_id;
+    const amount          = parseFloat(exp.amount || 0);
+
+    try {
+      // ── A. Remove this payment from the WRONG month record ──
+      const { data: wrongRec } = await db.from('bill_month_records')
+        .select('*').eq('bill_id', billId).eq('month_key', wrongMonthKey).maybeSingle();
+
+      if (wrongRec) {
+        const entries = (() => { try { return JSON.parse(wrongRec.payment_entries || '[]'); } catch { return []; } })();
+        // Remove matching entry by amount + approximate date proximity
+        const updatedEntries = entries.filter(e => {
+          // Remove the first entry that matches this expense's amount
+          if (parseFloat(e.amount) === amount && !e._migrated) {
+            e._migrated = true; // mark so we only remove once
+            return false;
+          }
+          return true;
+        });
+        const newPaid = updatedEntries.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+        const isFullyPaid = newPaid >= parseFloat(wrongRec.amount_due || 0) - 0.005;
+        await db.from('bill_month_records').update({
+          amount_paid: newPaid,
+          is_fully_paid: isFullyPaid,
+          payment_entries: JSON.stringify(updatedEntries)
+        }).eq('id', wrongRec.id);
+      }
+
+      // ── B. Get or create the CORRECT month record ──
+      let { data: correctRec } = await db.from('bill_month_records')
+        .select('*').eq('bill_id', billId).eq('month_key', correctMonthKey).maybeSingle();
+
+      if (!correctRec) {
+        const { data: billDef } = await db.from('recurring_bills')
+          .select('default_amount').eq('id', billId).maybeSingle();
+        const newRec = {
+          id: uid(), bill_id: billId, month_key: correctMonthKey,
+          amount_due: parseFloat(billDef?.default_amount || 0),
+          amount_paid: 0, is_fully_paid: false,
+          payment_entries: '[]', created_at: new Date().toISOString()
+        };
+        await db.from('bill_month_records').insert(newRec);
+        correctRec = newRec;
+      }
+
+      // ── C. Add the payment entry to the CORRECT month record ──
+      const correctEntries = (() => { try { return JSON.parse(correctRec.payment_entries || '[]'); } catch { return []; } })();
+      correctEntries.push({
+        id: uid(), amount,
+        date: exp.exp_date,
+        by: exp.paid_by || '',
+        note: exp.receipt_ref || `Migrated from ${fmtMonthKey(wrongMonthKey)}`
+      });
+      const newCorrectPaid = correctEntries.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+      const newIsFullyPaid = newCorrectPaid >= parseFloat(correctRec.amount_due || 0) - 0.005;
+      await db.from('bill_month_records').update({
+        amount_paid: newCorrectPaid,
+        is_fully_paid: newIsFullyPaid,
+        payment_entries: JSON.stringify(correctEntries)
+      }).eq('id', correctRec.id);
+
+      // ── D. Update the expense row's bill_month_key to match exp_date ──
+      await db.from('expenses').update({
+        bill_month_key: correctMonthKey,
+        description: exp.description?.replace(fmtMonthKey(wrongMonthKey), fmtMonthKey(correctMonthKey)) || exp.description,
+        notes: `Bill payment — ${fmtMonthKey(correctMonthKey)}`
+      }).eq('id', exp.id);
+
+      fixed++;
+    } catch (err) {
+      console.error('Migration error for expense', exp.id, err);
+      errors++;
+    }
+  }
+
+  toast(`✅ Migration complete — ${fixed} payment(s) moved to correct month${errors ? `, ${errors} error(s) — check console` : ''}.`);
+  renderBillsSection();
+  renderExpensesPanel();
+  renderPaymentsPage();
 }
 
 async function fetchMaintenanceState() {
