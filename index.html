@@ -2595,7 +2595,7 @@
           <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
             <button onclick="openAddContact()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:7px;"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Contact</button>
           </div>
-          <div id="dynamic-contacts-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;"></div>
+          <div id="dynamic-contacts-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:24px;min-height:100px;"></div>
         </div>
     </div>
   </div>
@@ -12565,37 +12565,87 @@ async function renderDynamicContacts() {
   grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;">Loading contacts…</div>';
   const { data, error } = await db.from('quick_contacts').select('*').order('created_at', { ascending: true });
   if (error) {
-    grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--danger);font-size:13px;">Error loading contacts: ${error.message}</div>`;
+    grid.innerHTML = `
+      <div style="grid-column:span 2;background:var(--danger-light);border:1px solid var(--danger-border);border-radius:var(--radius);padding:20px 24px;">
+        <div style="font-weight:700;color:var(--danger);margin-bottom:8px;">⚠️ Table not found — run this SQL in your Supabase SQL editor:</div>
+        <code style="display:block;background:#fff;border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-size:12px;line-height:1.8;white-space:pre-wrap;color:var(--text);">CREATE TABLE IF NOT EXISTS quick_contacts (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  title TEXT,
+  org TEXT,
+  phone TEXT,
+  fax TEXT,
+  email1 TEXT,
+  email2 TEXT,
+  address TEXT,
+  notes TEXT,
+  color TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  created_by TEXT
+);</code>
+        <div style="font-size:12px;color:var(--text3);margin-top:10px;">After running the SQL, refresh this page and your contacts will load.</div>
+        <div style="font-size:11px;color:var(--danger);margin-top:6px;">Error detail: ${error.message}</div>
+      </div>`;
     return;
   }
   if (!data || !data.length) {
-    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text3);font-size:13px;">No contacts found. Click "Add Contact" to add one.</div>';
+    grid.innerHTML = `
+      <div style="grid-column:span 2;text-align:center;padding:60px 24px;">
+        <div style="font-size:48px;margin-bottom:16px;">📞</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px;">No Contacts Yet</div>
+        <div style="font-size:13px;color:var(--text3);margin-bottom:20px;">Add doctors, case managers, pharmacies and other key contacts for quick access.</div>
+        <button onclick="openAddContact()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add First Contact</button>
+      </div>`;
     return;
   }
 
   grid.innerHTML = data.map(c => {
     const colors = (c.color || '#1a4a8a:#2563eb').split(':');
-    const c1 = colors[0], c2 = colors[1] || colors[0];
-    const initials = c.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const c1 = colors[0] || '#1a4a8a';
+    const c2 = colors[1] || colors[0] || '#2563eb';
+    const initials = (c.name || '?').split(' ').map(w => w[0]).filter(Boolean).join('').slice(0,2).toUpperCase() || '?';
+
+    const infoRow = (icon, label, content, isLink, href) => `
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 10px;background:var(--surface2);border-radius:8px;">
+        <span style="font-size:18px;flex-shrink:0;margin-top:1px;">${icon}</span>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">${label}</div>
+          ${isLink
+            ? `<a href="${href}" style="font-size:13.5px;font-weight:600;color:${c2};text-decoration:none;word-break:break-all;">${content}</a>`
+            : `<div style="font-size:13.5px;font-weight:600;color:var(--text);word-break:break-word;">${content}</div>`}
+        </div>
+      </div>`;
+
     const rows = [
-      c.org    ? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;"><span style="font-size:20px;">🏢</span><div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Organization</div><div style="font-size:14px;font-weight:600;color:var(--text);">${c.org}</div></div></div>` : '',
-      c.phone  ? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;"><span style="font-size:20px;">📱</span><div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Phone</div><a href="tel:${c.phone.replace(/\D/g,'')}" style="font-size:15px;font-weight:700;color:${c2};text-decoration:none;">${c.phone}</a></div></div>` : '',
-      c.fax    ? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;"><span style="font-size:20px;">📠</span><div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Fax</div><div style="font-size:15px;font-weight:700;color:var(--text);">${c.fax}</div></div></div>` : '',
-      c.email1 ? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;"><span style="font-size:20px;">📧</span><div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Email</div><a href="mailto:${c.email1}" style="font-size:13px;font-weight:600;color:${c2};text-decoration:none;">${c.email1}</a></div></div>` : '',
-      c.email2 ? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:#f8f4ff;border-radius:8px;"><span style="font-size:20px;">📧</span><div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Alt Email</div><a href="mailto:${c.email2}" style="font-size:13px;font-weight:600;color:${c2};text-decoration:none;">${c.email2}</a></div></div>` : '',
-      c.address? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface2);border-radius:8px;"><span style="font-size:20px;">📍</span><div><div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;">Address</div><div style="font-size:14px;font-weight:600;color:var(--text);">${c.address}</div></div></div>` : '',
-      c.notes  ? `<div style="display:flex;align-items:center;gap:12px;padding:10px;background:#fffdf5;border-radius:8px;"><span style="font-size:20px;">💬</span><div style="font-size:12px;font-style:italic;color:#555;line-height:1.6;">${c.notes}</div></div>` : '',
+      c.org     ? infoRow('🏢','Organization', c.org, false) : '',
+      c.phone   ? infoRow('📱','Phone', c.phone, true, `tel:${(c.phone||'').replace(/\D/g,'')}`) : '',
+      c.fax     ? infoRow('📠','Fax', c.fax, false) : '',
+      c.email1  ? infoRow('📧','Email', c.email1, true, `mailto:${c.email1}`) : '',
+      c.email2  ? infoRow('📧','Alt Email', c.email2, true, `mailto:${c.email2}`) : '',
+      c.address ? infoRow('📍','Address', c.address, false) : '',
+      c.notes   ? `<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 10px;background:#fffdf5;border:1px solid #f0e8c8;border-radius:8px;"><span style="font-size:18px;flex-shrink:0;">💬</span><div style="font-size:12.5px;font-style:italic;color:#6b5a2a;line-height:1.6;">${c.notes}</div></div>` : '',
     ].filter(Boolean).join('');
 
-    return `<div class="card">
-      <div class="card-header" style="background:linear-gradient(135deg,${c1},${c2});border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:space-between;">
-        <h3 style="color:#fff;font-family:'DM Serif Display',serif;font-size:15px;">
-          ${initials[0] === initials[0].toUpperCase() ? '👤' : '🏢'} ${c.name}${c.title ? ' — ' + c.title : ''}
-        </h3>
-        <button onclick="deleteQuickContact('${c.id}')" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;" title="Remove contact">✕</button>
-      </div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">${rows}</div>
-    </div>`;
+    return `
+      <div class="card" style="overflow:hidden;">
+        <div style="background:linear-gradient(135deg,${c1},${c2});padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+            <div style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#fff;flex-shrink:0;">${initials}</div>
+            <div style="min-width:0;">
+              <div style="color:#fff;font-family:'DM Serif Display',serif;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+              ${c.title ? `<div style="color:rgba(255,255,255,0.75);font-size:11.5px;margin-top:2px;">${c.title}</div>` : ''}
+            </div>
+          </div>
+          <button onclick="event.stopPropagation();deleteQuickContact('${c.id}')"
+            style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.35);
+                   border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;
+                   font-family:inherit;flex-shrink:0;white-space:nowrap;"
+            title="Remove contact">✕ Remove</button>
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:8px;padding:14px 16px;">
+          ${rows || `<div style="color:var(--text3);font-size:13px;font-style:italic;text-align:center;padding:10px;">No contact details added.</div>`}
+        </div>
+      </div>`;
   }).join('');
 }
 
