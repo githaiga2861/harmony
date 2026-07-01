@@ -8237,13 +8237,29 @@ async function openBillPayment(billId, monthKey) {
 
 async function saveBillPayment() {
   const billId = document.getElementById('billpay-bill-id').value;
-  const monthKey = document.getElementById('billpay-month-key').value;
-  const recId = document.getElementById('billpay-rec-id').value;
   const amount = parseFloat(document.getElementById('billpay-amount').value);
+  const payDate = document.getElementById('billpay-date').value;
   if (!amount || amount <= 0) { toast('Please enter a valid payment amount'); return; }
 
-  const { data: rec } = await db.from('bill_month_records').select('*').eq('id', recId).single();
-  if (!rec) { toast('Error: record not found — please close and try again'); return; }
+  // Derive month_key from the actual payment date entered, not the current month
+  const monthKey = payDate ? payDate.slice(0, 7) : getCurrentMonthKey();
+
+  // Look up or create the record for THAT month (not necessarily current)
+  let { data: rec } = await db.from('bill_month_records')
+    .select('*').eq('bill_id', billId).eq('month_key', monthKey).maybeSingle();
+
+  if (!rec) {
+    const { data: b } = await db.from('recurring_bills').select('*').eq('id', billId).single();
+    const newRec = {
+      id: uid(), bill_id: billId, month_key: monthKey,
+      amount_due: parseFloat(b?.default_amount || 0), amount_paid: 0,
+      is_fully_paid: false, payment_entries: '[]', created_at: new Date().toISOString()
+    };
+    const { error } = await db.from('bill_month_records').insert(newRec);
+    if (error) { toast('Error: ' + error.message); return; }
+    rec = newRec;
+  }
+  const recId = rec.id;
 
   const entries = (() => { try { return JSON.parse(rec.payment_entries || '[]'); } catch { return []; } })();
   entries.push({
@@ -8264,12 +8280,12 @@ async function saveBillPayment() {
 
   if (error) { toast('Error saving: ' + error.message); return; }
 
-  // Also record as an expense so it appears in total expenses
+  // Also record as an expense so it appears in total expenses — use payDate for exp_date
   const { data: billData } = await db.from('recurring_bills').select('name, category').eq('id', billId).single();
   const expenseRecord = {
     id: uid(),
     expense_type: 'bill',
-    exp_date: document.getElementById('billpay-date').value || toLocalDateStr(new Date()),
+    exp_date: payDate || toLocalDateStr(new Date()),
     amount: parseFloat(amount).toFixed(2),
     category: billData?.category || 'Utilities',
     description: `${billData?.name || 'Bill'} — ${fmtMonthKey(monthKey)}`,
@@ -8289,7 +8305,7 @@ async function saveBillPayment() {
   closeModal('modal-bill-payment');
   toast(isFullyPaid
     ? `✅ ${fmtMonthKey(monthKey)} bill fully paid!`
-    : `✅ $${amount.toFixed(2)} recorded — $${remaining.toFixed(2)} remaining`);
+    : `✅ $${amount.toFixed(2)} recorded for ${fmtMonthKey(monthKey)} — $${remaining.toFixed(2)} remaining`);
   renderBillsSection();
   renderExpensesPanel();
   renderPaymentsPage();
@@ -9366,7 +9382,8 @@ async function saveExpense() {
     if (!billId) { toast('Please select a bill'); return; }
     if (!amount || amount <= 0) { toast('Please enter a valid payment amount'); return; }
     if (!payDate) { toast('Please enter the payment date'); return; }
-    const currentMK = getCurrentMonthKey();
+    const billPayDate = document.getElementById('exp-bill-payment-date').value || toLocalDateStr(new Date());
+    const currentMK = billPayDate.slice(0, 7);
     const { data: b } = await db.from('recurring_bills').select('*').eq('id', billId).single();
     if (!b) { toast('Bill not found'); return; }
     let { data: rec } = await db.from('bill_month_records').select('*').eq('bill_id', billId).eq('month_key', currentMK).maybeSingle();
@@ -9395,11 +9412,11 @@ async function saveExpense() {
     }).eq('id', rec.id);
     if (error) { toast('Error saving payment: ' + error.message); return; }
 
-    // Record as expense so it counts in totals
+    // Record as expense so it counts in totals — use actual payment date for correct month
     const expenseRecord = {
       id: uid(),
       expense_type: 'bill',
-      exp_date: document.getElementById('exp-bill-payment-date').value || toLocalDateStr(new Date()),
+      exp_date: billPayDate,
       amount: parseFloat(amount).toFixed(2),
       category: b.category || 'Utilities',
       description: `${b.name} — ${fmtMonthKey(currentMK)}`,
@@ -9416,7 +9433,7 @@ async function saveExpense() {
     await db.from('expenses').insert(expenseRecord);
 
     closeModal('modal-expense');
-    toast(isFullyPaid ? `✅ ${b.name} fully paid for ${fmtMonthKey(currentMK)}!` : `✅ $${amount.toFixed(2)} recorded for ${b.name}`);
+    toast(isFullyPaid ? `✅ ${b.name} fully paid for ${fmtMonthKey(currentMK)}!` : `✅ $${amount.toFixed(2)} recorded for ${b.name} — ${fmtMonthKey(currentMK)}`);
     renderExpensesPanel();
     renderPaymentsPage();
     return;
