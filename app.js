@@ -7476,8 +7476,10 @@ async function sendAlertEmail(alertType, subject, htmlBody, forceEmail = false) 
       })
     });
 
-    if (!res.ok) {
+    if (!res.ok && forceEmail) {
       throw new Error(`HTTP ${res.status}`);
+    } else if (!res.ok) {
+      return { success: false, method: 'edge-function-silenced' };
     }
 
     return {
