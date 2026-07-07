@@ -445,7 +445,7 @@
   .topbar-title {
     font-size: 15px;
     font-weight: 600;
-    color: var(--text);
+    color: #1a2332;
     letter-spacing: -0.01em;
   }
   .topbar-right { display: flex; align-items: center; gap: 10px; }

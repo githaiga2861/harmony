@@ -3954,15 +3954,7 @@ async function selectSummaryMonth(monthKey) {
       <div style="background:#1a3d1a;padding:11px 16px;"><div style="color:#fff;font-weight:700;font-size:13px;">📋 Payment Details — ${monthLabel}</div></div>
       <div style="overflow-x:auto;">
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
-          <thead>
-            <tr style="background:#1a3d1a;">
-              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Date</th>
-              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Resident</th>
-              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Method</th>
-              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Source</th>
-              <th style="padding:9px 12px;text-align:right;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Amount</th>
-            </tr>
-          </thead>
+          <thead><tr style="background:#1a3d1a;"><th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Date</th><th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Resident</th><th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Method</th><th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Source</th><th style="padding:9px 12px;text-align:right;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Amount</th></tr></thead>
           <tbody>
             ${pList.map((p,i) => {
               const res = residents.find(r => r.id === p.resident_id);
@@ -3989,15 +3981,7 @@ async function selectSummaryMonth(monthKey) {
       <div style="background:#6b1a1a;padding:11px 16px;"><div style="color:#fff;font-weight:700;font-size:13px;">🧾 Expense Details — ${monthLabel}</div></div>
       <div style="overflow-x:auto;">
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
-          <thead>
-            <tr style="background:#6b1a1a;">
-              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Date</th>
-              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Category</th>
-              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Description</th>
-              <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Paid By</th>
-              <th style="padding:9px 12px;text-align:right;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Amount</th>
-            </tr>
-          </thead>
+          <thead><tr style="background:#6b1a1a;"><th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Date</th><th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Category</th><th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Description</th><th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Paid By</th><th style="padding:9px 12px;text-align:right;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Amount</th></tr></thead>
           <tbody>
             ${eList.filter(e => e.expense_type !== 'bill').map(e => `<tr>
               <td style="padding:9px 12px;border-bottom:1px solid var(--border);">${fmtDate(e.exp_date)}</td>
@@ -4148,9 +4132,10 @@ async function savePayment() {
     receipt_num: document.getElementById('pay-receipt-num').value.trim() || genReceiptNum(),
     created_at: new Date().toISOString()
   };
-  await db.from('payments').upsert(payment);
+  const { error: payErr } = await db.from('payments').upsert(payment);
+  if (payErr) { toast('Error saving payment: ' + payErr.message); return; }
   closeModal('modal-payment');
-  toast('✅ Payment saved — click 🖨️ Receipt to print');
+  toast(editId ? '✅ Payment updated successfully' : '✅ Payment saved — click 🖨️ Receipt to print');
   renderPaymentsPage();
 }
 
@@ -7901,12 +7886,12 @@ async function loadAlertLog() {
   const typeIcons = { appointments:'📅', progress_notes:'📋', vitals:'❤️', overdue_payments:'💰', test:'🧪' };
   const typeColors = { appointments:'#1a73e8', progress_notes:'#7c3aed', vitals:'#c0392b', overdue_payments:'#d68910', test:'#1e7e34' };
   container.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
-    <thead><tr>
-      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Type</th>
-      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Subject</th>
-      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Recipient</th>
-      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Sent At</th>
-      <th style="padding:8px 14px;text-align:left;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">By</th>
+    <thead><tr style="background:#1a2332;">
+      <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Type</th>
+      <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Subject</th>
+      <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Recipient</th>
+      <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Sent At</th>
+      <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">By</th>
     </tr></thead><tbody>
     ${data.map(log => {
       const ic = typeIcons[log.alert_type] || '🔔';
