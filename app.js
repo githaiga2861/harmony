@@ -6871,8 +6871,8 @@ async function openStaffWageModal(firstName, fullName, focusMonth) {
     rows += '<div><label style="font-size:11px;font-weight:700;color:var(--text3);display:block;margin-bottom:3px;">Paid By</label><input type="text" id="swby-' + mk + '" placeholder="Name" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;box-sizing:border-box;"></div>';
     rows += '</div>';
     rows += '<div style="display:flex;gap:8px;">';
-    rows += '<button onclick="submitSwPayment('' + mk + '', '' + mStart + '', '' + mEnd + '', ' + amount.toFixed(2) + ')" style="background:var(--accent);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Save Payment</button>';
-    rows += '<button onclick="document.getElementById('swpayform-' + mk + '').style.display='none'" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:7px;padding:8px 14px;font-size:12px;cursor:pointer;font-family:inherit;">Cancel</button>';
+    rows += '<button onclick="submitSwPayment(\'' + mk + '\', \'' + mStart + '\', \'' + mEnd + '\', ' + amount.toFixed(2) + ')" style="background:var(--accent);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Save Payment</button>';
+    rows += '<button onclick="document.getElementById(\'swpayform-' + mk + '\').style.display=\'none\'" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:7px;padding:8px 14px;font-size:12px;cursor:pointer;font-family:inherit;">Cancel</button>';
     rows += '</div></div>';
     rows += '</div>';
   }
