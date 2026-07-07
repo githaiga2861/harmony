@@ -6846,7 +6846,7 @@ async function openStaffWageModal(firstName, fullName, focusMonth) {
       rows += '<span style="background:#e6f4ea;color:#1e7e34;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">Paid</span>';
     } else {
       rows += '<span style="background:' + (isOverdue ? '#fdf0ef' : '#fff3cd') + ';color:' + (isOverdue ? '#c0392b' : '#856404') + ';border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">' + (isOverdue ? 'Overdue' : 'Owed') + ' $' + mOwed.toFixed(2) + '</span>';
-      rows += '<button onclick="openSwPayForm('' + mk + '', ' + mOwed.toFixed(2) + ')" style="background:' + (isOverdue ? '#c0392b' : 'var(--accent)') + ';color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Pay</button>';
+      rows += '<button onclick="openSwPayForm(\'' + mk + '\', ' + mOwed.toFixed(2) + ')" style="background:' + (isOverdue ? '#c0392b' : 'var(--accent)') + ';color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Pay</button>';
     }
     rows += '</div></div>';
     rows += '<div style="background:#e8e8e8;border-radius:20px;height:5px;overflow:hidden;">';
