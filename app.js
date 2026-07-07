@@ -4757,6 +4757,30 @@ async function saveExpense() {
     };
     const { error } = await db.from('expenses').upsert(expense);
     if (error) { toast('Error saving wage: ' + error.message); return; }
+    const _expectedAmt = staffCfg && staffCfg.amount ? parseFloat(staffCfg.amount) : 0;
+    const _paidAmt = parseFloat(amount);
+    const _excess = _expectedAmt > 0 ? _paidAmt - _expectedAmt : 0;
+    if (_excess > 0.005) {
+      const _pStart = new Date(periodStart + 'T00:00:00');
+      const _nextDate = new Date(_pStart.getFullYear(), _pStart.getMonth() + 1, 1);
+      const _nextMK = _nextDate.toISOString().slice(0,7);
+      const _nextStart = _nextMK + '-01';
+      const _lastDay = new Date(_nextDate.getFullYear(), _nextDate.getMonth() + 1, 0).getDate();
+      const _nextEnd = _nextMK + '-' + String(_lastDay).padStart(2,'0');
+      await db.from('expenses').insert({
+        id: uid(), expense_type: 'wage', exp_date: _nextStart,
+        amount: _excess.toFixed(2), category: 'Staff Wages',
+        description: 'Wages — ' + staffName + ' (forwarded overpayment from ' + fmtDate(periodStart) + ')',
+        wage_staff: staffName, wage_period_start: _nextStart, wage_period_end: _nextEnd,
+        wage_hours: null, wage_rate: null,
+        method: document.getElementById('exp-wage-method').value,
+        paid_by: document.getElementById('exp-wage-paid-by').value.trim(),
+        receipt_ref: 'Forwarded from ' + fmtDate(periodStart),
+        notes: 'Auto-forwarded overpayment of $' + _excess.toFixed(2),
+        vendor: null, created_at: new Date().toISOString()
+      });
+      toast('Wage saved — $' + _excess.toFixed(2) + ' overpayment forwarded to next month');
+    }
   } else {
     const amount = document.getElementById('exp-amount-general').value;
     const category = document.getElementById('exp-category').value;
@@ -6761,6 +6785,170 @@ function _getWageMonths() {
   return months.reverse(); // most recent first
 }
 
+
+// ══════════════════════════════════
+// STAFF WAGE MODAL
+// ══════════════════════════════════
+let _swModalStaff = null;
+let _swModalFullName = null;
+
+async function openStaffWageModal(firstName, fullName, focusMonth) {
+  _swModalStaff = firstName;
+  _swModalFullName = fullName || firstName;
+
+  const { data: dbStaff } = await db.from('staff_members')
+    .select('name, salary_amount, salary_freq, salary_start_month')
+    .eq('name', fullName).maybeSingle();
+
+  const amount = dbStaff ? parseFloat(dbStaff.salary_amount || 0) : 0;
+  const startMonth = dbStaff ? (dbStaff.salary_start_month || '2026-05-01') : '2026-05-01';
+  const colors = STAFF_COLORS[firstName] || { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568' };
+
+  const { data: allPayments } = await db.from('expenses')
+    .select('*').eq('expense_type', 'wage').eq('wage_staff', firstName)
+    .order('wage_period_start', { ascending: true });
+  const payments = allPayments || [];
+
+  const allMonths = _getWageMonths().filter(mk => mk >= startMonth.slice(0,7)).reverse();
+  const today = new Date().toISOString().split('T')[0];
+  const mn = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  let rows = '';
+  let totalOwed = 0;
+
+  for (const mk of allMonths) {
+    const [my, mm] = mk.split('-').map(Number);
+    const mStart = mk + '-01';
+    const mEnd = mk + '-' + String(new Date(my, mm, 0).getDate()).padStart(2,'0');
+    if (mStart > today) continue;
+
+    const mPayments = payments.filter(p => {
+      if (!p.wage_period_start) return false;
+      return (p.wage_period_start >= mStart && p.wage_period_start <= mEnd) ||
+             (p.wage_period_start < mStart && p.wage_period_end && p.wage_period_end >= mStart);
+    });
+    const mPaid = mPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
+    const mOwed = Math.max(0, amount - mPaid);
+    const isPast = mEnd < today;
+    const isOverdue = isPast && mOwed > 0.005;
+    const isFullyPaid = mOwed <= 0.005;
+    const isFocus = mk === focusMonth;
+    if (isPast && mOwed > 0.005) totalOwed += mOwed;
+    const pct = amount > 0 ? Math.min(100, Math.round((mPaid / amount) * 100)) : 0;
+    const barColor = pct >= 100 ? '#1e7e34' : pct >= 50 ? '#d68910' : '#c0392b';
+
+    rows += '<div id="swrow-' + mk + '" style="border:1.5px solid ' + (isFocus ? '#c0392b' : isOverdue ? '#f5c0bb' : '#e8edf2') + ';border-radius:8px;padding:12px 14px;margin-bottom:8px;background:' + (isFocus ? '#fff5f5' : '#fff') + ';">';
+    rows += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">';
+    rows += '<div style="font-weight:700;font-size:13px;color:#1a2332;">' + mn[mm] + ' ' + my + '</div>';
+    rows += '<div style="display:flex;align-items:center;gap:8px;">';
+    rows += '<span style="font-size:11px;color:#888;">Paid: <strong style="color:#1e7e34;">$' + mPaid.toFixed(2) + '</strong> / $' + amount.toFixed(2) + '</span>';
+    if (isFullyPaid) {
+      rows += '<span style="background:#e6f4ea;color:#1e7e34;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">Paid</span>';
+    } else {
+      rows += '<span style="background:' + (isOverdue ? '#fdf0ef' : '#fff3cd') + ';color:' + (isOverdue ? '#c0392b' : '#856404') + ';border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">' + (isOverdue ? 'Overdue' : 'Owed') + ' $' + mOwed.toFixed(2) + '</span>';
+      rows += '<button onclick="openSwPayForm('' + mk + '', ' + mOwed.toFixed(2) + ')" style="background:' + (isOverdue ? '#c0392b' : 'var(--accent)') + ';color:#fff;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Pay</button>';
+    }
+    rows += '</div></div>';
+    rows += '<div style="background:#e8e8e8;border-radius:20px;height:5px;overflow:hidden;">';
+    rows += '<div style="width:' + pct + '%;background:' + barColor + ';height:100%;border-radius:20px;"></div></div>';
+
+    if (mPayments.length > 0) {
+      rows += '<div style="margin-top:8px;display:flex;flex-direction:column;gap:3px;">';
+      mPayments.forEach(function(p) {
+        rows += '<div style="display:flex;justify-content:space-between;font-size:11px;color:#888;padding:2px 0;">';
+        rows += '<span>' + fmtDate(p.exp_date) + (p.method ? ' · ' + p.method : '') + (p.paid_by ? ' by ' + p.paid_by : '') + '</span>';
+        rows += '<span style="color:#1e7e34;font-weight:600;">+$' + parseFloat(p.amount||0).toFixed(2) + '</span></div>';
+      });
+      rows += '</div>';
+    }
+
+    rows += '<div id="swpayform-' + mk + '" style="display:none;margin-top:10px;background:#f8f9fb;border:1px solid #e0e4ea;border-radius:8px;padding:12px;">';
+    rows += '<div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;">Record Payment — ' + mn[mm] + ' ' + my + '</div>';
+    rows += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">';
+    rows += '<div><label style="font-size:11px;font-weight:700;color:var(--text3);display:block;margin-bottom:3px;">Amount</label><input type="number" id="swamt-' + mk + '" value="' + mOwed.toFixed(2) + '" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;box-sizing:border-box;"></div>';
+    rows += '<div><label style="font-size:11px;font-weight:700;color:var(--text3);display:block;margin-bottom:3px;">Date Paid</label><input type="date" id="swdate-' + mk + '" value="' + today + '" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;box-sizing:border-box;"></div>';
+    rows += '<div><label style="font-size:11px;font-weight:700;color:var(--text3);display:block;margin-bottom:3px;">Method</label><select id="swmethod-' + mk + '" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;"><option>Cash</option><option>Check</option><option>Bank Transfer</option><option>Zelle</option><option>Other</option></select></div>';
+    rows += '<div><label style="font-size:11px;font-weight:700;color:var(--text3);display:block;margin-bottom:3px;">Paid By</label><input type="text" id="swby-' + mk + '" placeholder="Name" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;box-sizing:border-box;"></div>';
+    rows += '</div>';
+    rows += '<div style="display:flex;gap:8px;">';
+    rows += '<button onclick="submitSwPayment('' + mk + '', '' + mStart + '', '' + mEnd + '', ' + amount.toFixed(2) + ')" style="background:var(--accent);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Save Payment</button>';
+    rows += '<button onclick="document.getElementById('swpayform-' + mk + '').style.display='none'" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:7px;padding:8px 14px;font-size:12px;cursor:pointer;font-family:inherit;">Cancel</button>';
+    rows += '</div></div>';
+    rows += '</div>';
+  }
+
+  const modalEl = document.getElementById('modal-staff-wage');
+  if (!modalEl) return;
+  document.getElementById('sw-modal-title').textContent = firstName + ' — Wage History';
+  document.getElementById('sw-modal-subtitle').textContent = (fullName || firstName) + ' · $' + amount.toFixed(2) + '/month';
+  const owedEl = document.getElementById('sw-total-owed');
+  owedEl.textContent = totalOwed > 0.005 ? 'Total Outstanding: $' + totalOwed.toFixed(2) : 'All payments up to date';
+  owedEl.style.color = totalOwed > 0.005 ? '#c0392b' : '#1e7e34';
+  document.getElementById('sw-modal-body').innerHTML = rows || '<div style="text-align:center;padding:40px;color:var(--text3);">No wage history found.</div>';
+  openModal('modal-staff-wage');
+  if (focusMonth) {
+    setTimeout(function() {
+      const el = document.getElementById('swrow-' + focusMonth);
+      if (el) { el.scrollIntoView({ behavior:'smooth', block:'center' }); openSwPayForm(focusMonth, 0); }
+    }, 300);
+  }
+}
+
+function openSwPayForm(mk, owed) {
+  document.querySelectorAll('[id^="swpayform-"]').forEach(function(el) { el.style.display = 'none'; });
+  const form = document.getElementById('swpayform-' + mk);
+  if (form) form.style.display = 'block';
+}
+
+async function submitSwPayment(mk, mStart, mEnd, expectedAmount) {
+  const paidAmt = parseFloat(document.getElementById('swamt-' + mk)?.value || 0);
+  const payDate = document.getElementById('swdate-' + mk)?.value || new Date().toISOString().split('T')[0];
+  const method = document.getElementById('swmethod-' + mk)?.value || 'Cash';
+  const paidBy = document.getElementById('swby-' + mk)?.value?.trim() || '';
+  if (!paidAmt || paidAmt <= 0) { toast('Please enter a valid amount'); return; }
+
+  const { data: existing } = await db.from('expenses').select('amount')
+    .eq('expense_type', 'wage').eq('wage_staff', _swModalStaff)
+    .gte('wage_period_start', mStart).lte('wage_period_start', mEnd);
+  const alreadyPaid = (existing || []).reduce(function(s,p) { return s + parseFloat(p.amount||0); }, 0);
+  const remainingOwed = Math.max(0, expectedAmount - alreadyPaid);
+  const excess = paidAmt - remainingOwed;
+
+  const { error } = await db.from('expenses').insert({
+    id: uid(), expense_type: 'wage', exp_date: payDate,
+    amount: paidAmt.toFixed(2), category: 'Staff Wages',
+    description: 'Wages — ' + _swModalStaff + ' (' + fmtDate(mStart) + ' to ' + fmtDate(mEnd) + ')',
+    wage_staff: _swModalStaff, wage_period_start: mStart, wage_period_end: mEnd,
+    wage_hours: null, wage_rate: null, method: method, paid_by: paidBy,
+    receipt_ref: '', notes: '', vendor: null, created_at: new Date().toISOString()
+  });
+  if (error) { toast('Error: ' + error.message); return; }
+
+  if (excess > 0.005) {
+    const parts = mk.split('-');
+    const nextDate = new Date(parseInt(parts[0]), parseInt(parts[1]), 1);
+    const nextMK = nextDate.toISOString().slice(0,7);
+    const nextStart = nextMK + '-01';
+    const nextEnd = nextMK + '-' + String(new Date(nextDate.getFullYear(), nextDate.getMonth() + 1, 0).getDate()).padStart(2,'0');
+    await db.from('expenses').insert({
+      id: uid(), expense_type: 'wage', exp_date: nextStart,
+      amount: excess.toFixed(2), category: 'Staff Wages',
+      description: 'Wages — ' + _swModalStaff + ' (forwarded from ' + mk + ')',
+      wage_staff: _swModalStaff, wage_period_start: nextStart, wage_period_end: nextEnd,
+      wage_hours: null, wage_rate: null, method: method, paid_by: paidBy,
+      receipt_ref: 'Forwarded from ' + mk,
+      notes: 'Auto-forwarded $' + excess.toFixed(2) + ' overpayment',
+      vendor: null, created_at: new Date().toISOString()
+    });
+    toast('Saved — $' + excess.toFixed(2) + ' forwarded to ' + nextMK);
+  } else {
+    toast('Payment of $' + paidAmt.toFixed(2) + ' recorded');
+  }
+  closeModal('modal-staff-wage');
+  renderWageBalanceStrip();
+  renderExpensesPanel();
+}
+
 async function renderWageBalanceStrip() {
   const strip = document.getElementById('wage-balance-strip');
   if (!strip) { console.log('WAGE STRIP: element not found'); return; }
@@ -6869,7 +7057,7 @@ async function renderWageBalanceStrip() {
       }
 
       cards += `
-        <div style="background:#fff;border:1.5px solid ${isOverdue ? '#f5c0bb' : colors.border};border-radius:8px;padding:10px 13px;min-width:0;">
+        <div onclick="openStaffWageModal('${firstName}', '${s.name}')" style="cursor:pointer;background:#fff;border:1.5px solid ${isOverdue ? '#f5c0bb' : colors.border};border-radius:8px;padding:10px 13px;min-width:0;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.12)'" onmouseout="this.style.boxShadow=''">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
             <div style="width:32px;height:32px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:${colors.text};flex-shrink:0;">${firstName.charAt(0)}</div>
             <div style="flex:1;min-width:0;">
@@ -6964,7 +7152,7 @@ async function renderWageBalanceStrip() {
     }
 
     cards += `
-      <div style="background:#fff;border:1.5px solid ${isOverdue ? '#f5c0bb' : colors.border};border-radius:8px;padding:10px 13px;min-width:0;">
+      <div onclick="openStaffWageModal('${firstName}', '${s.name}')" style="cursor:pointer;background:#fff;border:1.5px solid ${isOverdue ? '#f5c0bb' : colors.border};border-radius:8px;padding:10px 13px;min-width:0;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.12)'" onmouseout="this.style.boxShadow=''">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
           <div style="width:32px;height:32px;border-radius:50%;background:${colors.bg};border:2px solid ${colors.border};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:${colors.text};flex-shrink:0;">${firstName.charAt(0)}</div>
           <div style="flex:1;min-width:0;">
@@ -7000,11 +7188,12 @@ async function renderWageBalanceStrip() {
             </span>
           </div>
           ${staffOverdue.map(o => `
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px 5px 30px;font-size:11.5px;border-bottom:1px solid #fde8e5;">
+            <div onclick="openStaffWageModal('${firstName}', '${s.name}', '${o.mk}')" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:5px 8px 5px 30px;font-size:11.5px;border-bottom:1px solid #fde8e5;transition:background 0.15s;" onmouseover="this.style.background='#fde8e5'" onmouseout="this.style.background=''">
               <span style="color:#555;">${mn[parseInt(o.mk.split('-')[1])]} ${o.mk.split('-')[0]}</span>
-              <span style="display:flex;gap:12px;">
+              <span style="display:flex;gap:12px;align-items:center;">
                 <span style="color:#888;">Paid: <strong style="color:#1e7e34;">$${o.paid.toFixed(2)}</strong></span>
                 <span style="color:#c0392b;font-weight:700;">Owed: $${o.owed.toFixed(2)}</span>
+                <span style="background:#c0392b;color:#fff;border-radius:5px;padding:2px 8px;font-size:10px;font-weight:700;">Pay</span>
               </span>
             </div>`).join('')}
         </div>`;
