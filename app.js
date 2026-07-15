@@ -6624,7 +6624,8 @@ async function renderWageBalancePanel(staffName) {
       p.wage_period_start && p.wage_period_end &&
       p.wage_period_start <= periodEnd && p.wage_period_end >= periodStart
     );
-    const paidThisPeriod = periodPayments.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+    const _rawPaidThisPeriod = periodPayments.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+    const paidThisPeriod = Math.min(_rawPaidThisPeriod, staffCfg.amount);
     const remainingThisPeriod = staffCfg.amount - paidThisPeriod;
     const pct = Math.min(100, Math.round((paidThisPeriod / staffCfg.amount) * 100));
     const barColor = pct >= 100 ? '#1e7e34' : pct >= 50 ? '#d68910' : '#c0392b';
@@ -6824,7 +6825,8 @@ async function openStaffWageModal(firstName, fullName, focusMonth) {
       const spanIn = p.wage_period_start < mStart && p.wage_period_end && p.wage_period_end >= mStart;
       return startIn || spanIn;
     });
-    const mPaid = mPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
+    const _rawMPaid2 = mPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
+    const mPaid = Math.min(_rawMPaid2, amount);
     const mOwed = Math.max(0, amount - mPaid);
     const isPast = mEnd < today;
     const isOverdue = isPast && mOwed > 0.005;
@@ -7119,7 +7121,9 @@ async function renderWageBalanceStrip() {
       return startInMonth || spanIntoMonth;
     });
 
-    const paidThisMonth = monthPayments.reduce((sum,p) => sum + parseFloat(p.amount||0), 0);
+    const _rawPaidThisMonth = monthPayments.reduce((sum,p) => sum + parseFloat(p.amount||0), 0);
+    // Cap at expected amount — overpayment is forwarded to next month
+    const paidThisMonth = Math.min(_rawPaidThisMonth, amount);
     const balance = Math.max(0, amount - paidThisMonth);
     const pct = Math.min(100, Math.round((paidThisMonth / amount) * 100));
     const barColor = pct >= 100 ? '#1e7e34' : pct >= 50 ? '#d68910' : '#c0392b';
@@ -7143,7 +7147,8 @@ async function renderWageBalanceStrip() {
         const spanIn = p.wage_period_start < mStart && p.wage_period_end && p.wage_period_end >= mStart;
         return startIn || spanIn;
       });
-      const mPaid = mPayments.reduce((sum,p) => sum + parseFloat(p.amount||0), 0);
+      const _rawMPaid = mPayments.reduce((sum,p) => sum + parseFloat(p.amount||0), 0);
+      const mPaid = Math.min(_rawMPaid, amount);
       const mOwed = amount - mPaid;
       if (mOwed > 0.005) {
         staffOverdue.push({ mk, mStart, mEnd, paid: mPaid, owed: mOwed });
