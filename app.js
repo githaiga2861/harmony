@@ -4764,16 +4764,18 @@ async function saveExpense() {
       await db.from('expenses').insert({
         id: uid(), expense_type: 'wage', exp_date: _nextStart,
         amount: _excess.toFixed(2), category: 'Staff Wages',
-        description: 'Wages — ' + staffName + ' (forwarded overpayment from ' + fmtDate(periodStart) + ')',
-        wage_staff: staffName, wage_period_start: _nextStart, wage_period_end: _nextEnd,
+        description: 'Wages — ' + staffName + ' (' + fmtDate(_nextStart) + ' – ' + fmtDate(_nextEnd) + ') [forwarded from ' + fmtDate(periodStart) + ']',
+        wage_staff: staffName,
+        wage_period_start: _nextStart,
+        wage_period_end: _nextEnd,
         wage_hours: null, wage_rate: null,
         method: document.getElementById('exp-wage-method').value,
         paid_by: document.getElementById('exp-wage-paid-by').value.trim(),
-        receipt_ref: 'Forwarded from ' + fmtDate(periodStart),
-        notes: 'Auto-forwarded overpayment of $' + _excess.toFixed(2),
+        receipt_ref: 'Forwarded overpayment from ' + fmtDate(periodStart),
+        notes: 'Auto-forwarded $' + _excess.toFixed(2) + ' overpayment from period ending ' + fmtDate(periodEnd),
         vendor: null, created_at: new Date().toISOString()
       });
-      toast('Wage saved — $' + _excess.toFixed(2) + ' overpayment forwarded to next month');
+      toast('Wage saved — $' + _excess.toFixed(2) + ' overpayment forwarded to ' + fmtMonthKey(_nextMK));
     }
   } else {
     const amount = document.getElementById('exp-amount-general').value;
@@ -6618,12 +6620,10 @@ async function renderWageBalancePanel(staffName) {
   // ── Compute for the currently selected period in the form ──
   let currentPeriodHtml = '';
   if (periodStart && periodEnd && staffCfg && staffCfg.amount) {
-    const periodPayments = payments.filter(p => {
-      const byPeriod = p.wage_period_start && p.wage_period_end &&
-        p.wage_period_start <= periodEnd && p.wage_period_end >= periodStart;
-      const byDate = p.exp_date && p.exp_date >= periodStart && p.exp_date <= periodEnd;
-      return byPeriod || byDate;
-    });
+    const periodPayments = payments.filter(p =>
+      p.wage_period_start && p.wage_period_end &&
+      p.wage_period_start <= periodEnd && p.wage_period_end >= periodStart
+    );
     const paidThisPeriod = periodPayments.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
     const remainingThisPeriod = staffCfg.amount - paidThisPeriod;
     const pct = Math.min(100, Math.round((paidThisPeriod / staffCfg.amount) * 100));
@@ -6819,11 +6819,10 @@ async function openStaffWageModal(firstName, fullName, focusMonth) {
     if (mStart > today) continue;
 
     const mPayments = payments.filter(p => {
-      if (!p.wage_period_start && !p.exp_date) return false;
-      const inByPeriod = (p.wage_period_start >= mStart && p.wage_period_start <= mEnd) ||
-             (p.wage_period_start < mStart && p.wage_period_end && p.wage_period_end >= mEnd);
-      const inByDate = p.exp_date && p.exp_date >= mStart && p.exp_date <= mEnd;
-      return inByPeriod || inByDate;
+      if (!p.wage_period_start) return false;
+      const startIn = p.wage_period_start >= mStart && p.wage_period_start <= mEnd;
+      const spanIn = p.wage_period_start < mStart && p.wage_period_end && p.wage_period_end >= mStart;
+      return startIn || spanIn;
     });
     const mPaid = mPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
     const mOwed = Math.max(0, amount - mPaid);
@@ -6931,11 +6930,11 @@ async function submitSwPayment(mk, mStart, mEnd, expectedAmount) {
     await db.from('expenses').insert({
       id: uid(), expense_type: 'wage', exp_date: nextStart,
       amount: excess.toFixed(2), category: 'Staff Wages',
-      description: 'Wages — ' + _swModalStaff + ' (forwarded from ' + mk + ')',
+      description: 'Wages — ' + _swModalStaff + ' (' + nextStart + ' to ' + nextEnd + ') [forwarded from ' + mk + ']',
       wage_staff: _swModalStaff, wage_period_start: nextStart, wage_period_end: nextEnd,
       wage_hours: null, wage_rate: null, method: method, paid_by: paidBy,
-      receipt_ref: 'Forwarded from ' + mk,
-      notes: 'Auto-forwarded $' + excess.toFixed(2) + ' overpayment',
+      receipt_ref: 'Forwarded overpayment from ' + mk,
+      notes: 'Auto-forwarded $' + excess.toFixed(2) + ' overpayment from ' + mk,
       vendor: null, created_at: new Date().toISOString()
     });
     toast('Saved — $' + excess.toFixed(2) + ' forwarded to ' + nextMK);
@@ -7109,14 +7108,15 @@ async function renderWageBalanceStrip() {
     }
 
     // ── REGULAR monthly staff card ──
-    // Match payments by wage_period_start OR exp_date falling in this month
-    // This ensures forwarded overpayments (which have period_start = next month start) are counted
+    // Match by pay PERIOD — exp_date is just when payment was physically made
+    // A payment belongs to the month its wage_period_start falls in
     const monthPayments = payments.filter(p => {
-      if (!p.wage_period_start && !p.exp_date) return false;
+      if (!p.wage_period_start) return false;
+      // Period starts in this month
       const startInMonth = p.wage_period_start >= monthStart && p.wage_period_start <= monthEnd;
-      const spanIntoMonth = p.wage_period_start < monthStart && p.wage_period_end && p.wage_period_end >= monthEnd;
-      const expDateInMonth = p.exp_date && p.exp_date >= monthStart && p.exp_date <= monthEnd;
-      return startInMonth || spanIntoMonth || expDateInMonth;
+      // Period spans into this month (started earlier, ends in or after this month)
+      const spanIntoMonth = p.wage_period_start < monthStart && p.wage_period_end && p.wage_period_end >= monthStart;
+      return startInMonth || spanIntoMonth;
     });
 
     const paidThisMonth = monthPayments.reduce((sum,p) => sum + parseFloat(p.amount||0), 0);
@@ -7138,11 +7138,10 @@ async function renderWageBalanceStrip() {
       if (mEnd >= today) continue;
       if (mStart < startMonth) continue;
       const mPayments = payments.filter(p => {
-        if (!p.wage_period_start && !p.exp_date) return false;
+        if (!p.wage_period_start) return false;
         const startIn = p.wage_period_start >= mStart && p.wage_period_start <= mEnd;
-        const spanIn = p.wage_period_start < mStart && p.wage_period_end && p.wage_period_end >= mEnd;
-        const expIn = p.exp_date && p.exp_date >= mStart && p.exp_date <= mEnd;
-        return startIn || spanIn || expIn;
+        const spanIn = p.wage_period_start < mStart && p.wage_period_end && p.wage_period_end >= mStart;
+        return startIn || spanIn;
       });
       const mPaid = mPayments.reduce((sum,p) => sum + parseFloat(p.amount||0), 0);
       const mOwed = amount - mPaid;
