@@ -213,9 +213,9 @@ let viewingNoteId = null;
 let weeklyChart = null;
 let residentChart = null;
 
-Chart.defaults.animation = false;
+if (typeof Chart !== "undefined") { Chart.defaults.animation = false;
 Chart.defaults.animations = {};
-Chart.defaults.transitions = {};
+Chart.defaults.transitions = {}; }
 
 function getData(key) {
   try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; }
