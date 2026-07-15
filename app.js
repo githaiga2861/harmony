@@ -3676,7 +3676,7 @@ async function renderPaymentsPage() {
   if (monthIncomeCardEl) monthIncomeCardEl.textContent = '$' + monthTotal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   const monthExpCardEl = document.getElementById('pay-stat-month-exp-card');
   if (monthExpCardEl) {
-    const { data: _expForCard } = await db.from('expenses').select('amount, exp_date');
+    const { data: _expForCard } = await db.from('expenses').select('amount, exp_date, notes');
     const _thisMonth = new Date().toISOString().slice(0,7);
     const _monthExp = (_expForCard||[]).filter(e => e.exp_date && e.exp_date.startsWith(_thisMonth) && !(e.notes && e.notes.startsWith('forwarded_overpayment:'))).reduce((s,e) => s + parseFloat(e.amount||0), 0);
     monthExpCardEl.textContent = '$' + _monthExp.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
@@ -3684,7 +3684,7 @@ async function renderPaymentsPage() {
   const payCountEl = document.getElementById('pay-stat-count');
   if (payCountEl) payCountEl.textContent = (allPayments||[]).length;
   // Net this month = income this month minus expenses this month
-  const { data: allExpForNet } = await db.from('expenses').select('amount, exp_date, expense_type');
+  const { data: allExpForNet } = await db.from('expenses').select('amount, exp_date, expense_type, notes');
   const expMonthTotal = (allExpForNet||[]).filter(e => e.exp_date && e.exp_date.startsWith(thisMonth) && !(e.notes && e.notes.startsWith('forwarded_overpayment:'))).reduce((s,e) => s + parseFloat(e.amount||0), 0);
 
   // Also count any bill payments in bill_month_records not yet dual-written as expense rows
