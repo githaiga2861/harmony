@@ -6537,38 +6537,12 @@ async function saveSalaryConfig() {
         salary_start_month: startMonth + '-01'
       }).eq('id', existing.id);
     }
+
   }
   closeModal('modal-salary-config');
   toast('Salary settings saved');
   renderExpensesPanel();
 }
-  // Save the four hardcoded staff inputs
-  ['James','Alvan','Joseph','Ketty'].forEach(name => {
-    const key = name.toLowerCase();
-    const amtEl = document.getElementById('salary-' + key + '-amount');
-    const freqEl = document.getElementById('salary-' + key + '-freq');
-    if (!amtEl) return;
-    const amount = parseFloat(amtEl.value || 0);
-    const freq = freqEl?.value || 'monthly';
-    if (amount > 0) cfg[key] = { amount, freq, name };
-  });
-  // Save any dynamically added staff cards in the modal
-  document.querySelectorAll('[id^="salary-card-"]').forEach(card => {
-    const key = card.id.replace('salary-card-', '');
-    const amtEl = document.getElementById('salary-' + key + '-amount');
-    const freqEl = document.getElementById('salary-' + key + '-freq');
-    if (!amtEl) return;
-    const amount = parseFloat(amtEl.value || 0);
-    const freq = freqEl?.value || 'monthly';
-    const existingName = cfg[key]?.name || key;
-    if (amount > 0) cfg[key] = { amount, freq, name: existingName };
-  });
-  localStorage.setItem(SALARY_CONFIG_KEY, JSON.stringify(cfg));
-  closeModal('modal-salary-config');
-  toast('✅ Salary settings saved');
-  renderExpensesPanel();
-}
-
 // Returns all wage payments for a staff member, optionally filtered by overlap with a period
 async function getWagePayments(staffName, periodStart, periodEnd) {
   const { data } = await db.from('expenses')
