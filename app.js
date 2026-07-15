@@ -269,6 +269,47 @@ async function deleteIncidentReportFromDb(id) {
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
+// ══════════════════════════════════
+// WASHINGTON STATE TIMEZONE HELPERS
+// ══════════════════════════════════
+// All "today" and date-stamping operations use WA state time (America/Los_Angeles)
+// regardless of the device/browser timezone of the person using the system.
+const WA_TIMEZONE = 'America/Los_Angeles';
+
+function getWANow() {
+  // Returns a Date object representing the current moment
+  return new Date();
+}
+
+function getWATodayStr() {
+  // Returns today's date as YYYY-MM-DD in Washington State time
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: WA_TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit'
+  }).formatToParts(new Date());
+  const y = parts.find(p => p.type === 'year').value;
+  const m = parts.find(p => p.type === 'month').value;
+  const d = parts.find(p => p.type === 'day').value;
+  return y + '-' + m + '-' + d;
+}
+
+function getWATimeStr() {
+  // Returns current time as HH:MM in Washington State time (24hr format for <input type=time>)
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: WA_TIMEZONE, hour: '2-digit', minute: '2-digit', hour12: false
+  }).formatToParts(new Date());
+  const h = parts.find(p => p.type === 'hour').value;
+  const m = parts.find(p => p.type === 'minute').value;
+  return h + ':' + m;
+}
+
+function getWAISOString() {
+  // Returns an ISO-8601 timestamp string but reflecting WA wall-clock time
+  // Used for created_at fields so records show WA time when displayed
+  const waTodayStr = getWATodayStr();
+  const waTimeStr = getWATimeStr();
+  return waTodayStr + 'T' + waTimeStr + ':00.000Z';
+}
+
 // ── MULTI-DIAGNOSIS HELPERS ──
 function addDiagnosisRow(containerId, value) {
   const container = document.getElementById(containerId);
@@ -363,7 +404,7 @@ function initApp() {
   const name = currentUser.name;
   document.getElementById('sidebar-name').textContent = name;
   document.getElementById('sidebar-avatar').textContent = name.charAt(0).toUpperCase();
-  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  document.getElementById('topbar-date').textContent = new Date().toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles', weekday:'long', month:'long', day:'numeric', year:'numeric' });
   // Apply saved theme
   const savedTheme = localStorage.getItem('hlh_theme') || 'light';
   if (savedTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
@@ -627,7 +668,7 @@ function openAddResident() {
     if (el) el.value = '';
   });
   setDiagnoses('res-diagnosis-list', '');
-  document.getElementById('res-admitted').value = new Date().toISOString().split('T')[0];
+  document.getElementById('res-admitted').value = getWATodayStr();
   openModal('modal-resident');
 }
 
@@ -638,7 +679,7 @@ async function handleSaveResident() {
   const admittedRaw = document.getElementById('res-admitted').value;
   const res = {
     id: uid(), name: name, dob: dob,
-    admitted_date: admittedRaw || new Date().toISOString().split('T')[0],
+    admitted_date: admittedRaw || getWATodayStr(),
     room: document.getElementById('res-room').value.trim(),
     diagnosis: getDiagnoses('res-diagnosis-list'),
     emergency_contact: document.getElementById('res-contact').value.trim(),
@@ -836,7 +877,7 @@ const NOTE_DRAFT_KEY = 'hlh_note_draft';
 function openAddNote() {
   document.getElementById('note-modal-title').textContent = 'Add Progress Note';
   document.getElementById('note-edit-id').value = '';
-  document.getElementById('note-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('note-date').value = getWATodayStr();
   document.getElementById('note-time').value = new Date().toTimeString().slice(0,5);
   document.getElementById('note-staff').value = currentUser.name;
   document.getElementById('note-flag').value = 'routine';
@@ -872,7 +913,7 @@ function openAddNote() {
 async function openAddNoteGlobal() {
   document.getElementById('note-modal-title').textContent = 'Add Progress Note';
   document.getElementById('note-edit-id').value = '';
-  document.getElementById('note-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('note-date').value = getWATodayStr();
   document.getElementById('note-time').value = new Date().toTimeString().slice(0,5);
   document.getElementById('note-staff').value = currentUser.name;
   document.getElementById('note-flag').value = 'routine';
@@ -1473,9 +1514,9 @@ function openAddIncidentReport() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  document.getElementById('ir-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ir-date').value = getWATodayStr();
   document.getElementById('ir-time').value = new Date().toTimeString().slice(0,5);
-  document.getElementById('ir-prepared-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ir-prepared-date').value = getWATodayStr();
   document.getElementById('ir-prepared-by').value = currentUser.name;
   document.getElementById('ir-sex').value = '';
   ['ir-n-injury','ir-n-missing','ir-n-death','ir-n-fire','ir-n-fall',
@@ -1519,9 +1560,9 @@ async function openAddIncidentGlobal() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  document.getElementById('ir-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ir-date').value = getWATodayStr();
   document.getElementById('ir-time').value = new Date().toTimeString().slice(0,5);
-  document.getElementById('ir-prepared-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('ir-prepared-date').value = getWATodayStr();
   document.getElementById('ir-prepared-by').value = currentUser.name;
   document.getElementById('ir-sex').value = '';
   ['ir-n-injury','ir-n-missing','ir-n-death','ir-n-fire','ir-n-fall',
@@ -2098,7 +2139,7 @@ async function saveResidentStatus() {
 // ══════════════════════════════════
 function checkBirthday(res) {
   if (!res.dob) return;
-  const today = new Date();
+  const today = new Date(getWATodayStr() + 'T00:00:00');
   const dob = new Date(res.dob + 'T00:00:00');
   const thisYearBday = new Date(today.getFullYear(), dob.getMonth(), dob.getDate());
   const diff = Math.round((thisYearBday - today) / (1000 * 60 * 60 * 24));
@@ -2149,7 +2190,7 @@ async function renderVitals() {
 
 function openAddVitals() {
   document.getElementById('vitals-edit-id').value = '';
-  document.getElementById('vitals-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('vitals-date').value = getWATodayStr();
   document.getElementById('vitals-by').value = currentUser.name;
   ['vitals-bp','vitals-temp','vitals-pulse','vitals-rr','vitals-o2','vitals-weight'].forEach(id => {
     document.getElementById(id).value = '';
@@ -2321,7 +2362,7 @@ function openAddMedication() {
   document.getElementById('med-frequency').value = '';
   document.getElementById('med-route').value = '';
   document.getElementById('med-status').value = 'active';
-  document.getElementById('med-start').value = new Date().toISOString().split('T')[0];
+  document.getElementById('med-start').value = getWATodayStr();
   document.getElementById('med-end').value = '';
   openModal('modal-medication');
 }
@@ -2432,7 +2473,7 @@ let calPopup = null;
 async function renderCalendar(notes, incidents) {
   const year = calCurrentDate.getFullYear();
   const month = calCurrentDate.getMonth();
-  const today = new Date();
+  const today = new Date(getWATodayStr() + 'T00:00:00');
 
   const monthName = calCurrentDate.toLocaleDateString('en-US', { month:'long', year:'numeric' });
   document.getElementById('cal-month-label').textContent = monthName;
@@ -2961,7 +3002,7 @@ async function renderADL() {
 function openAddADL() {
   document.getElementById('adl-modal-title').textContent = 'Daily Log';
   document.getElementById('adl-edit-id').value = '';
-  document.getElementById('adl-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('adl-date').value = getWATodayStr();
   document.getElementById('adl-by').value = currentUser.name;
   document.getElementById('adl-shift').value = '';
   document.getElementById('adl-notes').value = '';
@@ -3278,7 +3319,7 @@ async function renderBillsSection() {
   }
 
   // ── Current month bill cards ──
-  const today = new Date();
+  const today = new Date(getWATodayStr() + 'T00:00:00');
   grid.innerHTML = bills.map(b => {
     const rec = currentMap[b.id];
     const amountDue = rec ? parseFloat(rec.amount_due) : parseFloat(b.default_amount || 0);
@@ -4103,7 +4144,7 @@ async function openAddPayment() {
   });
   document.getElementById('payment-modal-title').textContent = 'Record Payment';
   document.getElementById('pay-edit-id').value = '';
-  document.getElementById('pay-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('pay-date').value = getWATodayStr();
   document.getElementById('pay-amount').value = '';
   document.getElementById('pay-method').value = '';
   document.getElementById('pay-period').value = '';
@@ -4546,7 +4587,7 @@ function setExpenseType(type) {
   if (isBill) {
     populateBillSelect();
     document.getElementById('exp-bill-summary').style.display = 'none';
-    document.getElementById('exp-bill-payment-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('exp-bill-payment-date').value = getWATodayStr();
     document.getElementById('exp-bill-payment-by').value = currentUser ? currentUser.name : '';
     document.getElementById('exp-bill-payment-amount').value = '';
     document.getElementById('exp-bill-payment-note').value = '';
@@ -4558,7 +4599,7 @@ function calcWageTotal() { /* removed — hours/rate fields no longer used */ }
 function openAddExpense() {
   document.getElementById('expense-modal-title').textContent = 'Add Expense';
   document.getElementById('exp-edit-id').value = '';
-  document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('exp-date').value = getWATodayStr();
   // General fields
   const amtG = document.getElementById('exp-amount-general');
   if (amtG) { amtG.value = ''; delete amtG.dataset.manualOverride; }
@@ -6248,7 +6289,7 @@ async function exportCredentialsPDF() {
   document.body.appendChild(container);
   const name = (document.getElementById('cred-staff-name').value || 'Staff').replace(/\s+/g,'_');
   doc.html(container, {
-    callback: (d) => { document.body.removeChild(container); d.save(`CredentialsChecklist_${name}_${new Date().toISOString().split('T')[0]}.pdf`); setTimeout(() => window.focus(), 300); },
+    callback: (d) => { document.body.removeChild(container); d.save(`CredentialsChecklist_${name}_${getWATodayStr()}.pdf`); setTimeout(() => window.focus(), 300); },
     x:36, y:20, width:540, windowWidth:816
   });
 }
@@ -6837,7 +6878,7 @@ async function openStaffWageModal(firstName, fullName, focusMonth) {
   const payments = allPayments || [];
 
   const allMonths = _getWageMonths().filter(mk => mk >= startMonth.slice(0,7)).reverse();
-  const today = new Date().toISOString().split('T')[0];
+  const today = getWATodayStr();
   const mn = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
   let rows = '';
@@ -6931,7 +6972,7 @@ function openSwPayForm(mk, owed) {
 
 async function submitSwPayment(mk, mStart, mEnd, expectedAmount) {
   const paidAmt = parseFloat(document.getElementById('swamt-' + mk)?.value || 0);
-  const payDate = document.getElementById('swdate-' + mk)?.value || new Date().toISOString().split('T')[0];
+  const payDate = document.getElementById('swdate-' + mk)?.value || getWATodayStr();
   const method = document.getElementById('swmethod-' + mk)?.value || 'Cash';
   const paidBy = document.getElementById('swby-' + mk)?.value?.trim() || '';
   if (!paidAmt || paidAmt <= 0) { toast('Please enter a valid amount'); return; }
@@ -6988,7 +7029,7 @@ async function renderWageBalanceStrip() {
 
   if (!dbStaff || !dbStaff.length) { strip.style.display = 'none'; return; }
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = getWATodayStr();
   const allMonths = _getWageMonths();
   if (!_wageStripMonth || !allMonths.includes(_wageStripMonth)) {
     _wageStripMonth = allMonths[0];
@@ -7747,8 +7788,8 @@ async function checkAppointmentAlerts(sendEmail) {
   const bodyEl = document.getElementById('alert-appt-body');
   const badgeEl = document.getElementById('alert-appt-badge');
   const residents = await getResidents();
-  const today = new Date(); today.setHours(0,0,0,0);
-  const todayStr = today.toISOString().split('T')[0];
+  const todayStr = getWATodayStr();
+  const today = new Date(todayStr + 'T00:00:00');
 
   // Fetch upcoming appointments up to 8 days ahead
   const { data: appts } = await db.from('appointments').select('*').eq('status','upcoming').order('appt_date');
@@ -7938,7 +7979,7 @@ async function checkPaymentAlerts(sendEmail) {
     };
   });
   const currentMK = getCurrentMonthKey();
-  const today = new Date().toISOString().split('T')[0];
+  const today = getWATodayStr();
   const overdueItems = [];
   const bills = await getBills();
   const billRecs = await getBillMonthRecords(currentMK);
@@ -8343,7 +8384,7 @@ async function exportCredentialsPDF() {
   document.body.appendChild(container);
   const name = (document.getElementById('cred-staff-name').value || 'Staff').replace(/\s+/g,'_');
   doc.html(container, {
-    callback: (d) => { document.body.removeChild(container); d.save(`CredentialsChecklist_${name}_${new Date().toISOString().split('T')[0]}.pdf`); setTimeout(() => window.focus(), 300); },
+    callback: (d) => { document.body.removeChild(container); d.save(`CredentialsChecklist_${name}_${getWATodayStr()}.pdf`); setTimeout(() => window.focus(), 300); },
     x:36, y:20, width:540, windowWidth:816
   });
 }
@@ -8621,7 +8662,7 @@ async function openKettyManager(staffName) {
   document.getElementById('ketty-manager-title').textContent = `📅 ${staffName} — Sunday Attendance Manager`;
 
   const allSundays = getAllSundaysSince('2026-05-01');
-  const today = new Date().toISOString().split('T')[0];
+  const today = getWATodayStr();
 
   const { data: allPayments } = await db.from('expenses')
     .select('amount, wage_period_start, exp_date')
