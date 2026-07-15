@@ -3819,19 +3819,14 @@ async function selectSummaryMonth(monthKey) {
   const lastDay = new Date(my, mm, 0).getDate();
   const monthEnd = `${monthKey}-${String(lastDay).padStart(2,'0')}`;
   const { data: payments } = await db.from('payments').select('*').gte('pay_date', monthStart).lte('pay_date', monthEnd).order('pay_date');
-  // Fetch non-wage expenses by exp_date, wage expenses by wage_period_start
-  const { data: nonWageExp } = await db.from('expenses').select('*')
-    .neq('expense_type', 'wage')
+  // Monthly summary uses exp_date (actual payment date) for ALL expenses including wages
+  // Wage balance tracking uses wage_period_start separately — these are independent
+  const { data: allExpData } = await db.from('expenses').select('*')
     .gte('exp_date', monthStart).lte('exp_date', monthEnd).order('exp_date');
-  const { data: wageExp } = await db.from('expenses').select('*')
-    .eq('expense_type', 'wage')
-    .gte('wage_period_start', monthStart).lte('wage_period_start', monthEnd)
-    .order('wage_period_start');
-  // Combine, excluding forwarded overpayment entries
-  const expenses = [
-    ...(nonWageExp || []),
-    ...(wageExp || []).filter(e => !(e.notes && e.notes.startsWith('forwarded_overpayment:')))
-  ];
+  // Exclude forwarded overpayment accounting entries — not real payments
+  const expenses = (allExpData || []).filter(e =>
+    !(e.notes && e.notes.startsWith('forwarded_overpayment:'))
+  );
   const { data: billRecs } = await db.from('bill_month_records').select('*').eq('month_key', monthKey);
   const residents = await getResidents();
 
