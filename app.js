@@ -6618,10 +6618,12 @@ async function renderWageBalancePanel(staffName) {
   // ── Compute for the currently selected period in the form ──
   let currentPeriodHtml = '';
   if (periodStart && periodEnd && staffCfg && staffCfg.amount) {
-    const periodPayments = payments.filter(p =>
-      p.wage_period_start && p.wage_period_end &&
-      p.wage_period_start <= periodEnd && p.wage_period_end >= periodStart
-    );
+    const periodPayments = payments.filter(p => {
+      const byPeriod = p.wage_period_start && p.wage_period_end &&
+        p.wage_period_start <= periodEnd && p.wage_period_end >= periodStart;
+      const byDate = p.exp_date && p.exp_date >= periodStart && p.exp_date <= periodEnd;
+      return byPeriod || byDate;
+    });
     const paidThisPeriod = periodPayments.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
     const remainingThisPeriod = staffCfg.amount - paidThisPeriod;
     const pct = Math.min(100, Math.round((paidThisPeriod / staffCfg.amount) * 100));
@@ -6817,9 +6819,11 @@ async function openStaffWageModal(firstName, fullName, focusMonth) {
     if (mStart > today) continue;
 
     const mPayments = payments.filter(p => {
-      if (!p.wage_period_start) return false;
-      return (p.wage_period_start >= mStart && p.wage_period_start <= mEnd) ||
-             (p.wage_period_start < mStart && p.wage_period_end && p.wage_period_end >= mStart);
+      if (!p.wage_period_start && !p.exp_date) return false;
+      const inByPeriod = (p.wage_period_start >= mStart && p.wage_period_start <= mEnd) ||
+             (p.wage_period_start < mStart && p.wage_period_end && p.wage_period_end >= mEnd);
+      const inByDate = p.exp_date && p.exp_date >= mStart && p.exp_date <= mEnd;
+      return inByPeriod || inByDate;
     });
     const mPaid = mPayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
     const mOwed = Math.max(0, amount - mPaid);
@@ -7105,12 +7109,14 @@ async function renderWageBalanceStrip() {
     }
 
     // ── REGULAR monthly staff card ──
-    // Payments overlapping the selected month
+    // Match payments by wage_period_start OR exp_date falling in this month
+    // This ensures forwarded overpayments (which have period_start = next month start) are counted
     const monthPayments = payments.filter(p => {
-      if (!p.wage_period_start) return false;
+      if (!p.wage_period_start && !p.exp_date) return false;
       const startInMonth = p.wage_period_start >= monthStart && p.wage_period_start <= monthEnd;
-      const spanIntoMonth = p.wage_period_start < monthStart && p.wage_period_end && p.wage_period_end >= monthStart;
-      return startInMonth || spanIntoMonth;
+      const spanIntoMonth = p.wage_period_start < monthStart && p.wage_period_end && p.wage_period_end >= monthEnd;
+      const expDateInMonth = p.exp_date && p.exp_date >= monthStart && p.exp_date <= monthEnd;
+      return startInMonth || spanIntoMonth || expDateInMonth;
     });
 
     const paidThisMonth = monthPayments.reduce((sum,p) => sum + parseFloat(p.amount||0), 0);
@@ -7132,10 +7138,11 @@ async function renderWageBalanceStrip() {
       if (mEnd >= today) continue;
       if (mStart < startMonth) continue;
       const mPayments = payments.filter(p => {
-        if (!p.wage_period_start) return false;
+        if (!p.wage_period_start && !p.exp_date) return false;
         const startIn = p.wage_period_start >= mStart && p.wage_period_start <= mEnd;
-        const spanIn = p.wage_period_start < mStart && p.wage_period_end && p.wage_period_end >= mStart;
-        return startIn || spanIn;
+        const spanIn = p.wage_period_start < mStart && p.wage_period_end && p.wage_period_end >= mEnd;
+        const expIn = p.exp_date && p.exp_date >= mStart && p.exp_date <= mEnd;
+        return startIn || spanIn || expIn;
       });
       const mPaid = mPayments.reduce((sum,p) => sum + parseFloat(p.amount||0), 0);
       const mOwed = amount - mPaid;
