@@ -4742,7 +4742,16 @@ async function saveExpense() {
     };
     const { error } = await db.from('expenses').upsert(expense);
     if (error) { toast('Error saving wage: ' + error.message); return; }
-    const _expectedAmt = staffCfg && staffCfg.amount ? parseFloat(staffCfg.amount) : 0;
+    // Get salary config for this staff member to detect overpayment
+    const _cfg = getSalaryConfig();
+    const _cfgKey = staffName.toLowerCase();
+    const _staffCfg = _cfg[_cfgKey] || null;
+    // Also check Supabase staff_members table as fallback
+    let _expectedAmt = _staffCfg && _staffCfg.amount ? parseFloat(_staffCfg.amount) : 0;
+    if (!_expectedAmt) {
+      const { data: _dbStaff } = await db.from('staff_members').select('salary_amount').eq('name', staffName).maybeSingle();
+      if (_dbStaff) _expectedAmt = parseFloat(_dbStaff.salary_amount || 0);
+    }
     const _paidAmt = parseFloat(amount);
     const _excess = _expectedAmt > 0 ? _paidAmt - _expectedAmt : 0;
     if (_excess > 0.005) {
