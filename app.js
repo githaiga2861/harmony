@@ -7605,8 +7605,9 @@ async function ensureAlertLogTable() {
 }
 
 // ── Check if an alert of this type was sent recently (throttle) ──
-async function wasAlertSentRecently(alertType) {
-  const cutoff = new Date(Date.now() - ALERT_THROTTLE_HOURS * 60 * 60 * 1000).toISOString();
+async function wasAlertSentRecently(alertType, hoursOverride) {
+  const hours = hoursOverride || ALERT_THROTTLE_HOURS;
+  const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
 
   const { data } = await db.from(ALERT_LOG_TABLE)
     .select('id')
@@ -7712,35 +7713,102 @@ async function checkAppointmentAlerts(sendEmail) {
   const badgeEl = document.getElementById('alert-appt-badge');
   const residents = await getResidents();
   const today = new Date(); today.setHours(0,0,0,0);
+  const todayStr = today.toISOString().split('T')[0];
+
+  // Fetch upcoming appointments up to 8 days ahead
   const { data: appts } = await db.from('appointments').select('*').eq('status','upcoming').order('appt_date');
-  const upcoming = (appts || []).filter(a => {
+  const relevant = (appts || []).filter(a => {
     if (!a.appt_date) return false;
-    const d = new Date(a.appt_date + 'T00:00:00');
-    const daysAway = Math.round((d - today) / 86400000);
-    return daysAway >= 0 && daysAway <= 3;
+    const daysAway = Math.round((new Date(a.appt_date + 'T00:00:00') - today) / 86400000);
+    return daysAway >= 0 && daysAway <= 7;
   });
-  if (!upcoming.length) {
-    if (badgeEl) badgeEl.textContent = '✅ All Clear';
-    if (bodyEl) bodyEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:16px;color:#1e7e34;font-size:13px;font-weight:600;"><span style="font-size:22px;">✅</span> No appointments in the next 3 days.</div>`;
-    return;
-  }
-  if (badgeEl) { badgeEl.textContent = `⚠️ ${upcoming.length} upcoming`; badgeEl.style.background = 'rgba(255,80,80,0.3)'; }
-  const rows = upcoming.map(a => {
+
+  // Build display rows for ALL relevant appointments
+  const allRows = relevant.map(a => {
     const res = residents.find(r => r.id === a.resident_id);
     const daysAway = Math.round((new Date(a.appt_date + 'T00:00:00') - today) / 86400000);
-    const label = daysAway === 0 ? '🔴 TODAY' : daysAway === 1 ? '🟠 Tomorrow' : `🟡 In ${daysAway} days`;
+    const label = daysAway === 0 ? '🔴 TODAY' : daysAway === 1 ? '🟠 Tomorrow' : daysAway === 7 ? '📅 1 Week Away' : `🟡 In ${daysAway} days`;
+    const urgentColor = daysAway === 0 ? '#c0392b' : daysAway === 1 ? '#d68910' : daysAway === 7 ? '#1a73e8' : '#856404';
     return {
-      html: `<div style="padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;"><strong>${res ? res.name : 'Unknown'}</strong><span style="font-size:11px;font-weight:700;color:${daysAway===0?'#c0392b':daysAway===1?'#d68910':'#856404'};">${label}</span></div><div style="color:var(--text2);">${a.doctor}${a.appt_type ? ' · ' + a.appt_type : ''}</div><div style="color:var(--text3);font-size:12px;">${fmtDate(a.appt_date)}${a.appt_time ? ' at ' + a.appt_time : ''}${a.location ? ' · ' + a.location : ''}</div>${a.reason ? `<div style="color:var(--text3);font-size:12px;">Reason: ${a.reason}</div>` : ''}</div>`,
-      emailLine: `<strong>${res ? res.name : 'Unknown'}</strong> — ${a.doctor}${a.appt_type ? ' (' + a.appt_type + ')' : ''} on ${fmtDate(a.appt_date)}${a.appt_time ? ' at ' + a.appt_time : ''} (${label.replace(/[🔴🟠🟡]/g,'').trim()})${a.location ? ' · ' + a.location : ''}`
+      daysAway,
+      html: `<div style="padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;border-left:3px solid ${urgentColor};">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+          <strong>${res ? res.name : 'Unknown'}</strong>
+          <span style="font-size:11px;font-weight:700;color:${urgentColor};">${label}</span>
+        </div>
+        <div style="color:var(--text2);">${a.doctor||''}${a.appt_type ? ' · ' + a.appt_type : ''}</div>
+        <div style="color:var(--text3);font-size:12px;">${fmtDate(a.appt_date)}${a.appt_time ? ' at ' + a.appt_time : ''}${a.location ? ' · ' + a.location : ''}</div>
+        ${a.reason ? `<div style="color:var(--text3);font-size:12px;">Reason: ${a.reason}</div>` : ''}
+      </div>`,
+      emailLine: `<strong>${res ? res.name : 'Unknown'}</strong> — ${a.doctor||''}${a.appt_type ? ' (' + a.appt_type + ')' : ''} on ${fmtDate(a.appt_date)}${a.appt_time ? ' at ' + a.appt_time : ''} <em>${label.replace(/[🔴🟠🟡📅]/g,'').trim()}</em>${a.location ? ' · ' + a.location : ''}`,
+      apptId: a.id,
+      resName: res ? res.name : 'Unknown'
     };
   });
-  if (bodyEl) bodyEl.innerHTML = rows.map(r => r.html).join('');
-  if (sendEmail) {
-    const alreadySent = await wasAlertSentRecently('appointments');
+
+  // Update alerts page display
+  if (!allRows.length) {
+    if (badgeEl) { badgeEl.textContent = '✅ All Clear'; badgeEl.style.background = ''; }
+    if (bodyEl) bodyEl.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:16px;color:#1e7e34;font-size:13px;font-weight:600;"><span style="font-size:22px;">✅</span> No appointments in the next 7 days.</div>`;
+    return;
+  }
+  if (badgeEl) { badgeEl.textContent = `⚠️ ${allRows.length} upcoming`; badgeEl.style.background = 'rgba(255,80,80,0.3)'; }
+  if (bodyEl) bodyEl.innerHTML = allRows.map(r => r.html).join('');
+
+  if (!sendEmail) return;
+
+  // ── Send 3 separate alert tiers: 7-day, 1-day, same-day ──
+  // Each tier is tracked separately so all 3 fire independently
+
+  // TIER 1: 7-day warning
+  const weekAhead = relevant.filter(a => Math.round((new Date(a.appt_date + 'T00:00:00') - today) / 86400000) === 7);
+  if (weekAhead.length) {
+    const tierKey = 'appointments_7day_' + todayStr;
+    const alreadySent = await wasAlertSentRecently('appointments_7day', 20);
     if (!alreadySent) {
-      const html = buildAlertEmailHtml('📅 Upcoming Doctor Appointments', `There are <strong>${upcoming.length}</strong> appointment${upcoming.length>1?'s':''} coming up in the next 3 days:`, rows.map(r => r.emailLine), '#1a73e8');
-      await sendAlertEmail('appointments', `[HLH Alert] ${upcoming.length} Upcoming Appointment${upcoming.length>1?'s':''}`, html);
-      toast(`📧 Appointment alert logged (${upcoming.length} upcoming)`);
+      const wRows = weekAhead.map(a => {
+        const res = residents.find(r => r.id === a.resident_id);
+        return `<strong>${res ? res.name : 'Unknown'}</strong> — ${a.doctor||''}${a.appt_type ? ' (' + a.appt_type + ')' : ''} on ${fmtDate(a.appt_date)}${a.appt_time ? ' at ' + a.appt_time : ''}${a.location ? ' · ' + a.location : ''}`;
+      });
+      const html = buildAlertEmailHtml('📅 Appointment Reminder — 1 Week Away',
+        `<strong>${weekAhead.length}</strong> appointment${weekAhead.length>1?'s are':' is'} scheduled <strong>7 days from today</strong>:`,
+        wRows, '#1a73e8');
+      await sendAlertEmail('appointments_7day',
+        `[HLH Reminder] ${weekAhead.length} Appointment${weekAhead.length>1?'s':''} in 1 Week`, html);
+    }
+  }
+
+  // TIER 2: 1-day warning (tomorrow)
+  const dayAhead = relevant.filter(a => Math.round((new Date(a.appt_date + 'T00:00:00') - today) / 86400000) === 1);
+  if (dayAhead.length) {
+    const alreadySent = await wasAlertSentRecently('appointments_1day', 20);
+    if (!alreadySent) {
+      const dRows = dayAhead.map(a => {
+        const res = residents.find(r => r.id === a.resident_id);
+        return `<strong>${res ? res.name : 'Unknown'}</strong> — ${a.doctor||''}${a.appt_type ? ' (' + a.appt_type + ')' : ''} TOMORROW ${fmtDate(a.appt_date)}${a.appt_time ? ' at ' + a.appt_time : ''}${a.location ? ' · ' + a.location : ''}`;
+      });
+      const html = buildAlertEmailHtml('🟠 Appointment Tomorrow',
+        `<strong>${dayAhead.length}</strong> appointment${dayAhead.length>1?'s are':' is'} scheduled <strong>tomorrow</strong>:`,
+        dRows, '#d68910');
+      await sendAlertEmail('appointments_1day',
+        `[HLH Reminder] ${dayAhead.length} Appointment${dayAhead.length>1?'s':''} Tomorrow`, html);
+    }
+  }
+
+  // TIER 3: Same-day alert
+  const sameDay = relevant.filter(a => Math.round((new Date(a.appt_date + 'T00:00:00') - today) / 86400000) === 0);
+  if (sameDay.length) {
+    const alreadySent = await wasAlertSentRecently('appointments_today', 20);
+    if (!alreadySent) {
+      const tRows = sameDay.map(a => {
+        const res = residents.find(r => r.id === a.resident_id);
+        return `🔴 <strong>${res ? res.name : 'Unknown'}</strong> — ${a.doctor||''}${a.appt_type ? ' (' + a.appt_type + ')' : ''} TODAY${a.appt_time ? ' at ' + a.appt_time : ''}${a.location ? ' · ' + a.location : ''}`;
+      });
+      const html = buildAlertEmailHtml('🔴 Appointment TODAY',
+        `<strong>${sameDay.length}</strong> appointment${sameDay.length>1?'s are':' is'} scheduled <strong>TODAY</strong>:`,
+        tRows, '#c0392b');
+      await sendAlertEmail('appointments_today',
+        `[HLH URGENT] ${sameDay.length} Appointment${sameDay.length>1?'s':''} Today`, html);
     }
   }
 }
