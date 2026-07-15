@@ -3773,6 +3773,7 @@ async function renderPaymentsPage() {
           <div class="note-staff">${fmtDate(p.pay_date)} · ${p.method||'—'} · ${p.period||''} · Receipt: ${p.receipt_num||'—'}</div>
         </div>
         <div class="note-actions">
+          <button class="btn btn-secondary btn-sm" onclick="openEditPayment('${p.id}')">✏️ Edit</button>
           <button class="btn btn-secondary btn-sm" onclick="printReceipt('${p.id}')">🖨️ Receipt</button>
           <button class="btn btn-danger btn-sm" onclick="deletePayment('${p.id}')">Delete</button>
         </div>
@@ -4161,6 +4162,39 @@ async function openAddPayment() {
   openModal('modal-payment');
 }
 
+async function openEditPayment(id) {
+  const { data: p } = await db.from('payments').select('*').eq('id', id).single();
+  if (!p) { toast('Payment not found'); return; }
+  const residents = await getResidents();
+  const sel = document.getElementById('pay-resident-id');
+  sel.innerHTML = '<option value="">— Select Resident —</option>';
+  residents.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id; opt.textContent = r.name;
+    if (r.id === p.resident_id) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  document.getElementById('payment-modal-title').textContent = 'Edit Payment';
+  document.getElementById('pay-edit-id').value = p.id;
+  document.getElementById('pay-date').value = p.pay_date || getWATodayStr();
+  document.getElementById('pay-amount').value = p.amount || '';
+  document.getElementById('pay-method').value = p.method || '';
+  document.getElementById('pay-period').value = p.period || '';
+  document.getElementById('pay-notes').value = p.notes || '';
+  document.getElementById('pay-classification').value = p.classification || '';
+  const selectedTags = (p.classification || '').split(',').map(t => t.trim()).filter(Boolean);
+  document.querySelectorAll('.pay-tag').forEach(btn => {
+    const isSelected = selectedTags.includes(btn.dataset.value);
+    btn.dataset.selected = isSelected ? 'true' : '';
+    btn.style.opacity = isSelected ? '1' : '0.6';
+    btn.style.transform = isSelected ? 'scale(1.05)' : 'scale(1)';
+    btn.style.boxShadow = isSelected ? '0 2px 8px rgba(0,0,0,0.18)' : '';
+    btn.style.fontWeight = isSelected ? '800' : '700';
+  });
+  document.getElementById('pay-received-by').value = p.received_by || (currentUser ? currentUser.name : '');
+  document.getElementById('pay-receipt-num').value = p.receipt_num || genReceiptNum();
+  openModal('modal-payment');
+}
 async function savePayment() {
   const resId = document.getElementById('pay-resident-id').value;
   const date = document.getElementById('pay-date').value;
