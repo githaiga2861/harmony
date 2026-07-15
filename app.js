@@ -475,14 +475,14 @@ async function refreshDashboard() {
 
   // Financial summary on dashboard
   const { data: dashPayments } = await db.from('payments').select('amount, pay_date');
-  const { data: dashExpenses } = await db.from('expenses').select('amount, exp_date, expense_type');
+  const { data: dashExpenses } = await db.from('expenses').select('amount, exp_date, expense_type, notes');
   const { data: dashBillRecs } = await db.from('bill_month_records').select('amount_paid, month_key');
   const thisMonthKey = new Date().toISOString().slice(0, 7);
 
   const totalIncome = (dashPayments || []).reduce((s, p) => s + parseFloat(p.amount || 0), 0);
   const monthIncome = (dashPayments || []).filter(p => p.pay_date && p.pay_date.startsWith(thisMonthKey)).reduce((s, p) => s + parseFloat(p.amount || 0), 0);
 
-  const totalExpBase = (dashExpenses || []).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+  const totalExpBase = (dashExpenses || []).filter(e => !(e.notes && e.notes.startsWith('forwarded_overpayment:'))).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
   const billAlreadyCounted = (dashExpenses || []).filter(e => e.expense_type === 'bill').reduce((s, e) => s + parseFloat(e.amount || 0), 0);
   const billRecordsTotal = (dashBillRecs || []).reduce((s, r) => s + parseFloat(r.amount_paid || 0), 0);
   const totalExpenses = totalExpBase + Math.max(0, billRecordsTotal - billAlreadyCounted);
