@@ -3983,7 +3983,7 @@ async function selectSummaryMonth(monthKey) {
         <table style="width:100%;border-collapse:collapse;font-size:13px;">
           <thead><tr style="background:#6b1a1a;"><th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Date</th><th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Category</th><th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Description</th><th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Paid By</th><th style="padding:9px 12px;text-align:right;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--border);">Amount</th></tr></thead>
           <tbody>
-            ${eList.filter(e => e.expense_type !== 'bill').map(e => `<tr>
+            ${eList.filter(e => e.expense_type !== 'bill' && !(e.expense_type === 'wage' && e.notes && e.notes.startsWith('forwarded_overpayment:'))).map(e => `<tr>
               <td style="padding:9px 12px;border-bottom:1px solid var(--border);">${fmtDate(e.exp_date)}</td>
               <td style="padding:9px 12px;border-bottom:1px solid var(--border);"><span style="background:var(--danger-light);color:var(--danger);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;">${e.category||'Other'}</span></td>
               <td style="padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text2);">${e.description||'—'}</td>
@@ -4772,7 +4772,7 @@ async function saveExpense() {
         method: document.getElementById('exp-wage-method').value,
         paid_by: document.getElementById('exp-wage-paid-by').value.trim(),
         receipt_ref: 'Forwarded overpayment from ' + fmtDate(periodStart),
-        notes: 'Auto-forwarded $' + _excess.toFixed(2) + ' overpayment from period ending ' + fmtDate(periodEnd),
+        notes: 'forwarded_overpayment:' + _excess.toFixed(2) + ' from ' + fmtDate(periodEnd),
         vendor: null, created_at: new Date().toISOString()
       });
       toast('Wage saved — $' + _excess.toFixed(2) + ' overpayment forwarded to ' + fmtMonthKey(_nextMK));
@@ -4842,13 +4842,20 @@ async function renderExpensesPanel() {
   const catF = document.getElementById('exp-cat-filter')?.value;
 
   const { data: allExpenses } = await db.from('expenses').select('*').order('exp_date', { ascending: false });
-  let expenses = allExpenses || [];
+  let expenses = (allExpenses || []).filter(e => {
+    // Exclude forwarded overpayment entries from display — they are accounting adjustments only
+    if (e.expense_type === 'wage' && e.notes && e.notes.startsWith('forwarded_overpayment:')) return false;
+    return true;
+  });
 
   const thisMonth = new Date().toISOString().slice(0, 7);
   const currentMK = getCurrentMonthKey();
 
-  // Sum all expenses rows (general + wage + bill payments already dual-written)
-  const totalExpFromRows = expenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+  // Sum all expenses rows (general + wage + bill payments) — exclude forwarded overpayments (accounting only)
+  const totalExpFromRows = expenses.reduce((s, e) => {
+    if (e.expense_type === 'wage' && e.notes && e.notes.startsWith('forwarded_overpayment:')) return s;
+    return s + parseFloat(e.amount || 0);
+  }, 0);
   const monthExpFromRows = expenses.filter(e => e.exp_date && e.exp_date.startsWith(thisMonth)).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
 
   // Also pull bill_month_records to catch any bill payments not yet in expenses table
@@ -6936,7 +6943,7 @@ async function submitSwPayment(mk, mStart, mEnd, expectedAmount) {
       wage_staff: _swModalStaff, wage_period_start: nextStart, wage_period_end: nextEnd,
       wage_hours: null, wage_rate: null, method: method, paid_by: paidBy,
       receipt_ref: 'Forwarded overpayment from ' + mk,
-      notes: 'Auto-forwarded $' + excess.toFixed(2) + ' overpayment from ' + mk,
+      notes: 'forwarded_overpayment:' + excess.toFixed(2) + ' from ' + mk,
       vendor: null, created_at: new Date().toISOString()
     });
     toast('Saved — $' + excess.toFixed(2) + ' forwarded to ' + nextMK);
