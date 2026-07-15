@@ -6498,8 +6498,50 @@ function openSalaryConfig() {
   openModal('modal-salary-config');
 }
 
-function saveSalaryConfig() {
-  const cfg = getSalaryConfig(); // start from existing so dynamic staff aren't wiped
+async function saveSalaryConfig() {
+  const cfg = getSalaryConfig();
+  const allStaffInputs = [];
+  document.querySelectorAll('[id^="salary-card-"]').forEach(card => {
+    const key = card.id.replace('salary-card-', '');
+    const nameEl = card.querySelector('[data-staff-name]');
+    const amtEl = document.getElementById('salary-' + key + '-amount');
+    const freqEl = document.getElementById('salary-' + key + '-freq');
+    const startEl = document.getElementById('salary-' + key + '-start');
+    if (!amtEl) return;
+    const staffName = nameEl ? nameEl.getAttribute('data-staff-name') : (cfg[key]?.name || key);
+    const amount = parseFloat(amtEl.value || 0);
+    const freq = freqEl?.value || 'monthly';
+    const startMonth = startEl ? startEl.value : (cfg[key]?.startMonth || new Date().toISOString().slice(0,7));
+    allStaffInputs.push({ key, staffName, amount, freq, startMonth });
+  });
+  ['James','Alvan','Joseph','Ketty'].forEach(name => {
+    const key = name.toLowerCase();
+    if (allStaffInputs.find(s => s.key === key)) return;
+    const amtEl = document.getElementById('salary-' + key + '-amount');
+    const freqEl = document.getElementById('salary-' + key + '-freq');
+    if (!amtEl) return;
+    const amount = parseFloat(amtEl.value || 0);
+    const freq = freqEl?.value || 'monthly';
+    if (amount > 0) allStaffInputs.push({ key, staffName: name, amount, freq, startMonth: cfg[key]?.startMonth || '2026-05-01' });
+  });
+  allStaffInputs.forEach(({ key, staffName, amount, freq, startMonth }) => {
+    if (amount > 0) cfg[key] = { amount, freq, name: staffName, startMonth };
+  });
+  localStorage.setItem(SALARY_CONFIG_KEY, JSON.stringify(cfg));
+  for (const { staffName, amount, freq, startMonth } of allStaffInputs) {
+    if (!amount || amount <= 0) continue;
+    const { data: existing } = await db.from('staff_members').select('id').eq('name', staffName).maybeSingle();
+    if (existing) {
+      await db.from('staff_members').update({
+        salary_amount: amount, salary_freq: freq,
+        salary_start_month: startMonth + '-01'
+      }).eq('id', existing.id);
+    }
+  }
+  closeModal('modal-salary-config');
+  toast('Salary settings saved');
+  renderExpensesPanel();
+}
   // Save the four hardcoded staff inputs
   ['James','Alvan','Joseph','Ketty'].forEach(name => {
     const key = name.toLowerCase();
@@ -8457,22 +8499,16 @@ async function registerNewStaff() {
     return;
   }
 
-  const startMonthFull = startMonth + '-01'; // e.g. "2026-06-01"
-
-  // 1. Save to Supabase staff_members — this is the single source of truth
+  const startMonthFull = startMonth + '-01';
+  const { data: existingByName } = await db.from('staff_members').select('id').eq('name', name).maybeSingle();
   const staffRecord = {
-    id: uid(),
-    name,
-    email: '',
-    password_plain: '',
-    salary_amount: amount || null,
-    salary_freq: freq,
-    salary_start_month: startMonthFull,
-    is_active: true,
-    created_at: new Date().toISOString(),
+    id: existingByName ? existingByName.id : uid(),
+    name, email: '', password_plain: '',
+    salary_amount: amount || null, salary_freq: freq,
+    salary_start_month: startMonthFull, is_active: true,
     created_by: currentUser ? currentUser.name : ''
   };
-
+  if (!existingByName) staffRecord.created_at = new Date().toISOString();
   const { error: dbError } = await db.from('staff_members').upsert(staffRecord);
   if (dbError) {
     toast('❌ Error saving to database: ' + dbError.message);
@@ -8502,7 +8538,8 @@ async function registerNewStaff() {
     newCard.innerHTML = `
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
         <div style="width:38px;height:38px;border-radius:50%;background:${pick[0]};border:2px solid ${pick[1]};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:${pick[1]};flex-shrink:0;">${initials}</div>
-        <div style="font-weight:700;font-size:15px;color:#1a2332;">${name}</div>
+        <div style="font-weight:700;font-size:15px;color:#1a2332;" data-staff-name="${name}">${name}</div>
+        <button onclick="deleteStaffMember('${name}','${firstName}')" style="margin-left:auto;background:#fdf0ef;color:#c0392b;border:1px solid #f5c0bb;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">🗑 Remove</button>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
         <div class="field" style="margin:0;">
@@ -8534,6 +8571,23 @@ async function registerNewStaff() {
 
 // ── Load all dynamic staff from Supabase into in-memory salary config ──
 // Called on login and after registering new staff
+async function deleteStaffMember(staffName, firstName) {
+  if (!confirm('Remove ' + staffName + ' from staff setup?\n\nNote: Their past payment records will be kept safely.')) return;
+  // Mark as inactive in Supabase — keeps payment history intact
+  const { error } = await db.from('staff_members').update({ is_active: false }).eq('name', staffName);
+  if (error) { toast('Error: ' + error.message); return; }
+  // Remove from KNOWN_STAFF and localStorage config
+  const idx = KNOWN_STAFF.indexOf(firstName);
+  if (idx > -1) KNOWN_STAFF.splice(idx, 1);
+  const cfg = getSalaryConfig();
+  delete cfg[firstName.toLowerCase()];
+  localStorage.setItem(SALARY_CONFIG_KEY, JSON.stringify(cfg));
+  toast(staffName + ' removed from staff setup. Payment history preserved.');
+  closeModal('modal-salary-config');
+  renderExpensesPanel();
+  renderWageBalanceStrip();
+}
+
 async function loadDynamicStaffFromSupabase() {
   const { data: allStaff } = await db.from('staff_members')
     .select('name, salary_amount, salary_freq, salary_start_month')
@@ -8543,33 +8597,41 @@ async function loadDynamicStaffFromSupabase() {
 
   const knownSeeds = new Set(['penninah nyandia','githaiga njoroge','james','alvan','ketty','joseph']);
   const currentCfg = getSalaryConfig();
-
+  const salaryGrid = document.querySelector('#modal-salary-config .modal-body > div[style*="flex-direction:column"]');
   allStaff.forEach(s => {
     if (!s.name || !s.salary_amount) return;
     const nameLower = s.name.toLowerCase();
     const firstName = s.name.split(' ')[0];
     const firstLower = firstName.toLowerCase();
-
-    // Skip the hardcoded four caregivers and login staff
     if (knownSeeds.has(nameLower) || knownSeeds.has(firstLower)) return;
-
-    currentCfg[firstLower] = {
-      amount: parseFloat(s.salary_amount),
-      freq: s.salary_freq || 'monthly',
-      name: s.name,
-      start_month: s.salary_start_month || null
-    };
-
-    // Always push to KNOWN_STAFF — even if already in config, may be missing from array
-    if (!KNOWN_STAFF.includes(firstName)) {
-      KNOWN_STAFF.push(firstName);
-    }
-    // Always set STAFF_COLORS so the card renders correctly
-    if (!STAFF_COLORS[firstName]) {
-      STAFF_COLORS[firstName] = { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568', dot:'#8a9ab0' };
+    currentCfg[firstLower] = { amount: parseFloat(s.salary_amount), freq: s.salary_freq || 'monthly', name: s.name, startMonth: s.salary_start_month || null };
+    if (!KNOWN_STAFF.includes(firstName)) KNOWN_STAFF.push(firstName);
+    if (!STAFF_COLORS[firstName]) STAFF_COLORS[firstName] = { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568', dot:'#8a9ab0' };
+    // Render card in modal if open and card not already there
+    if (salaryGrid && !document.getElementById('salary-card-' + firstLower)) {
+      const colPairs = [['#e8f0fe','#1a73e8'],['#f3e8fd','#7c3aed'],['#fce4ec','#e91e63'],['#e6f4ea','#1e7e34'],['#fff3cd','#d68910']];
+      const pick = colPairs[Math.floor(Math.random() * colPairs.length)];
+      const initials = firstName.slice(0,2).toUpperCase();
+      const startMK = s.salary_start_month ? s.salary_start_month.slice(0,7) : new Date().toISOString().slice(0,7);
+      const card = document.createElement('div');
+      card.id = 'salary-card-' + firstLower;
+      card.style.cssText = 'padding:16px 18px;border-top:1px solid var(--border);background:' + pick[0] + '22;';
+      card.innerHTML = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'
+        + '<div style="width:38px;height:38px;border-radius:50%;background:' + pick[0] + ';border:2px solid ' + pick[1] + ';display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:' + pick[1] + ';flex-shrink:0;">' + initials + '</div>'
+        + '<div style="font-weight:700;font-size:15px;color:#1a2332;" data-staff-name="' + s.name + '">' + s.name + '</div>'
+        + '<button onclick="deleteStaffMember(\'' + s.name + '\',\'' + firstName + '\')" style="margin-left:auto;background:#fdf0ef;color:#c0392b;border:1px solid #f5c0bb;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">Remove</button>'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+        + '<div class="field" style="margin:0;"><label style="font-size:11px;">Amount Per Period ($)</label><input type="number" id="salary-' + firstLower + '-amount" value="' + parseFloat(s.salary_amount) + '" step="0.01" min="0"></div>'
+        + '<div class="field" style="margin:0;"><label style="font-size:11px;">Frequency</label><select id="salary-' + firstLower + '-freq"><option value="monthly"' + (s.salary_freq==='monthly'?' selected':'') + '>Monthly</option><option value="weekly"' + (s.salary_freq==='weekly'?' selected':'') + '>Weekly</option></select></div>'
+        + '<div class="field" style="margin:0;grid-column:span 2;"><label style="font-size:11px;">Month Started</label><input type="month" id="salary-' + firstLower + '-start" value="' + startMK + '"></div>'
+        + '</div>';
+      salaryGrid.appendChild(card);
     }
   });
-
+  // Deduplicate KNOWN_STAFF
+  const _seen = new Set();
+  KNOWN_STAFF.splice(0, KNOWN_STAFF.length, ...KNOWN_STAFF.filter(n => { if (_seen.has(n)) return false; _seen.add(n); return true; }));
   localStorage.setItem(SALARY_CONFIG_KEY, JSON.stringify(currentCfg));
 }
 
