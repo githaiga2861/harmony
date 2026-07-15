@@ -3819,7 +3819,19 @@ async function selectSummaryMonth(monthKey) {
   const lastDay = new Date(my, mm, 0).getDate();
   const monthEnd = `${monthKey}-${String(lastDay).padStart(2,'0')}`;
   const { data: payments } = await db.from('payments').select('*').gte('pay_date', monthStart).lte('pay_date', monthEnd).order('pay_date');
-  const { data: expenses } = await db.from('expenses').select('*').gte('exp_date', monthStart).lte('exp_date', monthEnd).order('exp_date');
+  // Fetch non-wage expenses by exp_date, wage expenses by wage_period_start
+  const { data: nonWageExp } = await db.from('expenses').select('*')
+    .neq('expense_type', 'wage')
+    .gte('exp_date', monthStart).lte('exp_date', monthEnd).order('exp_date');
+  const { data: wageExp } = await db.from('expenses').select('*')
+    .eq('expense_type', 'wage')
+    .gte('wage_period_start', monthStart).lte('wage_period_start', monthEnd)
+    .order('wage_period_start');
+  // Combine, excluding forwarded overpayment entries
+  const expenses = [
+    ...(nonWageExp || []),
+    ...(wageExp || []).filter(e => !(e.notes && e.notes.startsWith('forwarded_overpayment:')))
+  ];
   const { data: billRecs } = await db.from('bill_month_records').select('*').eq('month_key', monthKey);
   const residents = await getResidents();
 
@@ -3831,7 +3843,7 @@ async function selectSummaryMonth(monthKey) {
 
   // General + wage expenses (exclude bill-type rows to avoid double-count)
   const nonBillExpenses = eList
-    .filter(e => e.expense_type !== 'bill')
+    .filter(e => e.expense_type !== 'bill' && !(e.notes && e.notes.startsWith('forwarded_overpayment:')))
     .reduce((s,e) => s + parseFloat(e.amount||0), 0);
 
   // Bills: use bill_month_records as the authoritative source for this month
