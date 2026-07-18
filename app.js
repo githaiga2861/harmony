@@ -4134,6 +4134,26 @@ async function printMonthlyExpenseReport(monthKey) {
   openReportWindow(html, `Expense Report — ${monthLabel}`);
 }
 
+function togglePayGroupMode() {
+  const isGroup = document.getElementById('pay-group-mode').checked;
+  document.getElementById('pay-resident-id').style.display = isGroup ? 'none' : 'block';
+  document.getElementById('pay-group-checklist').style.display = isGroup ? 'block' : 'none';
+  document.getElementById('pay-group-hint').style.display = isGroup ? 'block' : 'none';
+  const amtLabel = document.getElementById('pay-amount-label');
+  if (amtLabel) amtLabel.textContent = isGroup ? 'Total Amount ($) *' : 'Amount ($) *';
+}
+async function renderPayGroupChecklist(preSelectedIds) {
+  const residents = await getResidents();
+  const checklistEl = document.getElementById('pay-group-checklist');
+  if (!checklistEl) return;
+  const pre = preSelectedIds || [];
+  checklistEl.innerHTML = residents.map(r => {
+    const checked = pre.includes(r.id) ? 'checked' : '';
+    return '<label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);">' +
+      '<input type="checkbox" class="pay-group-resident" value="' + r.id + '" ' + checked + ' style="accent-color:var(--accent);">' +
+      r.name + '</label>';
+  }).join('') || '<div style="color:var(--text3);font-size:12px;">No residents found.</div>';
+}
 async function openAddPayment() {
   const residents = await getResidents();
   const sel = document.getElementById('pay-resident-id');
@@ -4159,6 +4179,11 @@ async function openAddPayment() {
   });
   document.getElementById('pay-received-by').value = currentUser.name;
   document.getElementById('pay-receipt-num').value = genReceiptNum();
+  // Reset group mode
+  const groupModeCb = document.getElementById('pay-group-mode');
+  if (groupModeCb) groupModeCb.checked = false;
+  await renderPayGroupChecklist();
+  togglePayGroupMode();
   openModal('modal-payment');
 }
 
@@ -4196,11 +4221,52 @@ async function openEditPayment(id) {
   openModal('modal-payment');
 }
 async function savePayment() {
-  const resId = document.getElementById('pay-resident-id').value;
+  const isGroup = document.getElementById('pay-group-mode')?.checked;
   const date = document.getElementById('pay-date').value;
   const amount = document.getElementById('pay-amount').value;
-  if (!resId || !date || !amount) { toast('Please fill in Resident, Date, and Amount'); return; }
   const editId = document.getElementById('pay-edit-id').value;
+
+  if (isGroup && !editId) {
+    // Group payment mode - split evenly across selected residents
+    const selectedBoxes = Array.from(document.querySelectorAll('.pay-group-resident:checked'));
+    const residentIds = selectedBoxes.map(b => b.value);
+    if (!residentIds.length || !date || !amount) {
+      toast('Please select at least one resident, and fill in Date and Total Amount');
+      return;
+    }
+    const totalAmt = parseFloat(amount);
+    const perResident = totalAmt / residentIds.length;
+    const method = document.getElementById('pay-method').value;
+    const period = document.getElementById('pay-period').value;
+    const notes = document.getElementById('pay-notes').value.trim();
+    const classification = document.getElementById('pay-classification').value || null;
+    const receivedBy = document.getElementById('pay-received-by').value.trim();
+
+    const inserts = residentIds.map(rid => ({
+      id: uid(),
+      resident_id: rid,
+      pay_date: date,
+      amount: perResident.toFixed(2),
+      method: method,
+      period: period,
+      notes: notes ? notes + ' (Group payment - split ' + residentIds.length + ' ways from $' + totalAmt.toFixed(2) + ' total)' : 'Group payment - split ' + residentIds.length + ' ways from $' + totalAmt.toFixed(2) + ' total',
+      classification: classification,
+      received_by: receivedBy,
+      receipt_num: genReceiptNum(),
+      created_at: new Date().toISOString()
+    }));
+
+    const { error: groupErr } = await db.from('payments').insert(inserts);
+    if (groupErr) { toast('Error saving group payment: ' + groupErr.message); return; }
+    closeModal('modal-payment');
+    toast('Group payment saved - $' + perResident.toFixed(2) + ' recorded for each of ' + residentIds.length + ' residents');
+    renderPaymentsPage();
+    return;
+  }
+
+  // Single resident mode (default)
+  const resId = document.getElementById('pay-resident-id').value;
+  if (!resId || !date || !amount) { toast('Please fill in Resident, Date, and Amount'); return; }
   const payment = {
     id: editId || uid(),
     resident_id: resId,
@@ -4217,7 +4283,7 @@ async function savePayment() {
   const { error: payErr } = await db.from('payments').upsert(payment);
   if (payErr) { toast('Error saving payment: ' + payErr.message); return; }
   closeModal('modal-payment');
-  toast(editId ? '✅ Payment updated successfully' : '✅ Payment saved — click 🖨️ Receipt to print');
+  toast(editId ? 'Payment updated successfully' : 'Payment saved - click Receipt to print');
   renderPaymentsPage();
 }
 

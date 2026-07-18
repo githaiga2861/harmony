@@ -3236,17 +3236,24 @@
       <input type="hidden" id="pay-edit-id">
       <div class="form-grid">
         <div class="field span2">
-          <label>Resident *</label>
+          <label style="display:flex;align-items:center;justify-content:space-between;">
+            <span>Resident(s) *</span>
+            <label style="display:flex;align-items:center;gap:5px;font-weight:400;font-size:12px;cursor:pointer;">
+              <input type="checkbox" id="pay-group-mode" onchange="togglePayGroupMode()"> Group Payment (multiple residents)
+            </label>
+          </label>
           <select id="pay-resident-id">
             <option value="">— Select Resident —</option>
           </select>
+          <div id="pay-group-checklist" style="display:none;max-height:180px;overflow-y:auto;border:1.5px solid var(--border);border-radius:7px;padding:10px 12px;background:var(--surface2);"></div>
+          <div id="pay-group-hint" style="display:none;font-size:11px;color:var(--text3);margin-top:5px;">Total amount below will be split evenly across selected residents. Individual receipts will be generated for each.</div>
         </div>
         <div class="field">
           <label>Payment Date *</label>
           <input type="date" id="pay-date">
         </div>
         <div class="field">
-          <label>Amount ($) *</label>
+          <label id="pay-amount-label">Amount ($) *</label>
           <input type="number" id="pay-amount" placeholder="0.00" step="0.01" min="0">
         </div>
         <div class="field">
