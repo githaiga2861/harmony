@@ -817,6 +817,83 @@
               </div>
             </div>
           </div><!-- /fin-section-expenses -->
+        <!-- STAFF PAGE -->
+        <div class="page" id="page-staff">
+          <div class="card">
+            <div class="card-header">
+              <h3>Staff Members</h3>
+              <button class="btn btn-primary btn-sm" onclick="openAddStaffMember()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Staff Member
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="search-bar">
+                <input class="search-input" id="staff-search" placeholder="Search staff by name..." oninput="renderStaffTable()">
+              </div>
+              <table>
+                <thead><tr>
+                  <th>Name</th><th>Gender</th><th>DOB</th><th>Date Joined</th><th>Credentials</th><th>Nearest Expiry</th><th>Phone</th><th>Actions</th>
+                </tr></thead>
+                <tbody id="staff-table"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- STAFF PROFILE -->
+        <div class="page" id="page-staff-profile">
+          <button class="back-btn" onclick="showPage('staff')">← Back to Staff</button>
+
+          <div class="profile-header" id="staff-profile-header">
+            <div class="profile-avatar" id="staff-profile-avatar">T</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <div class="profile-name" id="staff-profile-name">Staff Name</div>
+                <button onclick="openEditStaffMember(currentStaffId)" style="padding:5px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.12);color:#fff;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;">✏️ Edit Profile</button>
+              </div>
+              <div class="profile-meta" style="flex-wrap:wrap;">
+                <span id="staff-profile-gender">Gender: —</span>
+                <span id="staff-profile-dob">DOB: —</span>
+                <span id="staff-profile-joined">Joined: —</span>
+                <span id="staff-profile-phone">Phone: —</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;box-shadow:var(--shadow);">
+            <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Contact & Additional Info</div>
+            <div id="staff-profile-extra" style="font-size:13.5px;color:var(--text2);line-height:1.8;"></div>
+          </div>
+
+          <div class="card" style="margin-bottom:20px;">
+            <div class="card-header">
+              <h3>🎖 Credentials & Certifications</h3>
+              <button class="btn btn-primary btn-sm" onclick="openAddCredential()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Credential
+              </button>
+            </div>
+            <div class="card-body">
+              <div id="staff-credentials-list" class="notes-list"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>📄 Print Staff Documents</h3>
+            </div>
+            <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn btn-secondary" onclick="openStaffOrientationPrint(currentStaffId)">
+                📋 Orientation Checklist
+              </button>
+              <button class="btn btn-secondary" onclick="openStaffCredentialsPrint(currentStaffId)">
+                🎖 Credentials Checklist
+              </button>
+            </div>
+          </div>
+        </div>
+
 
         <!-- ALERTS PAGE -->
         <div class="page" id="page-alerts">
@@ -3863,5 +3940,184 @@
     </div>
   </div>
 </div>  
+<!-- MODAL: Add/Edit Staff Member -->
+<div class="modal-overlay" id="modal-staff-member">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="staff-member-modal-title">Add Staff Member</h3>
+      <button class="btn-close" onclick="closeModal('modal-staff-member')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="sm-edit-id">
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Full Name *</label>
+          <input type="text" id="sm-name" placeholder="e.g. Grace Mwangi">
+        </div>
+        <div class="field">
+          <label>Gender</label>
+          <select id="sm-gender">
+            <option value="">— Select —</option>
+            <option>Female</option>
+            <option>Male</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Date of Birth</label>
+          <input type="date" id="sm-dob">
+        </div>
+        <div class="field">
+          <label>Date Joined Facility</label>
+          <input type="date" id="sm-date-joined">
+        </div>
+        <div class="field">
+          <label>Phone Number</label>
+          <input type="text" id="sm-phone" placeholder="e.g. 360-555-0100">
+        </div>
+        <div class="field span2">
+          <label>Email</label>
+          <input type="email" id="sm-email" placeholder="e.g. name@example.com">
+        </div>
+        <div class="field span2">
+          <label>Address</label>
+          <input type="text" id="sm-address" placeholder="Street, City, State, ZIP">
+        </div>
+        <div class="field span2">
+          <label>Emergency Contact (Name & Phone)</label>
+          <input type="text" id="sm-emergency-contact" placeholder="e.g. Jane Doe — 253-555-0199 (Sister)">
+        </div>
+        <div class="field span2">
+          <label>Notes / Other Relevant Information</label>
+          <textarea id="sm-notes" rows="3" placeholder="Any additional relevant information..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-staff-member')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStaffMember()">Save Staff Member</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Credential -->
+<div class="modal-overlay" id="modal-credential">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="credential-modal-title">Add Credential</h3>
+      <button class="btn-close" onclick="closeModal('modal-credential')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cred-item-edit-id">
+      <input type="hidden" id="cred-item-staff-id">
+      <div class="form-grid">
+        <div class="field span2">
+          <label>Credential / Certification Name *</label>
+          <input type="text" id="cred-item-name" placeholder="e.g. CPR/First Aid, NAC License, TB Test">
+        </div>
+        <div class="field span2">
+          <label>License / Certificate Number (optional)</label>
+          <input type="text" id="cred-item-license-num" placeholder="e.g. NAC-123456">
+        </div>
+        <div class="field">
+          <label>Date Issued *</label>
+          <input type="date" id="cred-item-issued">
+        </div>
+        <div class="field">
+          <label>Expiry Date *</label>
+          <input type="date" id="cred-item-expiry">
+        </div>
+        <div class="field span2">
+          <label>Notes</label>
+          <input type="text" id="cred-item-notes" placeholder="Optional notes about this credential">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-credential')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCredentialItem()">Save Credential</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Print Staff Orientation (simplified, auto-filled) -->
+<div class="modal-overlay" id="modal-staff-orientation-print">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#1a1a1a,#b8860b);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:18px 24px;">
+      <div>
+        <div style="color:#fff;font-family:'DM Serif Display',serif;font-size:17px;">📋 Print Orientation Checklist</div>
+        <div style="color:rgba(255,255,255,0.55);font-size:11px;margin-top:3px;" id="sop-staff-name-label">For: —</div>
+      </div>
+      <button class="btn-close" onclick="closeModal('modal-staff-orientation-print')" style="color:#fff;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="sop-staff-id">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7;">
+        Name and hire date are auto-filled from this staff member's profile. Just fill in the orientation-specific fields below and print.
+      </p>
+      <div class="form-grid">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;" class="span2">
+          <div class="field" style="margin:0;">
+            <label>Orientation Date 1</label>
+            <input type="date" id="sop-date1">
+          </div>
+          <div class="field" style="margin:0;">
+            <label>Orientation Date 2</label>
+            <input type="date" id="sop-date2">
+          </div>
+          <div class="field" style="margin:0;">
+            <label>Orientation Date 3</label>
+            <input type="date" id="sop-date3">
+          </div>
+        </div>
+        <div class="field">
+          <label>Signature of Trainer</label>
+          <input type="text" id="sop-trainer-sig" placeholder="Trainer name">
+        </div>
+        <div class="field">
+          <label>No. of Hours</label>
+          <input type="text" id="sop-hours" placeholder="e.g. 5">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-staff-orientation-print')">Cancel</button>
+      <button class="btn btn-primary" onclick="printStaffOrientationChecklist()">🖨️ Print</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Print Staff Credentials Checklist (simplified, auto-filled) -->
+<div class="modal-overlay" id="modal-staff-credentials-print">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header" style="background:linear-gradient(135deg,#1a2a6b,#2563eb);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:18px 24px;">
+      <div>
+        <div style="color:#fff;font-family:'DM Serif Display',serif;font-size:17px;">🎖 Print Credentials Checklist</div>
+        <div style="color:rgba(255,255,255,0.55);font-size:11px;margin-top:3px;" id="scp-staff-name-label">For: —</div>
+      </div>
+      <button class="btn-close" onclick="closeModal('modal-staff-credentials-print')" style="color:#fff;">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="scp-staff-id">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.7;">
+        Name, DOB and all credentials with their issued/expiry dates are pulled automatically from this staff member's profile. Nothing to re-enter — just confirm and print.
+      </p>
+      <div id="scp-preview-list" style="border:1px solid var(--border);border-radius:8px;padding:12px 14px;max-height:280px;overflow-y:auto;background:var(--surface2);"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-staff-credentials-print')">Cancel</button>
+      <button class="btn btn-primary" onclick="printStaffCredentialsChecklist()" style="background:linear-gradient(135deg,#1a2a6b,#2563eb);">🖨️ Print</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

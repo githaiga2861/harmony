@@ -471,7 +471,7 @@ document.getElementById('login-password').addEventListener('keydown', e => { if 
 // ══════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════
-const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Financials — Income & Expenses', staffdocs: 'Staff Documents', contacts: 'Quick Contacts', alerts: '🔔 Alerts & Automated Notifications' };
+const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Financials — Income & Expenses', staff: 'Staff', 'staff-profile': 'Staff Profile', staffdocs: 'Staff Documents', contacts: 'Quick Contacts', alerts: '🔔 Alerts & Automated Notifications' };
 
 async function showPage(name) {
   if (name !== 'profile') localStorage.setItem('hlh_last_page', name);
@@ -497,6 +497,7 @@ async function showPage(name) {
   if (name === 'staffdocs') { initStaffDocsPage(); }
   if (name === 'alerts') { renderAlertsPage(); }
   if (name === 'contacts') { setTimeout(function(){ loadContactsPage(); }, 0); }
+  if (name === 'staff') { renderStaffTable(); }
 }
 // ══════════════════════════════════
 // DASHBOARD
@@ -619,6 +620,391 @@ function fmtDate(d, relative) {
     if (diff <= 6) return `📅 ${diff} days ago`;
   }
   return dt.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+}
+
+
+// ══════════════════════════════════
+// STAFF DIRECTORY
+// ══════════════════════════════════
+let currentStaffId = null;
+
+async function getStaffDirectory() {
+  const { data } = await db.from('staff_directory').select('*').eq('is_active', true).order('name', { ascending: true });
+  return data || [];
+}
+
+async function getStaffCredentials(staffId) {
+  const { data } = await db.from('staff_credentials').select('*').eq('staff_id', staffId).order('expiry_date', { ascending: true });
+  return data || [];
+}
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const today = new Date(getWATodayStr() + 'T00:00:00');
+  const target = new Date(dateStr + 'T00:00:00');
+  return Math.round((target - today) / 86400000);
+}
+
+function credentialStatusBadge(expiryDate) {
+  const days = daysUntil(expiryDate);
+  if (days === null) return '';
+  if (days < 0) return '<span class="badge badge-red">Expired</span>';
+  if (days <= 30) return '<span class="badge badge-warn">Expires in ' + days + 'd</span>';
+  return '<span class="badge badge-green">Valid</span>';
+}
+
+async function renderStaffTable() {
+  const q = (document.getElementById('staff-search')?.value || '').toLowerCase();
+  const allStaff = await getStaffDirectory();
+  const staffList = allStaff.filter(s => s.name.toLowerCase().includes(q));
+  const tbody = document.getElementById('staff-table');
+  if (!tbody) return;
+
+  if (!staffList.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:40px;">No staff members found. Add your first staff member!</td></tr>';
+    return;
+  }
+
+  const rows = [];
+  for (const s of staffList) {
+    const creds = await getStaffCredentials(s.id);
+    let nearestExpiry = null;
+    creds.forEach(c => {
+      if (!nearestExpiry || new Date(c.expiry_date) < new Date(nearestExpiry)) nearestExpiry = c.expiry_date;
+    });
+    const expiryBadge = nearestExpiry ? credentialStatusBadge(nearestExpiry) + ' ' + fmtDate(nearestExpiry) : '<span style="color:var(--text3);font-style:italic;">None on file</span>';
+
+    rows.push(
+      '<tr>' +
+      '<td><span class="resident-name" onclick="openStaffProfile(\'' + s.id + '\')">' + s.name + '</span></td>' +
+      '<td>' + (s.gender || '—') + '</td>' +
+      '<td>' + fmtDate(s.dob) + '</td>' +
+      '<td>' + fmtDate(s.date_joined) + '</td>' +
+      '<td><span class="badge badge-green">' + creds.length + ' credential' + (creds.length !== 1 ? 's' : '') + '</span></td>' +
+      '<td>' + expiryBadge + '</td>' +
+      '<td>' + (s.phone || '—') + '</td>' +
+      '<td style="display:flex;gap:6px;">' +
+      '<button class="btn btn-secondary btn-sm" onclick="openStaffProfile(\'' + s.id + '\')">View</button>' +
+      '<button class="btn btn-danger btn-sm" onclick="deleteStaffDirectoryEntry(\'' + s.id + '\')">Delete</button>' +
+      '</td></tr>'
+    );
+  }
+  tbody.innerHTML = rows.join('');
+}
+
+function openAddStaffMember() {
+  document.getElementById('staff-member-modal-title').textContent = 'Add Staff Member';
+  document.getElementById('sm-edit-id').value = '';
+  ['sm-name','sm-gender','sm-dob','sm-date-joined','sm-phone','sm-email','sm-address','sm-emergency-contact','sm-notes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  openModal('modal-staff-member');
+}
+
+async function openEditStaffMember(id) {
+  if (!id) return;
+  const { data: s } = await db.from('staff_directory').select('*').eq('id', id).single();
+  if (!s) return;
+  document.getElementById('staff-member-modal-title').textContent = 'Edit Staff Member';
+  document.getElementById('sm-edit-id').value = s.id;
+  document.getElementById('sm-name').value = s.name || '';
+  document.getElementById('sm-gender').value = s.gender || '';
+  document.getElementById('sm-dob').value = s.dob || '';
+  document.getElementById('sm-date-joined').value = s.date_joined || '';
+  document.getElementById('sm-phone').value = s.phone || '';
+  document.getElementById('sm-email').value = s.email || '';
+  document.getElementById('sm-address').value = s.address || '';
+  document.getElementById('sm-emergency-contact').value = s.emergency_contact || '';
+  document.getElementById('sm-notes').value = s.notes || '';
+  openModal('modal-staff-member');
+}
+
+async function saveStaffMember() {
+  const name = document.getElementById('sm-name').value.trim();
+  if (!name) { toast('Please enter the staff member name'); return; }
+  const editId = document.getElementById('sm-edit-id').value;
+  const record = {
+    id: editId || uid(),
+    name,
+    gender: document.getElementById('sm-gender').value,
+    dob: document.getElementById('sm-dob').value || null,
+    date_joined: document.getElementById('sm-date-joined').value || null,
+    phone: document.getElementById('sm-phone').value.trim(),
+    email: document.getElementById('sm-email').value.trim(),
+    address: document.getElementById('sm-address').value.trim(),
+    emergency_contact: document.getElementById('sm-emergency-contact').value.trim(),
+    notes: document.getElementById('sm-notes').value.trim(),
+    is_active: true,
+    created_by: currentUser ? currentUser.name : ''
+  };
+  if (!editId) record.created_at = new Date().toISOString();
+  const { error } = await db.from('staff_directory').upsert(record);
+  if (error) { toast('Error saving: ' + error.message); return; }
+  closeModal('modal-staff-member');
+  toast(editId ? 'Staff member updated' : 'Staff member added');
+  if (editId) {
+    openStaffProfile(editId);
+  } else {
+    renderStaffTable();
+  }
+}
+
+async function deleteStaffDirectoryEntry(id) {
+  if (!confirm('Remove this staff member from the directory? Their credential records will also be removed. This does not affect wage payment history.')) return;
+  await db.from('staff_directory').update({ is_active: false }).eq('id', id);
+  toast('Staff member removed');
+  renderStaffTable();
+}
+
+async function openStaffProfile(id) {
+  const { data: s } = await db.from('staff_directory').select('*').eq('id', id).single();
+  if (!s) return;
+  currentStaffId = id;
+
+  document.getElementById('staff-profile-name').textContent = s.name;
+  document.getElementById('staff-profile-avatar').textContent = s.name.charAt(0).toUpperCase();
+  document.getElementById('staff-profile-gender').textContent = 'Gender: ' + (s.gender || '—');
+  document.getElementById('staff-profile-dob').textContent = 'DOB: ' + fmtDate(s.dob);
+  document.getElementById('staff-profile-joined').textContent = 'Joined: ' + fmtDate(s.date_joined);
+  document.getElementById('staff-profile-phone').textContent = 'Phone: ' + (s.phone || '—');
+
+  const extraEl = document.getElementById('staff-profile-extra');
+  const extraParts = [];
+  if (s.email) extraParts.push('<div><strong>Email:</strong> ' + s.email + '</div>');
+  if (s.address) extraParts.push('<div><strong>Address:</strong> ' + s.address + '</div>');
+  if (s.emergency_contact) extraParts.push('<div><strong>Emergency Contact:</strong> ' + s.emergency_contact + '</div>');
+  if (s.notes) extraParts.push('<div><strong>Notes:</strong> ' + s.notes + '</div>');
+  extraEl.innerHTML = extraParts.join('') || '<div style="color:var(--text3);font-style:italic;">No additional information recorded.</div>';
+
+  await renderStaffCredentialsList();
+  showPage('staff-profile');
+}
+
+async function renderStaffCredentialsList() {
+  const container = document.getElementById('staff-credentials-list');
+  if (!container || !currentStaffId) return;
+  const creds = await getStaffCredentials(currentStaffId);
+
+  if (!creds.length) {
+    container.innerHTML = '<div class="empty-state"><div style="font-size:40px;margin-bottom:10px;">' + String.fromCodePoint(0x1F396) + '</div><h4>No Credentials Yet</h4><p>Add certifications, licenses and their expiry dates using the button above.</p></div>';
+    return;
+  }
+
+  container.innerHTML = creds.map(c => {
+    const badge = credentialStatusBadge(c.expiry_date);
+    return '<div class="note-card" style="cursor:default;">' +
+      '<div class="note-card-header">' +
+      '<div>' +
+      '<div class="note-date">' + c.credential_name + ' ' + badge + '</div>' +
+      '<div class="note-staff">Issued: ' + fmtDate(c.date_issued) + ' &middot; Expires: ' + fmtDate(c.expiry_date) + (c.license_number ? ' &middot; License #: ' + c.license_number : '') + '</div>' +
+      '</div>' +
+      '<div class="note-actions">' +
+      '<button class="btn btn-secondary btn-sm" onclick="openEditCredential(\'' + c.id + '\')">Edit</button>' +
+      '<button class="btn btn-danger btn-sm" onclick="deleteCredentialItem(\'' + c.id + '\')">Delete</button>' +
+      '</div></div>' +
+      (c.notes ? '<div class="note-preview">' + c.notes + '</div>' : '') +
+      '</div>';
+  }).join('');
+}
+
+function openAddCredential() {
+  if (!currentStaffId) return;
+  document.getElementById('credential-modal-title').textContent = 'Add Credential';
+  document.getElementById('cred-item-edit-id').value = '';
+  document.getElementById('cred-item-staff-id').value = currentStaffId;
+  ['cred-item-name','cred-item-license-num','cred-item-issued','cred-item-expiry','cred-item-notes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  openModal('modal-credential');
+}
+
+async function openEditCredential(id) {
+  const { data: c } = await db.from('staff_credentials').select('*').eq('id', id).single();
+  if (!c) return;
+  document.getElementById('credential-modal-title').textContent = 'Edit Credential';
+  document.getElementById('cred-item-edit-id').value = c.id;
+  document.getElementById('cred-item-staff-id').value = c.staff_id;
+  document.getElementById('cred-item-name').value = c.credential_name || '';
+  document.getElementById('cred-item-license-num').value = c.license_number || '';
+  document.getElementById('cred-item-issued').value = c.date_issued || '';
+  document.getElementById('cred-item-expiry').value = c.expiry_date || '';
+  document.getElementById('cred-item-notes').value = c.notes || '';
+  openModal('modal-credential');
+}
+
+async function saveCredentialItem() {
+  const name = document.getElementById('cred-item-name').value.trim();
+  const issued = document.getElementById('cred-item-issued').value;
+  const expiry = document.getElementById('cred-item-expiry').value;
+  const staffId = document.getElementById('cred-item-staff-id').value;
+  if (!name || !issued || !expiry) { toast('Please fill in Credential Name, Date Issued and Expiry Date'); return; }
+  const editId = document.getElementById('cred-item-edit-id').value;
+  const record = {
+    id: editId || uid(),
+    staff_id: staffId,
+    credential_name: name,
+    license_number: document.getElementById('cred-item-license-num').value.trim(),
+    date_issued: issued,
+    expiry_date: expiry,
+    notes: document.getElementById('cred-item-notes').value.trim()
+  };
+  if (!editId) record.created_at = new Date().toISOString();
+  const { error } = await db.from('staff_credentials').upsert(record);
+  if (error) { toast('Error saving: ' + error.message); return; }
+  closeModal('modal-credential');
+  toast(editId ? 'Credential updated' : 'Credential added');
+  renderStaffCredentialsList();
+  renderStaffTable();
+}
+
+async function deleteCredentialItem(id) {
+  if (!confirm('Delete this credential record?')) return;
+  await db.from('staff_credentials').delete().eq('id', id);
+  toast('Credential deleted');
+  renderStaffCredentialsList();
+  renderStaffTable();
+}
+
+async function openStaffOrientationPrint(staffId) {
+  if (!staffId) return;
+  const { data: s } = await db.from('staff_directory').select('*').eq('id', staffId).single();
+  if (!s) return;
+  document.getElementById('sop-staff-id').value = staffId;
+  document.getElementById('sop-staff-name-label').textContent = 'For: ' + s.name;
+  document.getElementById('sop-date1').value = '';
+  document.getElementById('sop-date2').value = '';
+  document.getElementById('sop-date3').value = '';
+  document.getElementById('sop-trainer-sig').value = currentUser ? currentUser.name : '';
+  document.getElementById('sop-hours').value = '';
+  openModal('modal-staff-orientation-print');
+}
+
+async function printStaffOrientationChecklist() {
+  const staffId = document.getElementById('sop-staff-id').value;
+  const { data: s } = await db.from('staff_directory').select('*').eq('id', staffId).single();
+  if (!s) return;
+
+  const date1 = document.getElementById('sop-date1').value;
+  const date2 = document.getElementById('sop-date2').value;
+  const date3 = document.getElementById('sop-date3').value;
+  const trainerSig = document.getElementById('sop-trainer-sig').value;
+  const hours = document.getElementById('sop-hours').value;
+
+  const fmtD = (v) => v ? new Date(v + 'T00:00:00').toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) : '';
+
+  let tableRows = ORI_CHECKLIST_ITEMS.map((item) => {
+    if (item.section) {
+      return '<tr><td style="border:1px solid #999;padding:5px 6px;text-align:center;background:#d0d0d0;font-size:13px;">&#9744;</td><td style="border:1px solid #999;padding:7px 10px;background:#d0d0d0;font-weight:bold;font-size:12px;">' + item.text + '</td></tr>';
+    }
+    return '<tr><td style="border:1px solid #999;padding:5px 6px;text-align:center;font-size:14px;">&#9744;</td><td style="border:1px solid #999;padding:6px 10px;font-size:11.5px;">' + item.text + '</td></tr>';
+  }).join('');
+
+  const oriDates = [date1, date2, date3].filter(Boolean).map(fmtD).join(', &nbsp; ');
+
+  const html = '<div style="text-align:center;margin-bottom:14px;">' +
+    '<img src="harmony_living_house_logo.png" alt="Logo" style="width:80px;height:80px;object-fit:contain;display:block;margin:0 auto 6px;">' +
+    '<div style="font-size:18px;font-weight:bold;text-transform:uppercase;letter-spacing:0.04em;">Harmony Living House Adult Family LLC</div>' +
+    '<div style="font-size:13px;">120 Newaukum Village Dr</div>' +
+    '<div style="font-size:13px;margin-bottom:14px;">Chehalis, WA 98532</div>' +
+    '</div>' +
+    '<div style="margin-bottom:10px;font-size:12.5px;line-height:2.1;">' +
+    '<div>Trainee Name: <span style="display:inline-block;border-bottom:1px solid #000;min-width:280px;padding:0 4px;">' + s.name + '</span></div>' +
+    '<div>Trainee Date of Hire: <span style="display:inline-block;border-bottom:1px solid #000;min-width:130px;padding:0 4px;">' + fmtD(s.date_joined) + '</span> &nbsp;&nbsp; Trainee Orientation Date (s): <span style="display:inline-block;border-bottom:1px solid #000;min-width:240px;padding:0 4px;">' + oriDates + '</span></div>' +
+    '<div>Signature of Trainer: <span style="display:inline-block;border-bottom:1px solid #000;min-width:220px;padding:0 4px;">' + trainerSig + '</span></div>' +
+    '<div>Signature of Trainee: <span style="display:inline-block;border-bottom:1px solid #000;min-width:220px;padding:0 4px;">' + s.name + '</span></div>' +
+    '<div>No. of Hours of Training: <span style="display:inline-block;border-bottom:1px solid #000;min-width:140px;padding:0 4px;">' + hours + '</span></div>' +
+    '</div>' +
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;">' +
+    '<thead><tr>' +
+    '<th style="width:80px;background:#000;color:#fff;padding:7px 8px;border:1px solid #333;text-align:center;font-size:11px;">Check<br>When<br>complete</th>' +
+    '<th style="background:#000;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;">The Following Topics Have Been Covered In This Orientation</th>' +
+    '</tr></thead><tbody>' + tableRows + '</tbody></table>' +
+    '<div style="font-size:12.5px;margin-bottom:10px;font-weight:bold;">LAST DAY OF WORK: <span style="display:inline-block;border-bottom:1px solid #000;min-width:160px;padding:0 4px;font-weight:normal;"></span></div>' +
+    '<div style="font-size:12.5px;margin-bottom:6px;font-weight:bold;">Notes or requests for this Trainee:</div>' +
+    '<div style="min-height:80px;border-bottom:1px solid #000;padding:4px 0;font-size:12px;line-height:1.8;">' + (s.notes || '') + '</div>';
+
+  const win = window.open('', '_blank', 'width=900,height=1200');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Staff Orientation Checklist</title>' +
+    "<style>* { box-sizing:border-box; margin:0; padding:0; } body { font-family:'Times New Roman',Times,serif; background:#fff; color:#000; padding:36px 48px; width:816px; margin:0 auto; }" +
+    "@media print { body { padding:24px 36px; } @page { size:letter; margin:0.5in; } }</style>" +
+    '</head><body>' + html + '</body></html>');
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); win.addEventListener('afterprint', () => { win.close(); window.focus(); }); }, 700);
+  closeModal('modal-staff-orientation-print');
+}
+
+async function openStaffCredentialsPrint(staffId) {
+  if (!staffId) return;
+  const { data: s } = await db.from('staff_directory').select('*').eq('id', staffId).single();
+  if (!s) return;
+  const creds = await getStaffCredentials(staffId);
+
+  document.getElementById('scp-staff-id').value = staffId;
+  document.getElementById('scp-staff-name-label').textContent = 'For: ' + s.name;
+
+  const previewEl = document.getElementById('scp-preview-list');
+  if (!creds.length) {
+    previewEl.innerHTML = '<div style="color:var(--text3);font-style:italic;font-size:13px;">No credentials on file for this staff member. Add credentials first.</div>';
+  } else {
+    previewEl.innerHTML = creds.map(c => {
+      const badge = credentialStatusBadge(c.expiry_date);
+      return '<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">' +
+        '<strong>' + c.credential_name + '</strong> ' + badge + '<br>' +
+        '<span style="color:var(--text3);font-size:12px;">Issued: ' + fmtDate(c.date_issued) + ' &middot; Expires: ' + fmtDate(c.expiry_date) + (c.license_number ? ' &middot; License #: ' + c.license_number : '') + '</span>' +
+        '</div>';
+    }).join('');
+  }
+  openModal('modal-staff-credentials-print');
+}
+
+async function printStaffCredentialsChecklist() {
+  const staffId = document.getElementById('scp-staff-id').value;
+  const { data: s } = await db.from('staff_directory').select('*').eq('id', staffId).single();
+  if (!s) return;
+  const creds = await getStaffCredentials(staffId);
+
+  const fmtD = (v) => v ? new Date(v + 'T00:00:00').toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'}) : '';
+
+  let credRows = creds.map(c => {
+    return '<tr>' +
+      '<td style="border:1px solid var(--border);padding:7px 10px;">' + c.credential_name + (c.license_number ? ' (License #: ' + c.license_number + ')' : '') + '</td>' +
+      '<td style="border:1px solid var(--border);padding:7px 10px;text-align:center;">' + fmtD(c.date_issued) + '</td>' +
+      '<td style="border:1px solid var(--border);padding:7px 10px;text-align:center;">' + fmtD(c.expiry_date) + '</td>' +
+      '</tr>';
+  }).join('');
+
+  if (!credRows) credRows = '<tr><td colspan="3" style="border:1px solid var(--border);padding:14px;text-align:center;color:#888;">No credentials on file</td></tr>';
+
+  const html = '<div style="text-align:center;margin-bottom:16px;">' +
+    '<img src="harmony_living_house_logo.png" alt="Logo" style="width:80px;height:80px;object-fit:contain;display:block;margin:0 auto 6px;">' +
+    '<div style="font-size:18px;font-weight:bold;text-transform:uppercase;letter-spacing:0.04em;">Harmony Living House Adult Family LLC</div>' +
+    '<div style="font-size:13px;">120 Newaukum Village Dr</div>' +
+    '<div style="font-size:13px;margin-bottom:12px;">Chehalis, WA 98532</div>' +
+    '<div style="font-size:15px;font-weight:bold;margin-bottom:14px;">Caregiver Credentials Checklist</div>' +
+    '</div>' +
+    '<div style="font-size:12.5px;line-height:2.1;margin-bottom:14px;">' +
+    '<div>Staff Name: <span style="display:inline-block;border-bottom:1px solid #000;min-width:220px;padding:0 4px;">' + s.name + '</span> &nbsp;&nbsp;&nbsp; DOB: <span style="display:inline-block;border-bottom:1px solid #000;min-width:140px;padding:0 4px;">' + fmtD(s.dob) + '</span></div>' +
+    '<div>Hire Date: <span style="display:inline-block;border-bottom:1px solid #000;min-width:140px;padding:0 4px;">' + fmtD(s.date_joined) + '</span></div>' +
+    '</div>' +
+    '<table style="width:100%;border-collapse:collapse;margin-bottom:14px;">' +
+    '<thead><tr>' +
+    '<th style="background:#000;color:#fff;padding:7px 10px;border:1px solid #333;text-align:left;font-size:11px;">Credential / Certification</th>' +
+    '<th style="background:#000;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11px;">Date Issued</th>' +
+    '<th style="background:#000;color:#fff;padding:7px 10px;border:1px solid #333;text-align:center;font-size:11px;">Expiry Date</th>' +
+    '</tr></thead><tbody>' + credRows + '</tbody></table>';
+
+  const win = window.open('', '_blank', 'width=900,height=1200');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Credentials Checklist</title>' +
+    "<style>* { box-sizing:border-box; margin:0; padding:0; } body { font-family:'Times New Roman',Times,serif; background:#fff; color:#000; padding:36px 48px; width:816px; margin:0 auto; }" +
+    "@media print { body { padding:24px 36px; } @page { size:letter; margin:0.5in; } }</style>" +
+    '</head><body>' + html + '</body></html>');
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); win.addEventListener('afterprint', () => { win.close(); window.focus(); }); }, 700);
+  closeModal('modal-staff-credentials-print');
 }
 
 async function renderResidentTable() {
