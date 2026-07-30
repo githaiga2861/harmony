@@ -471,7 +471,7 @@ document.getElementById('login-password').addEventListener('keydown', e => { if 
 // ══════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════
-const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Financials — Income & Expenses', staff: 'Staff', 'staff-profile': 'Staff Profile', staffdocs: 'Staff Documents', contacts: 'Quick Contacts', alerts: '🔔 Alerts & Automated Notifications' };
+const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Financials — Income & Expenses', staff: 'Staff', 'staff-profile': 'Staff Profile', staffdocs: 'Staff Documents', contacts: 'Quick Contacts', 'facility-numbers': 'Facility Numbers', alerts: '🔔 Alerts & Automated Notifications' };
 
 async function showPage(name) {
   if (name !== 'profile') localStorage.setItem('hlh_last_page', name);
@@ -497,6 +497,7 @@ async function showPage(name) {
   if (name === 'staffdocs') { initStaffDocsPage(); }
   if (name === 'alerts') { renderAlertsPage(); }
   if (name === 'contacts') { setTimeout(function(){ loadContactsPage(); }, 0); }
+  if (name === 'facility-numbers') { setTimeout(function(){ loadFacilityNumbersPage(); }, 0); }
   if (name === 'staff') { renderStaffTable(); }
 }
 // ══════════════════════════════════
@@ -1207,7 +1208,7 @@ async function openProfile(id) {
           </div>
           <div style="display:flex;gap:5px;flex-shrink:0;">
             ${phoneHref ? `<a ${phoneHref} style="background:#e8f0fe;color:#1a73e8;border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;text-decoration:none;" title="Call">📞 Call</a>` : ''}
-            <button onclick="navigator.clipboard.writeText('${c.val.replace(/'/g,"\\'")}').then(()=>toast('📋 Copied to clipboard'))" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;" title="Copy">Copy</button>
+            <button onclick="navigator.clipboard.writeText('${c.val.replace(/'/g,"\'")}').then(()=>toast('📋 Copied to clipboard'))" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:6px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;" title="Copy">Copy</button>
           </div>
         </div>`;
       }).join('');
@@ -8658,6 +8659,123 @@ async function saveNewContact() {
   closeModal('modal-add-contact');
   toast('Contact saved!');
   loadContactsPage();
+}
+
+
+// ══════════════════════════════════
+// FACILITY NUMBERS
+// ══════════════════════════════════
+async function loadFacilityNumbersPage() {
+  const grid = document.getElementById('facility-numbers-grid');
+  if (!grid) return;
+  grid.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:40px;color:var(--text3);">Loading...</div>';
+
+  const { data, error } = await db.from('facility_numbers').select('*').order('created_at', { ascending: true });
+
+  if (error) {
+    grid.innerHTML = '<div style="grid-column:span 2;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:20px;font-size:13px;color:#b91c1c;"><strong>Error:</strong> ' + error.message + '</div>';
+    return;
+  }
+
+  if (!data || !data.length) {
+    grid.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:60px 24px;">' +
+      '<div style="font-size:48px;margin-bottom:14px;">🔢</div>' +
+      '<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">No Numbers Registered Yet</div>' +
+      '<div style="font-size:13px;color:var(--text3);margin-bottom:20px;">Add your facility NPI, EIN, ProviderOne and license numbers.</div>' +
+      '<button onclick="openAddFacilityNumber()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">+ Add First Number</button>' +
+      '</div>';
+    return;
+  }
+
+  const iconMap = {
+    'NPI Number': '🏥',
+    'EIN Number': '🏢',
+    'ProviderOne Number': '📋',
+    'License Number': '📜',
+    'Medicaid Provider Number': '💳',
+    'Other': '🔢'
+  };
+
+  grid.innerHTML = data.map(item => {
+    const icon = iconMap[item.label] || '🔢';
+    return '<div class="card" style="overflow:hidden;">' +
+      '<div style="background:linear-gradient(135deg,#1a1a1a,#b8860b);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
+      '<div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">' +
+      '<span style="font-size:26px;flex-shrink:0;">' + icon + '</span>' +
+      '<div style="min-width:0;">' +
+      '<div style="color:#fff;font-weight:700;font-size:14px;">' + item.label + '</div>' +
+      '</div></div>' +
+      '<button onclick="deleteFacilityNumber(\'' + item.id + '\')" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">✕</button>' +
+      '</div>' +
+      '<div class="card-body" style="padding:16px 18px;">' +
+      '<div style="font-size:22px;font-weight:800;color:var(--text);letter-spacing:0.02em;font-family:monospace;margin-bottom:6px;">' + item.number_value + '</div>' +
+      (item.notes ? '<div style="font-size:12.5px;color:var(--text3);margin-bottom:10px;">' + item.notes + '</div>' : '') +
+      '<div style="display:flex;gap:8px;">' +
+      '<button onclick="copyFacilityNumber(\'' + item.number_value + '\')" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📋 Copy</button>' +
+      '<button onclick="openEditFacilityNumber(\'' + item.id + '\')" style="background:var(--surface2);color:var(--text2);border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✏️ Edit</button>' +
+      '</div></div></div>';
+  }).join('');
+}
+
+function copyFacilityNumber(value) {
+  navigator.clipboard.writeText(value).then(() => toast('📋 Copied: ' + value));
+}
+
+function openAddFacilityNumber() {
+  document.getElementById('fn-modal-title').textContent = 'Add Facility Number';
+  document.getElementById('fn-edit-id').value = '';
+  document.getElementById('fn-label').value = '';
+  document.getElementById('fn-custom-label').value = '';
+  document.getElementById('fn-value').value = '';
+  document.getElementById('fn-notes').value = '';
+  openModal('modal-facility-number');
+}
+
+async function openEditFacilityNumber(id) {
+  const { data: item } = await db.from('facility_numbers').select('*').eq('id', id).single();
+  if (!item) return;
+  document.getElementById('fn-modal-title').textContent = 'Edit Facility Number';
+  document.getElementById('fn-edit-id').value = item.id;
+  const knownLabels = ['NPI Number','EIN Number','ProviderOne Number','License Number','Medicaid Provider Number'];
+  if (knownLabels.includes(item.label)) {
+    document.getElementById('fn-label').value = item.label;
+    document.getElementById('fn-custom-label').value = '';
+  } else {
+    document.getElementById('fn-label').value = 'Other';
+    document.getElementById('fn-custom-label').value = item.label;
+  }
+  document.getElementById('fn-value').value = item.number_value || '';
+  document.getElementById('fn-notes').value = item.notes || '';
+  openModal('modal-facility-number');
+}
+
+async function saveFacilityNumber() {
+  const labelSel = document.getElementById('fn-label').value;
+  const customLabel = document.getElementById('fn-custom-label').value.trim();
+  const label = labelSel === 'Other' ? customLabel : labelSel;
+  const value = document.getElementById('fn-value').value.trim();
+  if (!label || !value) { toast('Please select/enter a label and enter the number'); return; }
+  const editId = document.getElementById('fn-edit-id').value;
+  const record = {
+    id: editId || uid(),
+    label: label,
+    number_value: value,
+    notes: document.getElementById('fn-notes').value.trim(),
+    created_by: currentUser ? currentUser.name : ''
+  };
+  if (!editId) record.created_at = new Date().toISOString();
+  const { error } = await db.from('facility_numbers').upsert(record);
+  if (error) { toast('Error saving: ' + error.message); return; }
+  closeModal('modal-facility-number');
+  toast(editId ? 'Number updated' : 'Number added');
+  loadFacilityNumbersPage();
+}
+
+async function deleteFacilityNumber(id) {
+  if (!confirm('Remove this number?')) return;
+  await db.from('facility_numbers').delete().eq('id', id);
+  toast('Number removed');
+  loadFacilityNumbersPage();
 }
 
 async function deleteQuickContact(id) {
