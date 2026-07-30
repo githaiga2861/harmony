@@ -693,13 +693,23 @@ async function renderStaffTable() {
   tbody.innerHTML = rows.join('');
 }
 
+function toggleSmCredOtherField() {
+  const sel = document.getElementById('sm-cred-type');
+  const wrap = document.getElementById('sm-cred-other-wrap');
+  if (wrap) wrap.style.display = sel.value === 'Other' ? 'block' : 'none';
+}
+
 function openAddStaffMember() {
   document.getElementById('staff-member-modal-title').textContent = 'Add Staff Member';
   document.getElementById('sm-edit-id').value = '';
-  ['sm-name','sm-gender','sm-dob','sm-date-joined','sm-phone','sm-email','sm-address','sm-emergency-contact','sm-notes'].forEach(id => {
+  ['sm-name','sm-gender','sm-dob','sm-date-joined','sm-phone','sm-email','sm-address','sm-emergency-contact','sm-notes','sm-cred-type','sm-cred-other-name','sm-cred-license-num','sm-cred-issued','sm-cred-expiry'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  const wrap = document.getElementById('sm-cred-other-wrap');
+  if (wrap) wrap.style.display = 'none';
+  const credSel = document.getElementById('sm-cred-type');
+  if (credSel) credSel.onchange = toggleSmCredOtherField;
   openModal('modal-staff-member');
 }
 
@@ -742,6 +752,28 @@ async function saveStaffMember() {
   if (!editId) record.created_at = new Date().toISOString();
   const { error } = await db.from('staff_directory').upsert(record);
   if (error) { toast('Error saving: ' + error.message); return; }
+
+  // If a credential was filled in, save it too
+  const credTypeSel = document.getElementById('sm-cred-type').value;
+  const credOtherName = document.getElementById('sm-cred-other-name').value.trim();
+  const credName = credTypeSel === 'Other' ? credOtherName : credTypeSel;
+  const credIssued = document.getElementById('sm-cred-issued').value;
+  const credExpiry = document.getElementById('sm-cred-expiry').value;
+  if (credName && credIssued && credExpiry) {
+    await db.from('staff_credentials').insert({
+      id: uid(),
+      staff_id: record.id,
+      credential_name: credName,
+      license_number: document.getElementById('sm-cred-license-num').value.trim(),
+      date_issued: credIssued,
+      expiry_date: credExpiry,
+      notes: '',
+      created_at: new Date().toISOString()
+    });
+  } else if (credName && (!credIssued || !credExpiry)) {
+    toast('Staff saved, but credential needs both Date Issued and Expiry Date to be recorded');
+  }
+
   closeModal('modal-staff-member');
   toast(editId ? 'Staff member updated' : 'Staff member added');
   if (editId) {

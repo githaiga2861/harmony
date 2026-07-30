@@ -4057,6 +4057,42 @@
           <label>Emergency Contact (Name & Phone)</label>
           <input type="text" id="sm-emergency-contact" placeholder="e.g. Jane Doe — 253-555-0199 (Sister)">
         </div>
+
+        <div class="field span2" style="margin-top:6px;padding-top:14px;border-top:2px solid var(--accent-light);">
+          <label style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;">Initial Credential (optional — add more later from profile)</label>
+        </div>
+        <div class="field span2">
+          <label>Credential Type</label>
+          <select id="sm-cred-type">
+            <option value="">— Select or leave blank —</option>
+            <option>CPR/First Aid</option>
+            <option>NAC License</option>
+            <option>NAR License</option>
+            <option>HCA-C</option>
+            <option>TB Test</option>
+            <option>Background Check</option>
+            <option>Food Worker Card</option>
+            <option>Nurse Delegation</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field span2" id="sm-cred-other-wrap" style="display:none;">
+          <label>Custom Credential Name</label>
+          <input type="text" id="sm-cred-other-name" placeholder="e.g. State Tax ID">
+        </div>
+        <div class="field">
+          <label>License / Certificate Number</label>
+          <input type="text" id="sm-cred-license-num" placeholder="Optional">
+        </div>
+        <div class="field">
+          <label>Date Issued</label>
+          <input type="date" id="sm-cred-issued">
+        </div>
+        <div class="field span2">
+          <label>Expiry Date</label>
+          <input type="date" id="sm-cred-expiry">
+        </div>
+
         <div class="field span2">
           <label>Notes / Other Relevant Information</label>
           <textarea id="sm-notes" rows="3" placeholder="Any additional relevant information..."></textarea>
