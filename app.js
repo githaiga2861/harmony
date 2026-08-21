@@ -4161,6 +4161,20 @@ async function renderPaymentsPage() {
     const incomeVal = incomeCard.querySelector('.value');
     if (incomeVal) incomeVal.style.color = total > 0 ? '#1e7e34' : 'var(--text)';
   }
+  const incomeSinceEl = document.getElementById('pay-stat-total-since');
+  if (incomeSinceEl) {
+    if (allPayments && allPayments.length) {
+      const earliestPayDate = allPayments.reduce((min, p) => (!min || (p.pay_date && p.pay_date < min)) ? p.pay_date : min, null);
+      if (earliestPayDate) {
+        const d = new Date(earliestPayDate + 'T00:00:00');
+        incomeSinceEl.textContent = 'Since ' + d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      } else {
+        incomeSinceEl.textContent = '';
+      }
+    } else {
+      incomeSinceEl.textContent = '';
+    }
+  }
   const payMonthEl = document.getElementById('pay-stat-month');
   if (payMonthEl) payMonthEl.textContent = '$' + monthTotal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
   const monthIncomeCardEl = document.getElementById('pay-stat-month-income-card');
@@ -5482,6 +5496,20 @@ async function renderExpensesPanel() {
     expStatCard.style.borderColor = totalExp > 0 ? '#f5c0bb' : '';
     const expVal = expStatCard.querySelector('.value');
     if (expVal) expVal.style.color = totalExp > 0 ? '#c0392b' : 'var(--text)';
+  }
+  const expSinceEl = document.getElementById('pay-stat-expenses-since');
+  if (expSinceEl) {
+    if (allExpenses && allExpenses.length) {
+      const earliestExpDate = allExpenses.reduce((min, e) => (!min || (e.exp_date && e.exp_date < min)) ? e.exp_date : min, null);
+      if (earliestExpDate) {
+        const d = new Date(earliestExpDate + 'T00:00:00');
+        expSinceEl.textContent = 'Since ' + d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      } else {
+        expSinceEl.textContent = '';
+      }
+    } else {
+      expSinceEl.textContent = '';
+    }
   }
   const expMonthEl = document.getElementById('exp-stat-month');
   if (expMonthEl) expMonthEl.textContent = '$' + monthExp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
