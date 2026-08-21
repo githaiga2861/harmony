@@ -702,10 +702,12 @@ function toggleSmCredOtherField() {
 function openAddStaffMember() {
   document.getElementById('staff-member-modal-title').textContent = 'Add Staff Member';
   document.getElementById('sm-edit-id').value = '';
-  ['sm-name','sm-gender','sm-dob','sm-date-joined','sm-phone','sm-email','sm-address','sm-emergency-contact','sm-notes','sm-cred-type','sm-cred-other-name','sm-cred-license-num','sm-cred-issued','sm-cred-expiry'].forEach(id => {
+  ['sm-name','sm-gender','sm-dob','sm-date-joined','sm-phone','sm-email','sm-address','sm-emergency-contact','sm-notes','sm-cred-type','sm-cred-other-name','sm-cred-license-num','sm-cred-issued','sm-cred-expiry','sm-salary-amount'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  const freqEl = document.getElementById('sm-salary-freq');
+  if (freqEl) freqEl.value = 'monthly';
   const wrap = document.getElementById('sm-cred-other-wrap');
   if (wrap) wrap.style.display = 'none';
   const credSel = document.getElementById('sm-cred-type');
@@ -728,6 +730,10 @@ async function openEditStaffMember(id) {
   document.getElementById('sm-address').value = s.address || '';
   document.getElementById('sm-emergency-contact').value = s.emergency_contact || '';
   document.getElementById('sm-notes').value = s.notes || '';
+  // Pull existing salary setup if any
+  const { data: salaryRec } = await db.from('staff_members').select('*').eq('name', s.name).maybeSingle();
+  document.getElementById('sm-salary-amount').value = salaryRec ? (salaryRec.salary_amount || '') : '';
+  document.getElementById('sm-salary-freq').value = salaryRec ? (salaryRec.salary_freq || 'monthly') : 'monthly';
   openModal('modal-staff-member');
 }
 
@@ -752,6 +758,26 @@ async function saveStaffMember() {
   if (!editId) record.created_at = new Date().toISOString();
   const { error } = await db.from('staff_directory').upsert(record);
   if (error) { toast('Error saving: ' + error.message); return; }
+
+  // Sync salary setup with staff_members table
+  const salaryAmt = parseFloat(document.getElementById('sm-salary-amount').value || 0);
+  const salaryFreq = document.getElementById('sm-salary-freq').value || 'monthly';
+  if (salaryAmt > 0) {
+    const { data: existingSalary } = await db.from('staff_members').select('id').eq('name', name).maybeSingle();
+    const salaryRecord = {
+      id: existingSalary ? existingSalary.id : uid(),
+      name: name,
+      email: record.email || '',
+      password_plain: '',
+      salary_amount: salaryAmt,
+      salary_freq: salaryFreq,
+      salary_start_month: (record.date_joined || getWATodayStr()).slice(0, 7) + '-01',
+      is_active: true,
+      created_by: currentUser ? currentUser.name : ''
+    };
+    if (!existingSalary) salaryRecord.created_at = new Date().toISOString();
+    await db.from('staff_members').upsert(salaryRecord);
+  }
 
   // If a credential was filled in, save it too
   const credTypeSel = document.getElementById('sm-cred-type').value;
@@ -784,10 +810,15 @@ async function saveStaffMember() {
 }
 
 async function deleteStaffDirectoryEntry(id) {
-  if (!confirm('Remove this staff member from the directory? Their credential records will also be removed. This does not affect wage payment history.')) return;
+  if (!confirm('Remove this staff member? This will also remove their salary setup on the Financials page. This does not affect wage payment history already recorded.')) return;
+  const { data: s } = await db.from('staff_directory').select('name').eq('id', id).single();
   await db.from('staff_directory').update({ is_active: false }).eq('id', id);
-  toast('Staff member removed');
+  if (s && s.name) {
+    await db.from('staff_members').update({ is_active: false }).eq('name', s.name);
+  }
+  toast('Staff member removed from directory and salary setup');
   renderStaffTable();
+  renderExpensesPanel();
 }
 
 async function openStaffProfile(id) {

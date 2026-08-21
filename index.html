@@ -4097,6 +4097,26 @@
           <label>Notes / Other Relevant Information</label>
           <textarea id="sm-notes" rows="3" placeholder="Any additional relevant information..."></textarea>
         </div>
+
+        <div class="field span2" style="margin-top:6px;padding-top:14px;border-top:2px solid var(--accent-light);">
+          <label style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;">Salary Setup</label>
+        </div>
+        <div class="field">
+          <label>Expected Amount Per Period ($)</label>
+          <input type="number" id="sm-salary-amount" placeholder="e.g. 800.00" step="0.01" min="0">
+        </div>
+        <div class="field">
+          <label>Pay Frequency</label>
+          <select id="sm-salary-freq">
+            <option value="monthly">Monthly</option>
+            <option value="biweekly">Bi-weekly</option>
+            <option value="weekly">Weekly</option>
+            <option value="sunday_only">Sunday Only</option>
+          </select>
+        </div>
+        <div class="field span2" style="font-size:11px;color:var(--text3);margin-top:-6px;">
+          Wage tracking will start from the "Date Joined Facility" entered above. Leave amount blank to skip salary setup.
+        </div>
       </div>
     </div>
     <div class="modal-footer">
