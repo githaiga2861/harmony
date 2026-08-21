@@ -8373,6 +8373,23 @@ async function checkAppointmentAlerts(sendEmail) {
     }
   }
 
+  // TIER 1.5: 3-day warning
+  const threeDayAhead = relevant.filter(a => Math.round((new Date(a.appt_date + 'T00:00:00') - today) / 86400000) === 3);
+  if (threeDayAhead.length) {
+    const alreadySent3 = await wasAlertSentRecently('appointments_3day', 20);
+    if (!alreadySent3) {
+      const t3Rows = threeDayAhead.map(a => {
+        const res = residents.find(r => r.id === a.resident_id);
+        return '<strong>' + (res ? res.name : 'Unknown') + '</strong> - ' + (a.doctor||'') + (a.appt_type ? ' (' + a.appt_type + ')' : '') + ' on ' + fmtDate(a.appt_date) + (a.appt_time ? ' at ' + a.appt_time : '') + (a.location ? ' - ' + a.location : '');
+      });
+      const html3 = buildAlertEmailHtml('Appointment Reminder - 3 Days Away',
+        '<strong>' + threeDayAhead.length + '</strong> appointment' + (threeDayAhead.length>1?'s are':' is') + ' scheduled 3 days from today:',
+        t3Rows, '#d68910');
+      await sendAlertEmail('appointments_3day',
+        '[HLH Reminder] ' + threeDayAhead.length + ' Appointment' + (threeDayAhead.length>1?'s':'') + ' in 3 Days', html3);
+    }
+  }
+
   // TIER 2: 1-day warning (tomorrow)
   const dayAhead = relevant.filter(a => Math.round((new Date(a.appt_date + 'T00:00:00') - today) / 86400000) === 1);
   if (dayAhead.length) {
