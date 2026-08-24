@@ -635,7 +635,7 @@ async function getStaffDirectory() {
 }
 
 async function getStaffCredentials(staffId) {
-  const { data } = await db.from('staff_credentials').select('*').eq('staff_id', staffId).order('expiry_date', { ascending: true });
+  const { data } = await db.from('staff_credential_items').select('*').eq('staff_id', staffId).order('expiry_date', { ascending: true });
   return data || [];
 }
 
@@ -786,7 +786,7 @@ async function saveStaffMember() {
   const credIssued = document.getElementById('sm-cred-issued').value;
   const credExpiry = document.getElementById('sm-cred-expiry').value;
   if (credName && credIssued && credExpiry) {
-    await db.from('staff_credentials').insert({
+    await db.from('staff_credential_items').insert({
       id: uid(),
       staff_id: record.id,
       credential_name: credName,
@@ -885,7 +885,7 @@ function openAddCredential() {
 }
 
 async function openEditCredential(id) {
-  const { data: c } = await db.from('staff_credentials').select('*').eq('id', id).single();
+  const { data: c } = await db.from('staff_credential_items').select('*').eq('id', id).single();
   if (!c) return;
   document.getElementById('credential-modal-title').textContent = 'Edit Credential';
   document.getElementById('cred-item-edit-id').value = c.id;
@@ -915,7 +915,7 @@ async function saveCredentialItem() {
     notes: document.getElementById('cred-item-notes').value.trim()
   };
   if (!editId) record.created_at = new Date().toISOString();
-  const { error } = await db.from('staff_credentials').upsert(record);
+  const { error } = await db.from('staff_credential_items').upsert(record);
   if (error) { toast('Error saving: ' + error.message); return; }
   closeModal('modal-credential');
   toast(editId ? 'Credential updated' : 'Credential added');
@@ -925,7 +925,7 @@ async function saveCredentialItem() {
 
 async function deleteCredentialItem(id) {
   if (!confirm('Delete this credential record?')) return;
-  await db.from('staff_credentials').delete().eq('id', id);
+  await db.from('staff_credential_items').delete().eq('id', id);
   toast('Credential deleted');
   renderStaffCredentialsList();
   renderStaffTable();
