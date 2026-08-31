@@ -6482,33 +6482,29 @@ function printSigChangeFormFromData(d) {
 
 // ── DOCUMENT HUB ──
 function switchDocCategory(cat) {
-  const isStaff = cat === 'staff';
-  document.getElementById('docsection-staff').style.display = isStaff ? 'block' : 'none';
-  document.getElementById('docsection-resident').style.display = !isStaff ? 'block' : 'none';
-
-  const staffBtn = document.getElementById('doccat-staff');
-  const resBtn = document.getElementById('doccat-resident');
-
-  if (staffBtn) {
-    staffBtn.style.background = isStaff
-      ? 'linear-gradient(135deg,#1a1a1a,#b8860b)' : 'var(--surface)';
-    staffBtn.style.color = isStaff ? '#fff' : 'var(--text)';
-    staffBtn.style.borderColor = isStaff ? 'var(--accent2)' : 'var(--border)';
-    staffBtn.style.boxShadow = isStaff ? '0 4px 16px rgba(184,134,11,0.25)' : 'var(--shadow)';
-    const sub = staffBtn.querySelector('div:last-child');
-    if (sub) sub.style.color = isStaff ? 'rgba(255,255,255,0.65)' : 'var(--text3)';
-  }
-  if (resBtn) {
-    resBtn.style.background = !isStaff
-      ? 'linear-gradient(135deg,#003366,#0056b3)' : 'var(--surface)';
-    resBtn.style.color = !isStaff ? '#fff' : 'var(--text)';
-    resBtn.style.borderColor = !isStaff ? '#0056b3' : 'var(--border)';
-    resBtn.style.boxShadow = !isStaff ? '0 4px 16px rgba(0,86,179,0.25)' : 'var(--shadow)';
-    const sub = resBtn.querySelector('div:last-child');
-    if (sub) sub.style.color = !isStaff ? 'rgba(255,255,255,0.65)' : 'var(--text3)';
-  }
+  const sections = { staff: 'docsection-staff', resident: 'docsection-resident', other: 'docsection-other' };
+  const buttons = { staff: 'doccat-staff', resident: 'doccat-resident', other: 'doccat-other' };
+  const activeColors = {
+    staff: ['linear-gradient(135deg,#1a1a1a,#b8860b)', 'var(--accent2)', '0 4px 16px rgba(184,134,11,0.25)'],
+    resident: ['linear-gradient(135deg,#003366,#0056b3)', '#0056b3', '0 4px 16px rgba(0,86,179,0.25)'],
+    other: ['linear-gradient(135deg,#4a2d6b,#7c3aed)', '#7c3aed', '0 4px 16px rgba(124,58,237,0.25)']
+  };
+  Object.keys(sections).forEach(key => {
+    const secEl = document.getElementById(sections[key]);
+    if (secEl) secEl.style.display = key === cat ? 'block' : 'none';
+    const btnEl = document.getElementById(buttons[key]);
+    if (btnEl) {
+      const isActive = key === cat;
+      btnEl.style.background = isActive ? activeColors[key][0] : 'var(--surface)';
+      btnEl.style.color = isActive ? '#fff' : 'var(--text)';
+      btnEl.style.borderColor = isActive ? activeColors[key][1] : 'var(--border)';
+      btnEl.style.boxShadow = isActive ? activeColors[key][2] : 'var(--shadow)';
+      const sub = btnEl.querySelector('div:last-child');
+      if (sub) sub.style.color = isActive ? 'rgba(255,255,255,0.65)' : 'var(--text3)';
+    }
+  });
+  if (cat === 'other') loadOtherDocumentsPage();
 }
-
 function openDocModal(type) {
   if (type === 'orientation') openModal('modal-doc-orientation');
   else if (type === 'credentials') openModal('modal-doc-credentials');
@@ -9520,3 +9516,139 @@ async function removeKettyDayOff(id, sunday) {
   renderExpensesPanel();
   closeModal('modal-ketty-manager');
 }  
+
+// ══════════════════════════════════
+// OTHER DOCUMENTS (PDF UPLOAD)
+// ══════════════════════════════════
+let _pendingOtherDocFile = null;
+
+function handleOtherDocFileSelect(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.type !== 'application/pdf') {
+    toast('Please select a PDF file');
+    event.target.value = '';
+    return;
+  }
+  _pendingOtherDocFile = file;
+  document.getElementById('other-doc-name-input').value = file.name.replace(/\.pdf$/i, '');
+  document.getElementById('other-doc-upload-status').textContent = 'File selected: ' + file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
+  document.getElementById('other-doc-save-btn').disabled = false;
+  openModal('modal-other-doc-name');
+}
+
+function cancelOtherDocUpload() {
+  _pendingOtherDocFile = null;
+  document.getElementById('other-doc-file-input').value = '';
+  document.getElementById('other-doc-name-input').value = '';
+  document.getElementById('other-doc-upload-status').textContent = '';
+  closeModal('modal-other-doc-name');
+}
+
+async function confirmOtherDocUpload() {
+  if (!_pendingOtherDocFile) { toast('No file selected'); return; }
+  const docName = document.getElementById('other-doc-name-input').value.trim();
+  if (!docName) { toast('Please enter a name for this document'); return; }
+
+  const statusEl = document.getElementById('other-doc-upload-status');
+  const saveBtn = document.getElementById('other-doc-save-btn');
+  statusEl.textContent = 'Uploading...';
+  saveBtn.disabled = true;
+
+  const file = _pendingOtherDocFile;
+  const fileId = uid();
+  const filePath = fileId + '_' + file.name;
+
+  try {
+    const { data: uploadData, error: uploadError } = await db.storage
+      .from('other-documents')
+      .upload(filePath, file, { contentType: 'application/pdf', upsert: false });
+
+    if (uploadError) {
+      statusEl.textContent = 'Upload failed: ' + uploadError.message;
+      saveBtn.disabled = false;
+      return;
+    }
+
+    const { data: urlData } = db.storage.from('other-documents').getPublicUrl(filePath);
+    const publicUrl = urlData.publicUrl;
+
+    const { error: dbError } = await db.from('other_documents').insert({
+      id: fileId,
+      document_name: docName,
+      file_url: publicUrl,
+      file_size: file.size,
+      uploaded_at: new Date().toISOString(),
+      uploaded_by: currentUser ? currentUser.name : ''
+    });
+
+    if (dbError) {
+      statusEl.textContent = 'Error saving record: ' + dbError.message;
+      saveBtn.disabled = false;
+      return;
+    }
+
+    toast('Document saved: ' + docName);
+    cancelOtherDocUpload();
+    loadOtherDocumentsPage();
+  } catch (err) {
+    statusEl.textContent = 'Error: ' + err.message;
+    saveBtn.disabled = false;
+  }
+}
+
+async function loadOtherDocumentsPage() {
+  const grid = document.getElementById('other-documents-grid');
+  if (!grid) return;
+  grid.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:40px;color:var(--text3);">Loading...</div>';
+
+  const { data, error } = await db.from('other_documents').select('*').order('uploaded_at', { ascending: false });
+
+  if (error) {
+    grid.innerHTML = '<div style="grid-column:span 2;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;padding:20px;font-size:13px;color:#b91c1c;"><strong>Error:</strong> ' + error.message + '</div>';
+    return;
+  }
+
+  if (!data || !data.length) {
+    grid.innerHTML = '<div style="grid-column:span 2;text-align:center;padding:60px 24px;">' +
+      '<div style="font-size:48px;margin-bottom:14px;">📁</div>' +
+      '<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">No Documents Uploaded Yet</div>' +
+      '<div style="font-size:13px;color:var(--text3);margin-bottom:20px;">Upload PDFs like licenses, certificates, insurance documents and more.</div>' +
+      '<button onclick="document.getElementById(\'other-doc-file-input\').click()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">+ Upload Your First Document</button>' +
+      '</div>';
+    return;
+  }
+
+  grid.innerHTML = data.map(doc => {
+    const sizeKb = doc.file_size ? (doc.file_size / 1024).toFixed(0) + ' KB' : '';
+    const uploadedDate = doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    return '<div class="card" style="overflow:hidden;">' +
+      '<div style="background:linear-gradient(135deg,#4a2d6b,#7c3aed);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;">' +
+      '<div style="display:flex;align-items:center;gap:12px;min-width:0;flex:1;">' +
+      '<span style="font-size:26px;flex-shrink:0;">📄</span>' +
+      '<div style="min-width:0;">' +
+      '<div style="color:#fff;font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + doc.document_name + '</div>' +
+      '</div></div>' +
+      '<button onclick="deleteOtherDocument(\'' + doc.id + '\')" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;">✕</button>' +
+      '</div>' +
+      '<div class="card-body" style="padding:16px 18px;">' +
+      '<div style="font-size:12px;color:var(--text3);margin-bottom:12px;">Uploaded ' + uploadedDate + (sizeKb ? ' · ' + sizeKb : '') + (doc.uploaded_by ? ' · by ' + doc.uploaded_by : '') + '</div>' +
+      '<div style="display:flex;gap:8px;">' +
+      '<a href="' + doc.file_url + '" target="_blank" style="background:var(--accent);color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px;">📄 View / Download</a>' +
+      '</div></div></div>';
+  }).join('');
+}
+
+async function deleteOtherDocument(id) {
+  if (!confirm('Delete this document permanently?')) return;
+  const { data: doc } = await db.from('other_documents').select('file_url').eq('id', id).single();
+  if (doc && doc.file_url) {
+    const parts = doc.file_url.split('/other-documents/');
+    if (parts[1]) {
+      await db.storage.from('other-documents').remove([parts[1]]);
+    }
+  }
+  await db.from('other_documents').delete().eq('id', id);
+  toast('Document deleted');
+  loadOtherDocumentsPage();
+}
