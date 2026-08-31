@@ -9652,3 +9652,233 @@ async function deleteOtherDocument(id) {
   toast('Document deleted');
   loadOtherDocumentsPage();
 }
+
+// ══════════════════════════════════
+// RESIDENT ADMISSION FORM
+// ══════════════════════════════════
+async function openAdmissionFormModal(residentId) {
+  if (!residentId) return;
+  document.getElementById('af-resident-id').value = residentId;
+
+  const { data: af } = await db.from('resident_admission_forms').select('*').eq('resident_id', residentId).maybeSingle();
+  const a = af || {};
+
+  const fields = {
+    'af-admission-date': a.admission_date || '',
+    'af-discharge-date': a.discharge_date || '',
+    'af-likes-called': a.likes_to_be_called || '',
+    'af-birth-place': a.birth_place || '',
+    'af-marital-status': a.marital_status || '',
+    'af-ssn': a.ssn || '',
+    'af-weight': a.weight || '',
+    'af-height': a.height || '',
+    'af-allergies': a.allergies || '',
+    'af-advance-directive': a.advance_directive || '',
+    'af-diagnoses-history': a.diagnoses_history || '',
+    'af-pc-name': a.primary_contact_name || '',
+    'af-pc-relationship': a.primary_contact_relationship || '',
+    'af-pc-address': a.primary_contact_address || '',
+    'af-pc-home-phone': a.primary_contact_home_phone || '',
+    'af-pc-work-phone': a.primary_contact_work_phone || '',
+    'af-pc-cp': a.primary_contact_cp || '',
+    'af-pc-email': a.primary_contact_email || '',
+    'af-pc-preference': a.primary_contact_preference || '',
+    'af-sc-name': a.secondary_contact_name || '',
+    'af-sc-relationship': a.secondary_contact_relationship || '',
+    'af-sc-address': a.secondary_contact_address || '',
+    'af-sc-home-phone': a.secondary_contact_home_phone || '',
+    'af-sc-work-phone': a.secondary_contact_work_phone || '',
+    'af-sc-cp': a.secondary_contact_cp || '',
+    'af-sc-email': a.secondary_contact_email || '',
+    'af-sc-preference': a.secondary_contact_preference || '',
+    'af-phys-name': a.physician_name || '',
+    'af-phys-specialty': a.physician_specialty || '',
+    'af-phys-clinic': a.physician_clinic || '',
+    'af-phys-address': a.physician_address || '',
+    'af-phys-city': a.physician_city || '',
+    'af-phys-state': a.physician_state || '',
+    'af-phys-zip': a.physician_zip || '',
+    'af-phys-phone': a.physician_phone || '',
+    'af-phys-fax': a.physician_fax || '',
+    'af-phys-email': a.physician_email || '',
+    'af-phys-primary': a.physician_primary === false ? 'false' : 'true',
+    'af-ophys-name': a.other_physician_name || '',
+    'af-ophys-specialty': a.other_physician_specialty || '',
+    'af-ophys-clinic': a.other_physician_clinic || '',
+    'af-ophys-address': a.other_physician_address || '',
+    'af-ophys-city': a.other_physician_city || '',
+    'af-ophys-state': a.other_physician_state || '',
+    'af-ophys-zip': a.other_physician_zip || '',
+    'af-ophys-phone': a.other_physician_phone || '',
+    'af-ophys-fax': a.other_physician_fax || '',
+    'af-ophys-email': a.other_physician_email || '',
+    'af-ophys-primary': a.other_physician_primary === true ? 'true' : 'false',
+    'af-hospital-name': a.hospital_name || '',
+    'af-hospital-address': a.hospital_address || '',
+    'af-ins-primary-carrier': a.insurance_primary_carrier || '',
+    'af-ins-secondary-carrier': a.insurance_secondary_carrier || '',
+    'af-ins-primary-phone': a.insurance_primary_phone || '',
+    'af-ins-secondary-phone': a.insurance_secondary_phone || '',
+    'af-ins-primary-policy': a.insurance_primary_policy_id || '',
+    'af-ins-secondary-policy': a.insurance_secondary_policy_id || '',
+    'af-ins-primary-group': a.insurance_primary_group || '',
+    'af-ins-secondary-group': a.insurance_secondary_group || '',
+    'af-mortuary-name': a.mortuary_name || '',
+    'af-mortuary-phone': a.mortuary_phone || '',
+    'af-mortuary-address': a.mortuary_address || ''
+  };
+
+  Object.keys(fields).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = fields[id];
+  });
+
+  openModal('modal-admission-form');
+}
+
+async function saveAdmissionForm() {
+  const residentId = document.getElementById('af-resident-id').value;
+  if (!residentId) return;
+
+  const getVal = (id) => document.getElementById(id)?.value || '';
+
+  const record = {
+    resident_id: residentId,
+    admission_date: getVal('af-admission-date') || null,
+    discharge_date: getVal('af-discharge-date') || null,
+    likes_to_be_called: getVal('af-likes-called'),
+    birth_place: getVal('af-birth-place'),
+    marital_status: getVal('af-marital-status'),
+    ssn: getVal('af-ssn'),
+    weight: getVal('af-weight'),
+    height: getVal('af-height'),
+    allergies: getVal('af-allergies'),
+    advance_directive: getVal('af-advance-directive'),
+    diagnoses_history: getVal('af-diagnoses-history'),
+    primary_contact_name: getVal('af-pc-name'),
+    primary_contact_relationship: getVal('af-pc-relationship'),
+    primary_contact_address: getVal('af-pc-address'),
+    primary_contact_home_phone: getVal('af-pc-home-phone'),
+    primary_contact_work_phone: getVal('af-pc-work-phone'),
+    primary_contact_cp: getVal('af-pc-cp'),
+    primary_contact_email: getVal('af-pc-email'),
+    primary_contact_preference: getVal('af-pc-preference'),
+    secondary_contact_name: getVal('af-sc-name'),
+    secondary_contact_relationship: getVal('af-sc-relationship'),
+    secondary_contact_address: getVal('af-sc-address'),
+    secondary_contact_home_phone: getVal('af-sc-home-phone'),
+    secondary_contact_work_phone: getVal('af-sc-work-phone'),
+    secondary_contact_cp: getVal('af-sc-cp'),
+    secondary_contact_email: getVal('af-sc-email'),
+    secondary_contact_preference: getVal('af-sc-preference'),
+    physician_name: getVal('af-phys-name'),
+    physician_specialty: getVal('af-phys-specialty'),
+    physician_clinic: getVal('af-phys-clinic'),
+    physician_address: getVal('af-phys-address'),
+    physician_city: getVal('af-phys-city'),
+    physician_state: getVal('af-phys-state'),
+    physician_zip: getVal('af-phys-zip'),
+    physician_phone: getVal('af-phys-phone'),
+    physician_fax: getVal('af-phys-fax'),
+    physician_email: getVal('af-phys-email'),
+    physician_primary: getVal('af-phys-primary') === 'true',
+    other_physician_name: getVal('af-ophys-name'),
+    other_physician_specialty: getVal('af-ophys-specialty'),
+    other_physician_clinic: getVal('af-ophys-clinic'),
+    other_physician_address: getVal('af-ophys-address'),
+    other_physician_city: getVal('af-ophys-city'),
+    other_physician_state: getVal('af-ophys-state'),
+    other_physician_zip: getVal('af-ophys-zip'),
+    other_physician_phone: getVal('af-ophys-phone'),
+    other_physician_fax: getVal('af-ophys-fax'),
+    other_physician_email: getVal('af-ophys-email'),
+    other_physician_primary: getVal('af-ophys-primary') === 'true',
+    hospital_name: getVal('af-hospital-name'),
+    hospital_address: getVal('af-hospital-address'),
+    insurance_primary_carrier: getVal('af-ins-primary-carrier'),
+    insurance_secondary_carrier: getVal('af-ins-secondary-carrier'),
+    insurance_primary_phone: getVal('af-ins-primary-phone'),
+    insurance_secondary_phone: getVal('af-ins-secondary-phone'),
+    insurance_primary_policy_id: getVal('af-ins-primary-policy'),
+    insurance_secondary_policy_id: getVal('af-ins-secondary-policy'),
+    insurance_primary_group: getVal('af-ins-primary-group'),
+    insurance_secondary_group: getVal('af-ins-secondary-group'),
+    mortuary_name: getVal('af-mortuary-name'),
+    mortuary_phone: getVal('af-mortuary-phone'),
+    mortuary_address: getVal('af-mortuary-address'),
+    updated_at: new Date().toISOString()
+  };
+
+  const { error } = await db.from('resident_admission_forms').upsert(record);
+  if (error) { toast('Error saving: ' + error.message); return; }
+  closeModal('modal-admission-form');
+  toast('Admission information saved');
+}
+
+async function downloadAdmissionDocument(residentId) {
+  if (!residentId) return;
+  const { data: res } = await db.from('residents').select('*').eq('id', residentId).single();
+  if (!res) { toast('Resident not found'); return; }
+  const { data: af } = await db.from('resident_admission_forms').select('*').eq('resident_id', residentId).maybeSingle();
+  const a = af || {};
+
+  const fmtD = (v) => v ? new Date(v + 'T00:00:00').toLocaleDateString('en-US') : '';
+  const cb = (val, target) => val === target ? '\u2611' : '\u2610';
+  const line = (val, minW) => '<span style="display:inline-block;border-bottom:1px solid #000;min-width:' + (minW||100) + 'px;padding:0 4px;font-size:11px;">' + (val||'') + '</span>';
+
+  const html = '<div style="text-align:center;margin-bottom:6px;">' +
+    '<img src="harmony_living_house_logo.png" alt="Logo" style="width:70px;height:70px;object-fit:contain;display:block;margin:0 auto 4px;">' +
+    '<div style="font-size:16px;font-weight:bold;">HARMONY LIVING HOUSE ADULT FAMILY LLC</div>' +
+    '<div style="font-size:12px;">120 Newaukum Village Dr</div>' +
+    '<div style="font-size:12px;margin-bottom:10px;">Chehalis,WA 98532</div>' +
+    '</div>' +
+    '<table style="width:100%;border-collapse:collapse;font-size:11px;">' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;width:50%;"><strong>Admission Date:</strong> ' + line(fmtD(a.admission_date), 150) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Discharge Date:</strong> ' + line(fmtD(a.discharge_date), 150) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Resident\'s Name:</strong> ' + line(res.name, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Likes To Be Called:</strong> ' + line(a.likes_to_be_called, 150) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>DOB:</strong> ' + line(fmtD(res.dob), 100) + ' &nbsp; <strong>Birth place:</strong> ' + line(a.birth_place, 80) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Marital Status:</strong> ' + line(a.marital_status, 90) + ' &nbsp; <strong>SSN:</strong> ' + line(a.ssn, 80) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Gender:</strong> ' + line(res.gender, 90) + ' &nbsp; <strong>Weight:</strong> ' + line(a.weight, 60) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Height:</strong> ' + line(a.height, 150) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;background:#f5deb3;"><strong>Allergies:</strong> ' + line(a.allergies, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Advance Directive:</strong> ' + cb(a.advance_directive,'CPR') + ' CPR &nbsp; ' + cb(a.advance_directive,'DNAR') + ' DNAR &nbsp; ' + cb(a.advance_directive,'NONE') + ' NONE</td></tr>' +
+    '<tr><td colspan="2" style="border:1px solid #000;padding:4px 6px;"><strong>Diagnoses/Medical History:</strong><br><div style="min-height:50px;padding-top:4px;">' + (a.diagnoses_history || res.diagnosis || '') + '</div></td></tr>' +
+    '<tr><td colspan="2" style="border:1px solid #000;padding:4px 8px;background:#f5deb3;text-align:center;font-weight:bold;">Primary Contact</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Name:</strong> ' + line(a.primary_contact_name, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Relationship:</strong> ' + line(a.primary_contact_relationship, 150) + '</td></tr>' +
+    '<tr><td colspan="2" style="border:1px solid #000;padding:4px 6px;"><strong>Address:</strong> ' + line(a.primary_contact_address, 500) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Home Phone #:</strong> ' + line(a.primary_contact_home_phone, 100) + ' &nbsp; <strong>Work Phone#:</strong> ' + line(a.primary_contact_work_phone, 80) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>CP#:</strong> ' + line(a.primary_contact_cp, 150) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Email:</strong> ' + line(a.primary_contact_email, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Contact Preference:</strong> ' + line(a.primary_contact_preference, 150) + '</td></tr>' +
+    '<tr><td colspan="2" style="border:1px solid #000;padding:4px 8px;background:#f5deb3;text-align:center;font-weight:bold;">Secondary Contact</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Name:</strong> ' + line(a.secondary_contact_name, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Relationship:</strong> ' + line(a.secondary_contact_relationship, 150) + '</td></tr>' +
+    '<tr><td colspan="2" style="border:1px solid #000;padding:4px 6px;"><strong>Address:</strong> ' + line(a.secondary_contact_address, 500) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Home Phone#:</strong> ' + line(a.secondary_contact_home_phone, 100) + ' &nbsp; <strong>Work Phone#:</strong> ' + line(a.secondary_contact_work_phone, 80) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>CP#:</strong> ' + line(a.secondary_contact_cp, 150) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Email:</strong> ' + line(a.secondary_contact_email, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Contact Preference:</strong> ' + line(a.secondary_contact_preference, 150) + '</td></tr>' +
+    '<tr><td colspan="2" style="border:1px solid #000;padding:4px 8px;background:#f5deb3;text-align:center;font-weight:bold;">Physician Information</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Physician\'s Name:</strong> ' + line(a.physician_name, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Specialty:</strong> ' + line(a.physician_specialty, 150) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Clinic:</strong> ' + line(a.physician_clinic, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Address:</strong> ' + line(a.physician_address, 150) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>City:</strong> ' + line(a.physician_city, 60) + ' <strong>State:</strong> ' + line(a.physician_state, 40) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Zipcode:</strong> ' + line(a.physician_zip, 60) + ' <strong>Phone:</strong> ' + line(a.physician_phone, 100) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Fax:</strong> ' + line(a.physician_fax, 100) + ' <strong>Email:</strong> ' + line(a.physician_email, 100) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Primary:</strong> ' + cb(String(a.physician_primary), 'true') + ' YES &nbsp; ' + cb(String(a.physician_primary), 'false') + ' NO</td></tr>' +
+    '<tr><td colspan="2" style="border:1px solid #000;padding:4px 8px;background:#f5deb3;text-align:center;font-weight:bold;">Other Physician Information</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Physician\'s Name:</strong> ' + line(a.other_physician_name, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Specialty:</strong> ' + line(a.other_physician_specialty, 150) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Clinic:</strong> ' + line(a.other_physician_clinic, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Address:</strong> ' + line(a.other_physician_address, 150) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>City:</strong> ' + line(a.other_physician_city, 60) + ' <strong>State:</strong> ' + line(a.other_physician_state, 40) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Zip Code:</strong> ' + line(a.other_physician_zip, 60) + ' <strong>Phone:</strong> ' + line(a.other_physician_phone, 100) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Fax:</strong> ' + line(a.other_physician_fax, 100) + ' <strong>Email:</strong> ' + line(a.other_physician_email, 100) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Primary:</strong> ' + cb(String(a.other_physician_primary), 'true') + ' YES &nbsp; ' + cb(String(a.other_physician_primary), 'false') + ' NO</td></tr>' +
+    '<tr><td colspan="2" style="border:1px solid #000;padding:4px 8px;background:#f5deb3;text-align:center;font-weight:bold;">Preferred Hospital</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Name Of Hospital:</strong> ' + line(a.hospital_name, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Address:</strong> ' + line(a.hospital_address, 150) + '</td></tr>' +
+    '<tr><td colspan="2" style="border:1px solid #000;padding:4px 8px;background:#f5deb3;text-align:center;font-weight:bold;">Insurance Information</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Primary Carrier:</strong> ' + line(a.insurance_primary_carrier, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Secondary Carrier:</strong> ' + line(a.insurance_secondary_carrier, 150) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Phone Number:</strong> ' + line(a.insurance_primary_phone, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Phone Number:</strong> ' + line(a.insurance_secondary_phone, 150) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Policy ID:</strong> ' + line(a.insurance_primary_policy_id, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Policy ID:</strong> ' + line(a.insurance_secondary_policy_id, 150) + '</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Insurance Group:</strong> ' + line(a.insurance_primary_group, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Insurance Group:</strong> ' + line(a.insurance_secondary_group, 150) + '</td></tr>' +
+    '<tr><td colspan="2" style="border:1px solid #000;padding:4px 8px;background:#f5deb3;text-align:center;font-weight:bold;">Mortuary Information</td></tr>' +
+    '<tr><td style="border:1px solid #000;padding:4px 6px;"><strong>Mortuary:</strong> ' + line(a.mortuary_name, 200) + '</td><td style="border:1px solid #000;padding:4px 6px;"><strong>Phone Number:</strong> ' + line(a.mortuary_phone, 150) + '</td></tr>' +
+    '<tr><td colspan="2" style="border:1px solid #000;padding:4px 6px;"><strong>Address:</strong> ' + line(a.mortuary_address, 500) + '</td></tr>' +
+    '</table>' +
+    '<div style="text-align:center;font-weight:bold;font-size:12px;margin-top:12px;">RESIDENT INFORMATION SHEET</div>';
+
+  const win = window.open('', '_blank', 'width=900,height=1200');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Admission Document - ' + res.name + '</title>' +
+    "<style>* { box-sizing:border-box; margin:0; padding:0; } body { font-family:Arial,Helvetica,sans-serif; background:#fff; color:#000; padding:24px 32px; width:816px; margin:0 auto; }" +
+    "@media print { body { padding:16px 24px; } @page { size:letter; margin:0.4in; } }</style>" +
+    '</head><body>' + html + '</body></html>');
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); win.addEventListener('afterprint', () => { win.close(); window.focus(); }); }, 700);
+}
+
