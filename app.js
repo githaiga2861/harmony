@@ -9936,7 +9936,32 @@ async function downloadAdmissionDocument(residentId) {
   const { data: res } = await db.from('residents').select('*').eq('id', residentId).single();
   if (!res) { toast('Resident not found'); return; }
   const { data: af } = await db.from('resident_admission_forms').select('*').eq('resident_id', residentId).maybeSingle();
-  const a = af || {};
+  const a = { ...(af || {}) };
+  const r = res || {};
+
+  if (!a.admission_date) a.admission_date = r.admitted_date || null;
+  if (!a.diagnoses_history) a.diagnoses_history = r.diagnosis || '';
+
+  const pc = parseEmergencyContactString(r.emergency_contact);
+  const sc = parseEmergencyContactString(r.emergency_contact2);
+  let physFallbackName = '', physFallbackPhone = '';
+  if (r.emergency_contact3) {
+    const physMatch = r.emergency_contact3.match(/Primary Physician:\\s*(.+?)\\s*[\\u2014\\u2013-]\\s*([\\d\\-\\(\\)\\s]+)$/i);
+    if (physMatch) {
+      physFallbackName = physMatch[1].trim();
+      physFallbackPhone = physMatch[2].trim();
+    }
+  }
+  if (!a.primary_contact_name) a.primary_contact_name = pc.name || '';
+  if (!a.primary_contact_relationship) a.primary_contact_relationship = pc.relationship || '';
+  if (!a.primary_contact_home_phone) a.primary_contact_home_phone = pc.phone || '';
+  if (!a.primary_contact_cp) a.primary_contact_cp = pc.phone || '';
+  if (!a.secondary_contact_name) a.secondary_contact_name = sc.name || '';
+  if (!a.secondary_contact_relationship) a.secondary_contact_relationship = sc.relationship || '';
+  if (!a.secondary_contact_home_phone) a.secondary_contact_home_phone = sc.phone || '';
+  if (!a.secondary_contact_cp) a.secondary_contact_cp = sc.phone || '';
+  if (!a.physician_name) a.physician_name = physFallbackName || '';
+  if (!a.physician_phone) a.physician_phone = physFallbackPhone || '';
 
   const fmtD = (v) => v ? new Date(v + 'T00:00:00').toLocaleDateString('en-US') : '';
   const cb = (val, target) => val === target ? '\u2611' : '\u2610';
