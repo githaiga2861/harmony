@@ -269,6 +269,23 @@ async function deleteIncidentReportFromDb(id) {
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
+function parseEmergencyContactString(str) {
+  if (!str) return { name: '', relationship: '', phone: '' };
+  let name = str, relationship = '', phone = '';
+  const phoneMatch = str.match(/([\d\-\(\)\s]{7,})$/);
+  if (phoneMatch) {
+    phone = phoneMatch[1].trim();
+    name = str.slice(0, phoneMatch.index).trim();
+  }
+  const relMatch = name.match(/\(([^)]+)\)/);
+  if (relMatch) {
+    relationship = relMatch[1].trim();
+    name = name.replace(/\([^)]+\)/, '').trim();
+  }
+  name = name.replace(/[\u2014\u2013-]+\s*$/, '').trim();
+  return { name, relationship, phone };
+}
+
 // ══════════════════════════════════
 // WASHINGTON STATE TIMEZONE HELPERS
 // ══════════════════════════════════
@@ -9750,23 +9767,6 @@ async function openAdmissionFormModal(residentId) {
   const { data: af } = await db.from('resident_admission_forms').select('*').eq('resident_id', residentId).maybeSingle();
   const a = af || {};
   const r = res || {};
-
-  function parseEmergencyContactString(str) {
-    if (!str) return { name: '', relationship: '', phone: '' };
-    let name = str, relationship = '', phone = '';
-    const phoneMatch = str.match(/([\d\-\(\)\s]{7,})$/);
-    if (phoneMatch) {
-      phone = phoneMatch[1].trim();
-      name = str.slice(0, phoneMatch.index).trim();
-    }
-    const relMatch = name.match(/\(([^)]+)\)/);
-    if (relMatch) {
-      relationship = relMatch[1].trim();
-      name = name.replace(/\([^)]+\)/, '').trim();
-    }
-    name = name.replace(/[\u2014\u2013-]+\s*$/, '').trim();
-    return { name, relationship, phone };
-  }
 
   const pc = parseEmergencyContactString(r.emergency_contact);
   const sc = parseEmergencyContactString(r.emergency_contact2);
