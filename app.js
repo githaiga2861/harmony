@@ -1140,9 +1140,58 @@ async function handleSaveResident() {
     created_by: currentUser.name
   };
   await saveResident(res);
+  await saveAdmissionExtras('res', res.id);
   closeModal('modal-resident');
   toast('Resident added successfully');
   openProfile(res.id);
+}
+
+async function saveAdmissionExtras(prefix, residentId) {
+  const g = (id) => document.getElementById(prefix + '-' + id)?.value?.trim() || '';
+  const hasAny = g('discharge-date') || g('likes-called') || g('birth-place') || g('marital-status') ||
+    g('ssn') || g('weight') || g('height') || g('advance-directive') || g('allergies') ||
+    g('phys-name') || g('phys-specialty') || g('phys-clinic') || g('phys-phone') || g('phys-address') ||
+    g('hospital-name') || g('hospital-address') ||
+    g('ins-primary-carrier') || g('ins-primary-policy') || g('ins-secondary-carrier') || g('ins-secondary-policy') ||
+    g('mortuary-name') || g('mortuary-phone') || g('mortuary-address');
+  if (!hasAny) return;
+  const record = {
+    resident_id: residentId,
+    discharge_date: g('discharge-date') || null,
+    likes_to_be_called: g('likes-called'),
+    birth_place: g('birth-place'),
+    marital_status: g('marital-status'),
+    ssn: g('ssn'),
+    weight: g('weight'),
+    height: g('height'),
+    advance_directive: g('advance-directive'),
+    allergies: g('allergies'),
+    physician_name: g('phys-name'),
+    physician_specialty: g('phys-specialty'),
+    physician_clinic: g('phys-clinic'),
+    physician_phone: g('phys-phone'),
+    physician_address: g('phys-address'),
+    hospital_name: g('hospital-name'),
+    hospital_address: g('hospital-address'),
+    insurance_primary_carrier: g('ins-primary-carrier'),
+    insurance_primary_policy_id: g('ins-primary-policy'),
+    insurance_secondary_carrier: g('ins-secondary-carrier'),
+    insurance_secondary_policy_id: g('ins-secondary-policy'),
+    mortuary_name: g('mortuary-name'),
+    mortuary_phone: g('mortuary-phone'),
+    mortuary_address: g('mortuary-address'),
+    updated_at: new Date().toISOString()
+  };
+  await db.from('resident_admission_forms').upsert(record);
+}
+
+function toggleAdmissionExtras(prefix) {
+  const panel = document.getElementById(prefix + '-extras-panel');
+  const arrow = document.getElementById(prefix + '-extras-arrow');
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.textContent = isOpen ? '▼' : '▲';
 }
   
 async function deleteResident(id) {
@@ -1166,6 +1215,42 @@ async function openEditResident(id) {
   document.getElementById('edit-res-contact').value = r.emergency_contact || '';
   document.getElementById('edit-res-contact2').value = r.emergency_contact2 || '';
   document.getElementById('edit-res-contact3').value = r.emergency_contact3 || '';
+  const { data: af } = await db.from('resident_admission_forms').select('*').eq('resident_id', id).maybeSingle();
+  const a = af || {};
+  const extraFields = {
+    'edit-res-discharge-date': a.discharge_date || '',
+    'edit-res-likes-called': a.likes_to_be_called || '',
+    'edit-res-birth-place': a.birth_place || '',
+    'edit-res-marital-status': a.marital_status || '',
+    'edit-res-ssn': a.ssn || '',
+    'edit-res-weight': a.weight || '',
+    'edit-res-height': a.height || '',
+    'edit-res-advance-directive': a.advance_directive || '',
+    'edit-res-allergies': a.allergies || '',
+    'edit-res-phys-name': a.physician_name || '',
+    'edit-res-phys-specialty': a.physician_specialty || '',
+    'edit-res-phys-clinic': a.physician_clinic || '',
+    'edit-res-phys-phone': a.physician_phone || '',
+    'edit-res-phys-address': a.physician_address || '',
+    'edit-res-hospital-name': a.hospital_name || '',
+    'edit-res-hospital-address': a.hospital_address || '',
+    'edit-res-ins-primary-carrier': a.insurance_primary_carrier || '',
+    'edit-res-ins-primary-policy': a.insurance_primary_policy_id || '',
+    'edit-res-ins-secondary-carrier': a.insurance_secondary_carrier || '',
+    'edit-res-ins-secondary-policy': a.insurance_secondary_policy_id || '',
+    'edit-res-mortuary-name': a.mortuary_name || '',
+    'edit-res-mortuary-phone': a.mortuary_phone || '',
+    'edit-res-mortuary-address': a.mortuary_address || ''
+  };
+  Object.keys(extraFields).forEach(fid => {
+    const el = document.getElementById(fid);
+    if (el) el.value = extraFields[fid];
+  });
+  const hasExtras = Object.values(extraFields).some(v => v);
+  const panel = document.getElementById('edit-res-extras-panel');
+  const arrow = document.getElementById('edit-res-extras-arrow');
+  if (panel) panel.style.display = hasExtras ? 'block' : 'none';
+  if (arrow) arrow.textContent = hasExtras ? '▲' : '▼';
   openModal('modal-edit-resident');
 }
 
@@ -1189,6 +1274,7 @@ async function handleUpdateResident() {
 
   if (error) { toast('Error saving: ' + error.message); return; }
 
+  await saveAdmissionExtras('edit-res', id);
   closeModal('modal-edit-resident');
   toast('✅ Resident updated — all pages refreshed');
 

@@ -340,9 +340,6 @@
                 <button onclick="openEditResident(currentResidentId)" style="padding:5px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.12);color:#fff;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;">
                   ✏️ Edit Profile
                 </button>
-                <button onclick="openAdmissionFormModal(currentResidentId)" style="padding:5px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.12);color:#fff;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;">
-                  📋 Admission Info
-                </button>
                 <button onclick="downloadAdmissionDocument(currentResidentId)" style="padding:5px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,0.5);background:rgba(255,255,255,0.12);color:#fff;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;">
                   🖨️ Download Admission Document
                 </button>
@@ -2437,6 +2434,52 @@
           <label>Emergency Contact 3 (Name &amp; Phone)</label>
           <input type="text" id="res-contact3" placeholder="Optional third contact">
         </div>
+
+        <div class="field span2" style="margin-top:4px;">
+          <button type="button" onclick="toggleAdmissionExtras('res')" id="res-extras-toggle"
+            style="width:100%;text-align:left;background:var(--surface2);border:1.5px dashed var(--border);border-radius:8px;padding:10px 14px;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+            <span>+ Additional Admission Details (optional)</span>
+            <span id="res-extras-arrow">▼</span>
+          </button>
+        </div>
+        <div id="res-extras-panel" style="display:none;" class="field span2">
+          <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+            <div class="field"><label>Discharge Date</label><input type="date" id="res-discharge-date"></div>
+            <div class="field"><label>Likes To Be Called</label><input type="text" id="res-likes-called"></div>
+            <div class="field"><label>Birth Place</label><input type="text" id="res-birth-place"></div>
+            <div class="field"><label>Marital Status</label><input type="text" id="res-marital-status"></div>
+            <div class="field"><label>SSN</label><input type="text" id="res-ssn"></div>
+            <div class="field"><label>Weight</label><input type="text" id="res-weight"></div>
+            <div class="field"><label>Height</label><input type="text" id="res-height"></div>
+            <div class="field">
+              <label>Advance Directive</label>
+              <select id="res-advance-directive"><option value="">— Select —</option><option>CPR</option><option>DNAR</option><option>NONE</option></select>
+            </div>
+            <div class="field span2"><label>Allergies</label><input type="text" id="res-allergies"></div>
+
+            <div class="field span2" style="margin-top:4px;padding-top:10px;border-top:1px solid var(--border);"><label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Physician Information</label></div>
+            <div class="field"><label>Physician's Name</label><input type="text" id="res-phys-name"></div>
+            <div class="field"><label>Specialty</label><input type="text" id="res-phys-specialty"></div>
+            <div class="field"><label>Clinic</label><input type="text" id="res-phys-clinic"></div>
+            <div class="field"><label>Phone</label><input type="text" id="res-phys-phone"></div>
+            <div class="field span2"><label>Address</label><input type="text" id="res-phys-address"></div>
+
+            <div class="field span2" style="margin-top:4px;padding-top:10px;border-top:1px solid var(--border);"><label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Preferred Hospital</label></div>
+            <div class="field"><label>Hospital Name</label><input type="text" id="res-hospital-name"></div>
+            <div class="field"><label>Hospital Address</label><input type="text" id="res-hospital-address"></div>
+
+            <div class="field span2" style="margin-top:4px;padding-top:10px;border-top:1px solid var(--border);"><label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Insurance</label></div>
+            <div class="field"><label>Primary Carrier</label><input type="text" id="res-ins-primary-carrier"></div>
+            <div class="field"><label>Primary Policy ID</label><input type="text" id="res-ins-primary-policy"></div>
+            <div class="field"><label>Secondary Carrier</label><input type="text" id="res-ins-secondary-carrier"></div>
+            <div class="field"><label>Secondary Policy ID</label><input type="text" id="res-ins-secondary-policy"></div>
+
+            <div class="field span2" style="margin-top:4px;padding-top:10px;border-top:1px solid var(--border);"><label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Mortuary</label></div>
+            <div class="field"><label>Mortuary Name</label><input type="text" id="res-mortuary-name"></div>
+            <div class="field"><label>Mortuary Phone</label><input type="text" id="res-mortuary-phone"></div>
+            <div class="field span2"><label>Mortuary Address</label><input type="text" id="res-mortuary-address"></div>
+          </div>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -2497,6 +2540,52 @@
         <div class="field span2">
           <label>Emergency Contact 3 (Name &amp; Phone)</label>
           <input type="text" id="edit-res-contact3" placeholder="Optional third contact">
+        </div>
+
+        <div class="field span2" style="margin-top:4px;">
+          <button type="button" onclick="toggleAdmissionExtras('edit-res')" id="edit-res-extras-toggle"
+            style="width:100%;text-align:left;background:var(--surface2);border:1.5px dashed var(--border);border-radius:8px;padding:10px 14px;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+            <span>+ Additional Admission Details (optional)</span>
+            <span id="edit-res-extras-arrow">▼</span>
+          </button>
+        </div>
+        <div id="edit-res-extras-panel" style="display:none;" class="field span2">
+          <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+            <div class="field"><label>Discharge Date</label><input type="date" id="edit-res-discharge-date"></div>
+            <div class="field"><label>Likes To Be Called</label><input type="text" id="edit-res-likes-called"></div>
+            <div class="field"><label>Birth Place</label><input type="text" id="edit-res-birth-place"></div>
+            <div class="field"><label>Marital Status</label><input type="text" id="edit-res-marital-status"></div>
+            <div class="field"><label>SSN</label><input type="text" id="edit-res-ssn"></div>
+            <div class="field"><label>Weight</label><input type="text" id="edit-res-weight"></div>
+            <div class="field"><label>Height</label><input type="text" id="edit-res-height"></div>
+            <div class="field">
+              <label>Advance Directive</label>
+              <select id="edit-res-advance-directive"><option value="">— Select —</option><option>CPR</option><option>DNAR</option><option>NONE</option></select>
+            </div>
+            <div class="field span2"><label>Allergies</label><input type="text" id="edit-res-allergies"></div>
+
+            <div class="field span2" style="margin-top:4px;padding-top:10px;border-top:1px solid var(--border);"><label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Physician Information</label></div>
+            <div class="field"><label>Physician's Name</label><input type="text" id="edit-res-phys-name"></div>
+            <div class="field"><label>Specialty</label><input type="text" id="edit-res-phys-specialty"></div>
+            <div class="field"><label>Clinic</label><input type="text" id="edit-res-phys-clinic"></div>
+            <div class="field"><label>Phone</label><input type="text" id="edit-res-phys-phone"></div>
+            <div class="field span2"><label>Address</label><input type="text" id="edit-res-phys-address"></div>
+
+            <div class="field span2" style="margin-top:4px;padding-top:10px;border-top:1px solid var(--border);"><label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Preferred Hospital</label></div>
+            <div class="field"><label>Hospital Name</label><input type="text" id="edit-res-hospital-name"></div>
+            <div class="field"><label>Hospital Address</label><input type="text" id="edit-res-hospital-address"></div>
+
+            <div class="field span2" style="margin-top:4px;padding-top:10px;border-top:1px solid var(--border);"><label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Insurance</label></div>
+            <div class="field"><label>Primary Carrier</label><input type="text" id="edit-res-ins-primary-carrier"></div>
+            <div class="field"><label>Primary Policy ID</label><input type="text" id="edit-res-ins-primary-policy"></div>
+            <div class="field"><label>Secondary Carrier</label><input type="text" id="edit-res-ins-secondary-carrier"></div>
+            <div class="field"><label>Secondary Policy ID</label><input type="text" id="edit-res-ins-secondary-policy"></div>
+
+            <div class="field span2" style="margin-top:4px;padding-top:10px;border-top:1px solid var(--border);"><label style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;">Mortuary</label></div>
+            <div class="field"><label>Mortuary Name</label><input type="text" id="edit-res-mortuary-name"></div>
+            <div class="field"><label>Mortuary Phone</label><input type="text" id="edit-res-mortuary-phone"></div>
+            <div class="field span2"><label>Mortuary Address</label><input type="text" id="edit-res-mortuary-address"></div>
+          </div>
         </div>
       </div>
     </div>
