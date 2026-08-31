@@ -9660,11 +9660,41 @@ async function openAdmissionFormModal(residentId) {
   if (!residentId) return;
   document.getElementById('af-resident-id').value = residentId;
 
+  const { data: res } = await db.from('residents').select('*').eq('id', residentId).single();
   const { data: af } = await db.from('resident_admission_forms').select('*').eq('resident_id', residentId).maybeSingle();
   const a = af || {};
+  const r = res || {};
+
+  function parseEmergencyContactString(str) {
+    if (!str) return { name: '', relationship: '', phone: '' };
+    let name = str, relationship = '', phone = '';
+    const phoneMatch = str.match(/([\d\-\(\)\s]{7,})$/);
+    if (phoneMatch) {
+      phone = phoneMatch[1].trim();
+      name = str.slice(0, phoneMatch.index).trim();
+    }
+    const relMatch = name.match(/\(([^)]+)\)/);
+    if (relMatch) {
+      relationship = relMatch[1].trim();
+      name = name.replace(/\([^)]+\)/, '').trim();
+    }
+    name = name.replace(/[\u2014\u2013-]+\s*$/, '').trim();
+    return { name, relationship, phone };
+  }
+
+  const pc = parseEmergencyContactString(r.emergency_contact);
+  const sc = parseEmergencyContactString(r.emergency_contact2);
+  let physFallbackName = '', physFallbackPhone = '';
+  if (r.emergency_contact3) {
+    const physMatch = r.emergency_contact3.match(/Primary Physician:\s*(.+?)\s*[\u2014\u2013-]\s*([\d\-\(\)\s]+)$/i);
+    if (physMatch) {
+      physFallbackName = physMatch[1].trim();
+      physFallbackPhone = physMatch[2].trim();
+    }
+  }
 
   const fields = {
-    'af-admission-date': a.admission_date || '',
+    'af-admission-date': a.admission_date || r.admitted_date || '',
     'af-discharge-date': a.discharge_date || '',
     'af-likes-called': a.likes_to_be_called || '',
     'af-birth-place': a.birth_place || '',
@@ -9674,31 +9704,31 @@ async function openAdmissionFormModal(residentId) {
     'af-height': a.height || '',
     'af-allergies': a.allergies || '',
     'af-advance-directive': a.advance_directive || '',
-    'af-diagnoses-history': a.diagnoses_history || '',
-    'af-pc-name': a.primary_contact_name || '',
-    'af-pc-relationship': a.primary_contact_relationship || '',
+    'af-diagnoses-history': a.diagnoses_history || r.diagnosis || '',
+    'af-pc-name': a.primary_contact_name || pc.name || '',
+    'af-pc-relationship': a.primary_contact_relationship || pc.relationship || '',
     'af-pc-address': a.primary_contact_address || '',
-    'af-pc-home-phone': a.primary_contact_home_phone || '',
+    'af-pc-home-phone': a.primary_contact_home_phone || pc.phone || '',
     'af-pc-work-phone': a.primary_contact_work_phone || '',
-    'af-pc-cp': a.primary_contact_cp || '',
+    'af-pc-cp': a.primary_contact_cp || pc.phone || '',
     'af-pc-email': a.primary_contact_email || '',
     'af-pc-preference': a.primary_contact_preference || '',
-    'af-sc-name': a.secondary_contact_name || '',
-    'af-sc-relationship': a.secondary_contact_relationship || '',
+    'af-sc-name': a.secondary_contact_name || sc.name || '',
+    'af-sc-relationship': a.secondary_contact_relationship || sc.relationship || '',
     'af-sc-address': a.secondary_contact_address || '',
-    'af-sc-home-phone': a.secondary_contact_home_phone || '',
+    'af-sc-home-phone': a.secondary_contact_home_phone || sc.phone || '',
     'af-sc-work-phone': a.secondary_contact_work_phone || '',
-    'af-sc-cp': a.secondary_contact_cp || '',
+    'af-sc-cp': a.secondary_contact_cp || sc.phone || '',
     'af-sc-email': a.secondary_contact_email || '',
     'af-sc-preference': a.secondary_contact_preference || '',
-    'af-phys-name': a.physician_name || '',
+    'af-phys-name': a.physician_name || physFallbackName || '',
     'af-phys-specialty': a.physician_specialty || '',
     'af-phys-clinic': a.physician_clinic || '',
     'af-phys-address': a.physician_address || '',
     'af-phys-city': a.physician_city || '',
     'af-phys-state': a.physician_state || '',
     'af-phys-zip': a.physician_zip || '',
-    'af-phys-phone': a.physician_phone || '',
+    'af-phys-phone': a.physician_phone || physFallbackPhone || '',
     'af-phys-fax': a.physician_fax || '',
     'af-phys-email': a.physician_email || '',
     'af-phys-primary': a.physician_primary === false ? 'false' : 'true',
