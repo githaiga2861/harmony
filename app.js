@@ -7670,7 +7670,7 @@ async function openStaffWageModal(firstName, fullName, focusMonth) {
   const modalEl = document.getElementById('modal-staff-wage');
   if (!modalEl) return;
   document.getElementById('sw-modal-title').textContent = firstName + ' — Wage History';
-  document.getElementById('sw-modal-subtitle').textContent = (fullName || firstName) + ' · $' + amount.toFixed(2) + '/month';
+  document.getElementById('sw-modal-subtitle').textContent = (fullName || firstName) + ' · $' + rateForMonth(fullName || firstName, today, baseAmount).toFixed(2) + '/month';
   const owedEl = document.getElementById('sw-total-owed');
   owedEl.textContent = totalOwed > 0.005 ? 'Total Outstanding: $' + totalOwed.toFixed(2) : 'All payments up to date';
   owedEl.style.color = totalOwed > 0.005 ? '#c0392b' : '#1e7e34';
