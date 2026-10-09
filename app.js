@@ -5363,7 +5363,7 @@ async function editExpense(id) {
   setExpenseType(isWage ? 'wage' : 'general');
 
   if (isWage) {
-    const staffNames = ['James','Alvan','Ketty','Joseph'];
+    const staffNames = ['Alvan','Ketty','Joseph'];
     const staffSel = document.getElementById('exp-wage-staff');
     if (staffNames.includes(e.wage_staff)) { staffSel.value = e.wage_staff; }
     else { staffSel.value = 'Other'; document.getElementById('exp-wage-other-name').value = e.wage_staff || ''; document.getElementById('exp-wage-other-wrap').style.display = 'block'; }
@@ -7228,7 +7228,7 @@ async function deleteSavedCredentials(id) {
 // ══════════════════════════════════
 
 const SALARY_CONFIG_KEY = 'hlh_salary_config';
-const KNOWN_STAFF = ['James', 'Alvan', 'Ketty', 'Joseph'];
+const KNOWN_STAFF = ['Alvan', 'Ketty', 'Joseph'];
 
 const STAFF_COLORS = {
   'James':  { bg:'#e8f0fe', border:'#1a73e8', text:'#1a73e8', dot:'#1a73e8' },
@@ -7269,7 +7269,7 @@ async function saveSalaryConfig() {
     const startMonth = startEl ? startEl.value : (cfg[key]?.startMonth || new Date().toISOString().slice(0,7));
     allStaffInputs.push({ key, staffName, amount, freq, startMonth });
   });
-  ['James','Alvan','Joseph','Ketty'].forEach(name => {
+  ['Alvan','Joseph','Ketty'].forEach(name => {
     const key = name.toLowerCase();
     if (allStaffInputs.find(s => s.key === key)) return;
     const amtEl = document.getElementById('salary-' + key + '-amount');
