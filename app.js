@@ -434,8 +434,43 @@ function initApp() {
   seedExistingStaff();
 }
 
+// ── Salary rate history ──
+// staff_members.salary_rate_history holds past rates, e.g. [{"until":"2026-08","amount":40}]
+// meaning months up to and including Aug 2026 are owed $40. Months after the last
+// "until" use the current salary_amount. If the column does not exist, nothing changes.
+let STAFF_RATE_HISTORY = {};
+let STAFF_CURRENT_RATE = {};
+async function loadStaffRates() {
+  try {
+    const { data, error } = await db.from('staff_members').select('name, salary_amount, salary_rate_history');
+    if (error || !data) return;
+    const hist = {}, cur = {};
+    data.forEach(r => {
+      if (!r.name) return;
+      const key = r.name.split(' ')[0].toLowerCase();
+      let h = r.salary_rate_history;
+      if (typeof h === 'string') { try { h = JSON.parse(h); } catch { h = []; } }
+      hist[key] = Array.isArray(h) ? h.filter(e => e && e.until && e.amount != null) : [];
+      if (r.salary_amount != null) cur[key] = parseFloat(r.salary_amount);
+    });
+    STAFF_RATE_HISTORY = hist;
+    STAFF_CURRENT_RATE = cur;
+  } catch (e) { /* keep previous values */ }
+}
+// Amount owed for one month (mk = 'YYYY-MM') for a staff member
+function rateForMonth(staffName, mk, fallback) {
+  const key = String(staffName || '').split(' ')[0].toLowerCase();
+  const month = String(mk || '').slice(0, 7);
+  const hist = (STAFF_RATE_HISTORY[key] || []).slice().sort((a, b) => a.until.localeCompare(b.until));
+  const hit = hist.find(e => month <= String(e.until).slice(0, 7));
+  if (hit) return parseFloat(hit.amount);
+  if (STAFF_CURRENT_RATE[key] != null && !isNaN(STAFF_CURRENT_RATE[key])) return STAFF_CURRENT_RATE[key];
+  return parseFloat(fallback || 0);
+}
+
 async function seedExistingStaff() {
   // Staff data is managed entirely in Supabase — just load it into memory
+  await loadStaffRates();
   await loadDynamicStaffFromSupabase();
 }
 
@@ -5467,6 +5502,8 @@ async function saveExpense() {
       const { data: _dbStaff } = await db.from('staff_members').select('salary_amount').eq('name', staffName).maybeSingle();
       if (_dbStaff) _expectedAmt = parseFloat(_dbStaff.salary_amount || 0);
     }
+    await loadStaffRates();
+    _expectedAmt = rateForMonth(staffName, periodStart, _expectedAmt);
     const _paidAmt = parseFloat(amount);
     const _excess = _expectedAmt > 0 ? _paidAmt - _expectedAmt : 0;
     if (_excess > 0.005) {
@@ -7284,6 +7321,7 @@ async function computeStaffBalance(staffName) {
   const key = staffName.toLowerCase();
   const staffCfg = cfg[key];
   if (!staffCfg || !staffCfg.amount) return null;
+  await loadStaffRates();
 
   const { data: allPayments } = await db.from('expenses')
     .select('*')
@@ -7303,7 +7341,7 @@ async function computeStaffBalance(staffName) {
 
   const periods = Object.values(byPeriod).map(pg => {
     const paid = pg.payments.reduce((s, p) => s + parseFloat(p.amount || 0), 0);
-    const expected = staffCfg.amount;
+    const expected = rateForMonth(staffName, pg.start, staffCfg.amount);
     return { start: pg.start, end: pg.end, expected, paid, balance: expected - paid, payments: pg.payments };
   });
 
@@ -7324,7 +7362,10 @@ async function renderWageBalancePanel(staffName) {
 
   const cfg = getSalaryConfig();
   const key = staffName.toLowerCase();
-  const staffCfg = cfg[key];
+  await loadStaffRates();
+  const periodStartForRate = document.getElementById('exp-wage-period-start')?.value;
+  const staffCfg = cfg[key] || (STAFF_CURRENT_RATE[key] ? { amount: STAFF_CURRENT_RATE[key] } : undefined);
+  if (staffCfg) staffCfg.amount = rateForMonth(staffName, periodStartForRate || getWATodayStr(), staffCfg.amount);
   const colors = STAFF_COLORS[staffName] || { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568' };
 
   // Get selected period from form
@@ -7351,7 +7392,7 @@ async function renderWageBalancePanel(staffName) {
       byPeriod[pk].paid += parseFloat(p.amount || 0);
     });
     Object.values(byPeriod).forEach(pg => {
-      const bal = staffCfg.amount - pg.paid;
+      const bal = rateForMonth(staffName, pg.start, staffCfg.amount) - pg.paid;
       if (bal > 0.005) {
         overallOwed += bal;
         overdueRows += `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px;border-bottom:1px solid rgba(0,0,0,0.06);">
@@ -7545,7 +7586,8 @@ async function openStaffWageModal(firstName, fullName, focusMonth) {
     .select('name, salary_amount, salary_freq, salary_start_month')
     .eq('name', fullName).maybeSingle();
 
-  const amount = dbStaff ? parseFloat(dbStaff.salary_amount || 0) : 0;
+  const baseAmount = dbStaff ? parseFloat(dbStaff.salary_amount || 0) : 0;
+  await loadStaffRates();
   const startMonth = dbStaff ? (dbStaff.salary_start_month || '2026-05-01') : '2026-05-01';
   const colors = STAFF_COLORS[firstName] || { bg:'#f4f6f9', border:'#8a9ab0', text:'#4a5568' };
 
@@ -7562,6 +7604,7 @@ async function openStaffWageModal(firstName, fullName, focusMonth) {
   let totalOwed = 0;
 
   for (const mk of allMonths) {
+    const amount = rateForMonth(fullName || firstName, mk, baseAmount);
     const [my, mm] = mk.split('-').map(Number);
     const mStart = mk + '-01';
     const mEnd = mk + '-' + String(new Date(my, mm, 0).getDate()).padStart(2,'0');
@@ -7703,6 +7746,7 @@ async function renderWageBalanceStrip() {
   const { data: dbStaff } = await db.from('staff_members')
     .select('name, salary_amount, salary_freq, salary_start_month')
     .eq('is_active', true);
+  await loadStaffRates();
 
   if (!dbStaff || !dbStaff.length) { strip.style.display = 'none'; return; }
 
@@ -7742,7 +7786,7 @@ async function renderWageBalanceStrip() {
   for (const s of staffRows) {
     const firstName = s.name.split(' ')[0];
     const key = firstName.toLowerCase();
-    const amount = parseFloat(s.salary_amount);
+    let amount = parseFloat(s.salary_amount);
     const freq = s.salary_freq || 'monthly';
     const startMonth = s.salary_start_month || '2026-05-01';
     const isKetty = firstName.toLowerCase() === 'ketty';
@@ -7858,6 +7902,8 @@ async function renderWageBalanceStrip() {
     }
 
     // ── REGULAR monthly staff card ──
+    const _baseAmt = amount;
+    amount = rateForMonth(s.name, _wageStripMonth, _baseAmt);
     // Match by pay PERIOD — exp_date is just when payment was physically made
     // A payment belongs to the month its wage_period_start falls in
     const monthPayments = payments.filter(p => {
@@ -7884,6 +7930,7 @@ async function renderWageBalanceStrip() {
     const allMonthsAsc = [...allMonths].reverse();
     let staffOverdue = [];
     for (const mk of allMonthsAsc) {
+      const amount = rateForMonth(s.name, mk, _baseAmt);
       const [my, mm] = mk.split('-').map(Number);
       const mStart = `${mk}-01`;
       const mEnd = `${mk}-${String(new Date(my, mm, 0).getDate()).padStart(2,'0')}`;
@@ -8689,6 +8736,7 @@ async function checkPaymentAlerts(sendEmail) {
       overdueItems.push({ label: `🏠 ${b.name}`, detail: `$${(amtDue - amtPaid).toFixed(2)} remaining (due ${ordinal(b.due_day)} of month)` });
     }
   });
+  await loadStaffRates();
   const allTrackedStaff = Object.values(cfg2).map(v => v.name);
   for (const staffName of allTrackedStaff) {
     const key = staffName.split(' ')[0].toLowerCase();
@@ -8703,7 +8751,7 @@ async function checkPaymentAlerts(sendEmail) {
     generateExpectedPeriods(staffCfg.freq || 'monthly', effectiveEarliest).forEach(period => {
       if (period.fullEnd >= today || period.start < staffFloor) return;
       const paid = payments.filter(p => p.wage_period_start && p.wage_period_end && p.wage_period_start <= period.end && p.wage_period_end >= period.start).reduce((s,p) => s + parseFloat(p.amount||0), 0);
-      const owed = staffCfg.amount - paid;
+      const owed = rateForMonth(staffName, period.start, staffCfg.amount) - paid;
       if (owed > 0.005) overdueItems.push({ label: `👤 ${staffName} Wages`, detail: `$${owed.toFixed(2)} owed for ${fmtDate(period.start)} – ${fmtDate(period.end)}` });
     });
   }
