@@ -2650,7 +2650,7 @@ function toast(msg) {
 // PROFILE TABS
 // ══════════════════════════════════
 function switchProfileTab(tab) {
-  ['notes','vitals','medications','adl','appointments','incidents','ncp','ad'].forEach(t => {
+  ['notes','vitals','medications','adl','appointments','incidents','ncp','ad','funds'].forEach(t => {
     document.getElementById('profile-tab-' + t).style.display = t === tab ? 'block' : 'none';
     document.getElementById('ptab-' + t).classList.toggle('active', t === tab);
   });
@@ -2661,6 +2661,7 @@ function switchProfileTab(tab) {
   if (tab === 'appointments') renderAppointments();
   if (tab === 'ncp' && typeof renderProfileNCPs === 'function') renderProfileNCPs();
   if (tab === 'ad' && typeof renderProfileADs === 'function') renderProfileADs();
+  if (tab === 'funds' && typeof renderResidentFunds === 'function') renderResidentFunds();
 }
 
 // ══════════════════════════════════

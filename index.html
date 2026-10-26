@@ -374,6 +374,7 @@
             <button class="profile-tab" id="ptab-incidents" onclick="switchProfileTab('incidents')">⚠️ Incidents</button>
             <button class="profile-tab" id="ptab-ncp" onclick="switchProfileTab('ncp')">🗂️ Care Plans (NCP)</button>
             <button class="profile-tab" id="ptab-ad" onclick="switchProfileTab('ad')">📑 Assessment Details</button>
+            <button class="profile-tab" id="ptab-funds" onclick="switchProfileTab('funds')">💵 Resident Funds</button>
           </div>
 
           <!-- TAB: NOTES -->
@@ -499,6 +500,25 @@
               </button>
             </div>
             <div id="profile-ad-list" class="notes-list"></div>
+          </div>
+
+          <!-- TAB: RESIDENT FUNDS -->
+          <div id="profile-tab-funds" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap;">
+              <div>
+                <h3 style="font-size:15px;font-weight:600;">Resident Funds <span style="font-size:10.5px;font-weight:700;color:var(--danger);background:var(--danger-light);border:1px solid var(--danger-border);border-radius:20px;padding:2px 8px;margin-left:6px;vertical-align:middle;">🔒 Confidential</span></h3>
+                <div style="font-size:12px;color:var(--text3);margin-top:3px;">Money held by staff for safekeeping. Entries can be voided but never edited or deleted.</div>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-secondary btn-sm" onclick="rfOpenAccount()">Account Setup</button>
+                <button class="btn btn-secondary btn-sm" onclick="rfOpenStatement()">🖨️ Statement</button>
+                <button class="btn btn-primary btn-sm" onclick="rfOpenTxn()">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Record Transaction
+                </button>
+              </div>
+            </div>
+            <div id="profile-funds-list"></div>
           </div>
         </div>
 
@@ -4246,6 +4266,7 @@
 <div id="toast"></div>
 <script src="app.js"></script>
 <script src="care-plans.js"></script>
+<script src="resident-funds.js"></script>
 <!-- MODAL: Ketty Sunday Manager -->
 <div class="modal-overlay" id="modal-ketty-manager">
   <div class="modal modal-lg">
