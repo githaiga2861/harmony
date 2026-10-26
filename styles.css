@@ -426,7 +426,7 @@
   .btn-logout:hover { background: rgba(185,28,28,0.12); color: #fca5a5; }
 
   /* ── MAIN ── */
-  .main { margin-left: var(--sidebar); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+  .main { margin-left: var(--sidebar); flex: 1; display: flex; flex-direction: column; min-height: 100vh; min-width: 0; }
   .topbar {
     background: rgba(255,255,255,0.95);
     border-bottom: 1px solid var(--border);
@@ -449,7 +449,7 @@
     letter-spacing: -0.01em;
   }
   .topbar-right { display: flex; align-items: center; gap: 10px; }
-  .content { padding: 24px 28px; flex: 1; }
+  .content { padding: 24px 28px; flex: 1; min-width: 0; }
 
   /* ── CARDS ── */
   .card {
