@@ -365,13 +365,15 @@
           </div>
 
           <!-- Profile Tab Nav -->
-          <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:0;">
+          <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--border);padding-bottom:0;overflow-x:auto;scrollbar-width:thin;">
             <button class="profile-tab active" id="ptab-notes" onclick="switchProfileTab('notes')">📋 Progress Notes</button>
             <button class="profile-tab" id="ptab-vitals" onclick="switchProfileTab('vitals')">❤️ Vitals</button>
             <button class="profile-tab" id="ptab-medications" onclick="switchProfileTab('medications')">💊 Medications</button>
             <button class="profile-tab" id="ptab-adl" onclick="switchProfileTab('adl')">🏠 Daily Living</button>
             <button class="profile-tab" id="ptab-appointments" onclick="switchProfileTab('appointments')">📅 Appointments</button>
             <button class="profile-tab" id="ptab-incidents" onclick="switchProfileTab('incidents')">⚠️ Incidents</button>
+            <button class="profile-tab" id="ptab-ncp" onclick="switchProfileTab('ncp')">🗂️ Care Plans (NCP)</button>
+            <button class="profile-tab" id="ptab-ad" onclick="switchProfileTab('ad')">📑 Assessment Details</button>
           </div>
 
           <!-- TAB: NOTES -->
@@ -467,6 +469,36 @@
               </button>
             </div>
             <div id="profile-incidents-list" class="notes-list"></div>
+          </div>
+
+          <!-- TAB: NEGOTIATED CARE PLANS -->
+          <div id="profile-tab-ncp" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap;">
+              <div>
+                <h3 style="font-size:15px;font-weight:600;">Negotiated Care Plans <span style="font-size:10.5px;font-weight:700;color:var(--danger);background:var(--danger-light);border:1px solid var(--danger-border);border-radius:20px;padding:2px 8px;margin-left:6px;vertical-align:middle;">🔒 Confidential</span></h3>
+                <div style="font-size:12px;color:var(--text3);margin-top:3px;">Reviewed and updated monthly. Each plan is kept as its own record.</div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openAddNCP(currentResidentId)">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add NCP
+              </button>
+            </div>
+            <div id="profile-ncp-list" class="notes-list"></div>
+          </div>
+
+          <!-- TAB: ASSESSMENT DETAILS -->
+          <div id="profile-tab-ad" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:10px;flex-wrap:wrap;">
+              <div>
+                <h3 style="font-size:15px;font-weight:600;">Assessment Details (DSHS CARE) <span style="font-size:10.5px;font-weight:700;color:var(--danger);background:var(--danger-light);border:1px solid var(--danger-border);border-radius:20px;padding:2px 8px;margin-left:6px;vertical-align:middle;">🔒 Confidential</span></h3>
+                <div style="font-size:12px;color:var(--text3);margin-top:3px;">Record each assessment from the case manager and attach the original PDF.</div>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openAddAD(currentResidentId)">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Assessment Details
+              </button>
+            </div>
+            <div id="profile-ad-list" class="notes-list"></div>
           </div>
         </div>
 
@@ -4213,6 +4245,7 @@
 </button>
 <div id="toast"></div>
 <script src="app.js"></script>
+<script src="care-plans.js"></script>
 <!-- MODAL: Ketty Sunday Manager -->
 <div class="modal-overlay" id="modal-ketty-manager">
   <div class="modal modal-lg">
