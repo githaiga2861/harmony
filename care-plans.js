@@ -6,6 +6,7 @@
 // ══════════════════════════════════════════════════════════════════
 
 const CP_FACILITY = 'HARMONY LIVING HOUSE ADULT FAMILY LLC';
+function cpLogoUrl() { try { return new URL('harmony_living_house_logo.png', window.location.href).href; } catch (e) { return 'harmony_living_house_logo.png'; } }
 
 // ── small helpers ──
 function cpEsc(v) {
@@ -671,6 +672,9 @@ const CP_PRINT_CSS = `
   @page { size: letter; margin: 0.5in 0.45in 0.6in; }
   * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body { font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; color: #000; margin: 0; }
+  .doc-head { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 4px; }
+  .doc-head img { width: 64px; height: 64px; object-fit: contain; }
+  .doc-head .titles { text-align: center; }
   h1 { text-align: center; font-size: 13pt; margin: 0 0 2px; letter-spacing: 0.02em; }
   h2 { text-align: center; font-size: 12pt; margin: 0 0 10px; }
   table { width: 100%; border-collapse: collapse; margin-bottom: 8px; page-break-inside: auto; border: 2px double #000; }
@@ -706,8 +710,8 @@ function ncpPrintHTML(p, residentName) {
     + [1, 2, 3, 4].map(() => '<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td></tr>').join('');
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>NCP — ${cpEsc(d.name || residentName)} — ${cpFmt(p.plan_date)}</title><style>${CP_PRINT_CSS}</style></head><body>
-  <h1>${CP_FACILITY}</h1><h2>NEGOTIATED CARE PLAN</h2>
-  <div class="conf">CONFIDENTIAL — Resident health information. Do not copy or share without authorization.</div>
+  <div class="doc-head"><img src="${cpLogoUrl()}" alt="" onerror="this.style.display='none'"><div class="titles"><h1>${CP_FACILITY}</h1><h2 style="margin-bottom:0;">NEGOTIATED CARE PLAN</h2></div></div>
+  <div class="conf" style="margin-top:2px;">CONFIDENTIAL — Resident health information. Do not copy or share without authorization.</div>
 
   <table>
     <tr><td colspan="5" class="hd">DEMOGRAPHICS</td></tr>
