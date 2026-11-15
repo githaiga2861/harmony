@@ -72,7 +72,7 @@
   document.querySelectorAll('.panel nav a').forEach(function (a, k) { a.style.transitionDelay = (0.08 + k * 0.04) + 's'; });
 
   /* Image fallback: soft gradient instead of broken image */
-  document.querySelectorAll('img').forEach(function (img) {
+  document.querySelectorAll('img:not(.lb-img)').forEach(function (img) {
     img.addEventListener('error', function () {
       img.style.visibility = 'hidden';
       if (img.parentElement) img.parentElement.style.background = 'linear-gradient(135deg,#F6EDD3,#F3F2EF)';
@@ -92,20 +92,32 @@
 
   /* Lightbox */
   var lb = document.querySelector('.lightbox');
-  function closeLb() { if (lb) lb.classList.remove('open'); }
+  var lbY = 0;
+  function closeLb() {
+    if (!lb || !lb.classList.contains('open')) return;
+    lb.classList.remove('open');
+    document.documentElement.classList.remove('lb-lock');
+    document.body.style.position = ''; document.body.style.top = ''; document.body.style.width = '';
+    window.scrollTo({ top: lbY, behavior: 'instant' });
+  }
   if (lb) {
     var lbImg = lb.querySelector('img'), lbTxt = lb.querySelector('p');
     document.querySelectorAll('.g-item').forEach(function (g) {
       function open() {
         var im = g.querySelector('img');
-        lbImg.src = im.src; lbImg.alt = im.alt;
+        lbImg.src = im.currentSrc || im.src; lbImg.alt = im.alt;
         lbTxt.textContent = g.getAttribute('data-caption') || im.alt;
+        lbY = window.scrollY;
+        document.documentElement.classList.add('lb-lock');
+        document.body.style.position = 'fixed'; document.body.style.top = (-lbY) + 'px'; document.body.style.width = '100%';
         lb.classList.add('open');
       }
       g.addEventListener('click', open);
       g.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
     });
     lb.addEventListener('click', function (e) { if (e.target === lb || e.target.closest('.lb-close')) closeLb(); });
+    lb.addEventListener('touchmove', function (e) { e.preventDefault(); }, { passive: false });
+    lb.addEventListener('wheel', function (e) { e.preventDefault(); }, { passive: false });
   }
 
   /* Contact form → opens email */

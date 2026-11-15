@@ -305,7 +305,7 @@ ourhome = page_hero("Our Home","Take a look around","A bright, single-level home
   {sec_head("Photo gallery","Inside &amp; outside <em>Harmony</em>","Tap any photo to see it larger.")}
   <div class="gallery g3gal">{gal_items}</div>
 </div></section>
-<div class="lightbox" role="dialog" aria-label="Photo viewer"><button class="lb-close" type="button" aria-label="Close">{sicon("x")}</button><img src="" alt=""><p></p></div>
+<div class="lightbox" role="dialog" aria-label="Photo viewer"><button class="lb-close" type="button" aria-label="Close">{sicon("x")}</button><img class="lb-img" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt=""><p></p></div>
 
 <section class="section tint"><div class="wrap">
   {sec_head("A day at Harmony","Gentle rhythms, <em>familiar</em> routines","No two days are identical, because they follow each resident. Here's what a typical day can look like.")}

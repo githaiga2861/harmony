@@ -279,7 +279,7 @@ p{max-width:68ch}
 .g-item:hover{transform:translateY(-8px);box-shadow:var(--shadow)}
 .g-item:hover img{transform:scale(1.08)}
 .g-item:hover .zoom{transform:none}
-.lightbox{position:fixed;inset:0;z-index:200;background:rgba(251,248,241,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;opacity:0;visibility:hidden;transition:opacity .45s,visibility .45s}
+.lightbox{position:fixed;inset:0;z-index:200;background:rgba(251,248,241,.99);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;opacity:0;visibility:hidden;transition:opacity .45s,visibility .45s}
 .lightbox.open{opacity:1;visibility:visible}
 .lightbox img{max-height:76vh;max-width:min(1100px,100%);border-radius:18px;box-shadow:var(--shadow);transform:scale(.94);transition:transform .6s var(--ease)}
 .lightbox.open img{transform:none}
@@ -526,3 +526,12 @@ body{border-top:3px solid transparent;border-image:var(--gold-grad) 1;border-lef
 .f-badge strong{font-size:1.15rem}
 .f-badge span{font-size:.74rem;line-height:1.4;display:block}
 @media (max-width:760px){.f-badge{left:12px;right:auto;bottom:-18px;max-width:220px}}
+
+/* v3 tweaks */
+.hero-name::after{background:var(--ink)}
+.mini .n{position:static;display:block;font-size:1.05rem;letter-spacing:.12em;line-height:1;margin:0 auto 10px;color:var(--gold-deep);font-style:italic}
+.f-brand img{height:120px}
+@media (max-width:760px){.f-brand img{height:105px}}
+.lightbox{overscroll-behavior:contain}
+.lightbox img{visibility:visible!important;max-height:78vh;width:auto;object-fit:contain}
+html.lb-lock,html.lb-lock body{overflow:hidden!important;touch-action:none}
