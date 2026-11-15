@@ -125,7 +125,6 @@ contact = page_hero("Contact","Contact &amp; tours","We'd love to <em>welcome</e
       <a class="c-card" href="{S["wa"]}" target="_blank" rel="noopener" data-reveal="left" data-draw style="--d:.08s"><div class="ico-badge">{icon("chat")}</div><div><small>WhatsApp</small><strong>Message us</strong></div></a>
       <a class="c-card" href="mailto:{S["email"]}" data-reveal="left" data-draw style="--d:.16s"><div class="ico-badge">{icon("mail")}</div><div><small>Email</small><strong>hello@<wbr>harmonylivinghouse.com</strong></div></a>
       <a class="c-card" href="{S["maps"]}" target="_blank" rel="noopener" data-reveal="left" data-draw style="--d:.24s"><div class="ico-badge">{icon("pin")}</div><div><small>Visit</small><strong>{S["addr1"]}, {S["addr2"]}</strong></div></a>
-      <a class="c-card" href="{S["fb"]}" target="_blank" rel="noopener" data-reveal="left" data-draw style="--d:.32s"><div class="ico-badge">{icon("users")}</div><div><small>Facebook</small><strong>/harmonylivinghouse</strong></div></a>
     </div>
     <div class="map" data-reveal="zoom"><iframe title="Map to Harmony Living House, 120 Newaukum Village Dr, Chehalis WA" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=120%20Newaukum%20Village%20Dr%2C%20Chehalis%2C%20WA%2098532&z=15&output=embed"></iframe></div>
   </div>

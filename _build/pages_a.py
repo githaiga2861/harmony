@@ -13,14 +13,20 @@ T_SMALL='1586324304780-c9a5031a3599'; T_FAMILY='1593100126453-19b562a800c1'; T_M
 AB_MISSION='1766524555239-245d78f3b3a2'; AB_VISION='1773227059780-5e865ce7fb13'; AB_PROMISE='1595023986775-e3e9ce35ca2f'
 OWN_LIVING='assets/img/home/living-room.jpg'; OWN_BATH='assets/img/home/bathroom.jpg'
 OWN_FRONT='assets/img/home/exterior-front.jpg'; OWN_STREET='assets/img/home/exterior-street.jpg'
+H='assets/img/home/'
+OWN_WIDE=H+'front-wide.jpg'; OWN_RAMP=H+'front-ramp.jpg'; OWN_TV=H+'living-tv.jpg'; OWN_KITCHEN=H+'kitchen-dining.jpg'
+OWN_BED=H+'bedroom.jpg'; OWN_SHOWER=H+'shower.jpg'; OWN_DECK=H+'deck-back.jpg'; OWN_UMBRELLA=H+'deck-umbrella.jpg'
+OWN_SEAT=H+'deck-seating.jpg'; OWN_GATE=H+'deck-gate.jpg'; OWN_GAZEBO=H+'gazebo-view.jpg'
+ACTIVITY='assets/img/activity-chair-exercise.jpg'
 
 S = SITE
 
 # ───────────────────────── HOME ─────────────────────────
 home = f'''
 <section class="hero">
-  <div class="hero-media">{img(HERO_HOME, "A smiling caregiver in green scrubs leaning in to talk with an elderly resident", eager=True, w=2000)}</div>
+  <div class="hero-media">{img(OWN_WIDE, "Harmony Living House: a blue single-story home with white trim, a covered porch and a railed ramp to the front door", eager=True)}</div>
   <div class="wrap"><div class="hero-copy">
+    <img class="hero-mark" src="assets/img/logo.png" alt="Harmony Living House logo" data-reveal="zoom">
     <span class="eyebrow" data-reveal="up">Licensed Adult Family Home &middot; Chehalis, Washington</span>
     <h1 data-split style="--d:.1s">A real home, with <em>caring hands</em> around the clock</h1>
     <p class="lead" data-reveal="blur" style="--d:.55s">Harmony Living House is a small, state-licensed adult family home in Lewis County. Your loved one gets personal attention, 24/7 support and the warmth of family life, in a home that is calm, bright and truly lived in.</p>
@@ -31,7 +37,6 @@ home = f'''
       <span class="chip" data-reveal="up">{sicon("coins")}Medicaid &amp; Private Pay</span>
     </div>
   </div></div>
-  <img class="hero-logo" src="assets/img/logo.png" alt="Harmony Living House logo">
 </section>
 
 <section class="section" style="padding-top:20px"><div class="wrap">
@@ -69,7 +74,7 @@ home = f'''
     {card("Meals &amp; Nutrition","Fresh, home-cooked meals and snacks shaped around preferences, appetite and doctor's orders.",MEALS,"Elderly woman enjoying a meal at a round table by a sunny window","utensils","services.html#meals",d=.2)}
     {card("Memory Support","Calm routines, gentle reminders and patient redirection for residents living with memory loss.",MEMORY,"Seniors sharing coffee and working on a puzzle together","brain","services.html#memory",d=0)}
     {card("Health Coordination","Vital signs, appointment scheduling and clear updates between doctors, nurses and family.",HEALTH,"Healthcare worker checking a woman's blood pressure","steth","services.html#coordination",d=.1)}
-    {card("Social &amp; Emotional Support","Conversation, music, games and quiet companionship, because feeling connected is part of good care.",SOCIAL,"Three seniors talking and smiling together","users","services.html#social",d=.2)}
+    {card("Social &amp; Emotional Support","Conversation, music, games and quiet companionship, because feeling connected is part of good care.",ACTIVITY,"Older adults doing seated stretching exercises with colorful balls","users","services.html#social",d=.2)}
   </div>
   <div class="center" style="margin-top:44px" data-reveal="up">{btn("View All Services","services.html")}</div>
 </div></section>
@@ -80,7 +85,7 @@ home = f'''
     {tile("Fewer residents","A small group means caregivers notice the little changes that matter: a skipped meal, a quiet mood, a new ache.",T_SMALL,"Two people holding hands, one in a blue shirt","heart",0)}
     {tile("Family is welcome","Visits, calls and holidays together. You stay part of every decision about your loved one's care.",T_FAMILY,"An elderly woman with white hair hugging a young child","users",.1)}
     {tile("Home-cooked food","Meals made in a real kitchen and shared at one table, never a cafeteria line.",T_MEALS,"Elderly woman preparing a fresh salad in a kitchen","utensils",.2)}
-    {tile("Calm surroundings","A quiet Chehalis neighborhood with fresh air, a porch and a lawn to enjoy on good days.",T_GARDEN,"Two people sitting together looking out at a green garden","leaf",.3)}
+    {tile("Calm surroundings","Beside Newaukum Golf Club and the Newaukum River, with a deck, gazebo and lawn to enjoy on good days.",OWN_GAZEBO,"View from the gazebo with string lights toward the back deck","leaf",.3)}
   </div>
 </div></section>
 
@@ -97,13 +102,13 @@ home = f'''
 
 <section class="section"><div class="wrap feature rev">
   <div class="f-media" data-reveal="right">
-    <div class="frame">{img(OWN_FRONT, "Front of Harmony Living House: a blue single-story home with white porch railings at sunset")}</div>
+    <div class="frame">{img(OWN_DECK, "The large back deck at Harmony Living House with white railings and sliding doors to the house")}</div>
   </div>
   <div>
     <span class="eyebrow" data-reveal="up">Our home in Chehalis</span>
     <h2 data-split>Bright rooms, a <em>quiet street</em>, and a porch for sunny days</h2>
     <div class="divider" data-reveal="left"></div>
-    <p class="lead" data-reveal="blur">Harmony Living House is a single-story home in the Newaukum Village neighborhood. Everything is on one level, with an open living and dining area at its heart. Take a look around before you visit.</p>
+    <p class="lead" data-reveal="blur">Harmony Living House is a single-story home in the Newaukum Village neighborhood. Everything is on one level, with a ramp at the front door, an open living and dining area at its heart and a big gated back deck for fresh air. Take a look around before you visit.</p>
     <div class="btn-row" data-reveal="up" style="margin-top:28px">{btn("Open the Gallery","our-home.html")}</div>
   </div>
 </div></section>
@@ -118,15 +123,15 @@ home = f'''
 </div></section>
 
 <section class="section" style="padding-bottom:0"><div class="wrap">{hint("Helpful hint","When you tour any adult family home, ask to see its Disclosure of Charges (DSHS form 15-449). It lists the home's rates, services and policies. Ours is on the Payment &amp; Admissions page.")}</div></section>
-{cta("Let's find the right care, together","Call, message or book a tour. We'll listen first, answer honestly and help you decide what's best for your family.",OWN_STREET,"Harmony Living House seen from the street, with its lawn and garage")}
+{cta("Let's find the right care, together","Call, message or book a tour. We'll listen first, answer honestly and help you decide what's best for your family.",OWN_UMBRELLA,"Shaded table and chairs under a large umbrella on the back deck")}
 '''
 
 # ───────────────────────── ABOUT ─────────────────────────
 about = page_hero("About Us","About Harmony Living House","Rooted in <em>dignity</em>, run like a family",
   "We are a licensed adult family home in Chehalis, Washington, built on a simple belief: every person deserves to age with dignity, comfort and real human connection.",
-  OWN_FRONT,"Harmony Living House exterior with porch railings and neat lawn") + f'''
+  OWN_RAMP,"Corner view of Harmony Living House with its ramp, porch and two-car garage") + f'''
 <section class="section"><div class="wrap feature">
-  <div class="f-media" data-reveal="left"><div class="frame">{img(OWN_LIVING,"Open-plan living room and dining area inside Harmony Living House")}</div>
+  <div class="f-media" data-reveal="left"><div class="frame">{img(OWN_KITCHEN,"Kitchen, dining table and living area inside Harmony Living House")}</div>
     <div class="f-badge" data-reveal="up" style="--d:.4s"><div class="ico-badge" data-draw>{icon("shield")}</div><div><strong>#{S["license"]}</strong><span>Washington DSHS adult family home license</span></div></div></div>
   <div>
     <span class="eyebrow" data-reveal="up">Our story</span>
@@ -193,7 +198,7 @@ services = page_hero("Services","Care &amp; services","Everything your loved one
     {svc("coordination","Health Monitoring &amp; Coordination","We keep everyone on the same page about health.",["Routine vital signs and weight","Doctor appointment scheduling","Updates to physicians and family","Nurse delegation when required"],HEALTH,"Healthcare worker in blue scrubs taking a woman's blood pressure","steth",.2)}
     {svc("meals","Meals &amp; Nutrition","Home-cooked food served at the family table.",["Three meals a day plus snacks","Menus shaped by preferences","Diet and texture per doctor's orders","Encouraging fluids and good appetite"],MEALS,"An elderly woman eating a meal at a round table by a window","utensils",0)}
     {svc("memory","Memory &amp; Dementia Support","Patient, structured support for memory loss.",["Calm, predictable routines","Gentle reminders and redirection","Visual cues around the home","Watchful supervision day and night"],MEMORY,"Seniors enjoying coffee and a jigsaw puzzle together","brain",.1)}
-    {svc("social","Social &amp; Emotional Support","Connection is part of wellbeing.",["Conversation and companionship","Music, games, crafts and TV time","Porch time on pleasant days","Faith and cultural preferences honored"],SOCIAL,"Three seniors sharing a laugh in conversation","users",.2)}
+    {svc("social","Social &amp; Emotional Support","Connection is part of wellbeing.",["Conversation and companionship","Music, games, crafts and TV time","Porch time on pleasant days","Faith and cultural preferences honored"],ACTIVITY,"Older adults doing seated exercises with colorful balls in a bright room","users",.2)}
     {svc("housekeeping","Housekeeping &amp; Laundry","A clean, comfortable home without the chores.",["Daily tidying and sanitizing","Personal laundry and linens","Fresh bedding every week","Room kept the way residents like it"],HOUSEKEEP,"Freshly folded towels stacked on a neatly made bed","sparkle",0)}
     {svc("respite","Respite Stays","A break for family caregivers, when space allows.",["Short-term stays","Same care standards as long-term residents","Ideal after a hospital stay or during travel","Ask us about current availability"],RESPITE,"A cozy bedroom with a neatly made bed and soft light","bed",.1)}
     {svc("comfort","Comfort &amp; End-of-Life Care","Peace, comfort and presence in the final chapter.",["Comfort-focused personal care","Working alongside hospice providers","Family welcome to stay close","Quiet, dignified surroundings"],COMFORT,"Close-up of elderly hands gently clasped together","heart",.2)}
@@ -216,7 +221,7 @@ services = page_hero("Services","Care &amp; services","Everything your loved one
     <div class="btn-row" data-reveal="up">{btn("Book a Tour","contact.html")}{btn("Payment Options","payment.html","line","coins")}</div>
   </div>
 </div></section>
-{cta("Not sure what level of care is needed?","Tell us about your loved one. We'll talk through needs honestly and let you know if Harmony is the right fit.",OWN_LIVING,"Living room at Harmony Living House")}
+{cta("Not sure what level of care is needed?","Tell us about your loved one. We'll talk through needs honestly and let you know if Harmony is the right fit.",OWN_TV,"Living room at Harmony Living House with sectional sofa and TV")}
 '''
 
 # ───────────────────────── HOW IT WORKS ─────────────────────────
@@ -231,7 +236,7 @@ how = page_hero("How It Works","Your path to Harmony","Six calm steps from <em>f
   HOW_HERO,"Two hands holding each other with care") + f'''
 <section class="section"><div class="wrap"><div class="steps">
   {step("01","Reach out","Call, WhatsApp or email us. We'll ask about your loved one's health, daily needs, personality and routines, and answer your first questions about care and cost. There's no pressure and no obligation.",S_CALL,"A person holding a smartphone, ready to call",f'<div class="btn-row" style="margin-top:8px">{btn("Call "+S["phone"],"tel:"+S["tel"],"line","phone")}</div>')}
-  {step("02","Tour the home","Visit Harmony Living House, see the living spaces, meet the caregivers and get a feel for daily life. Bring your loved one if you can: their comfort matters most.",OWN_STREET,"Harmony Living House from the street, with its lawn and blue siding")}
+  {step("02","Tour the home","Visit Harmony Living House, see the living spaces, meet the caregivers and get a feel for daily life. Bring your loved one if you can: their comfort matters most.",OWN_WIDE,"Front of Harmony Living House with its covered porch and railed ramp")}
   {step("03","Assessment","We review your loved one's care needs. For Medicaid residents, this is based on the DSHS assessment completed with a case manager. For private pay, we gather information from you, the physician and any recent records.",S_ASSESS,"A health professional examining an older woman's arm")}
   {step("04","Paperwork &amp; disclosures","You'll receive our Disclosure of Charges, admission agreement and house policies to read before signing. We explain everything in plain language, with no surprises.",S_SIGN,"A couple reviewing and signing documents at a desk")}
   {step("05","Your care plan","Together we write a Negotiated Care Plan: how we'll help with each daily activity, medications, preferences and goals. The first full plan is completed within 30 days of move-in and updated whenever needs change.",COORD,"A caregiver listening carefully to a resident's health")}
@@ -250,22 +255,44 @@ how = page_hero("How It Works","Your path to Harmony","Six calm steps from <em>f
              "Comfortable clothing labeled with your loved one's name",
              "Familiar things: photos, a favorite blanket or chair"])}
   </div>
-  <div class="f-media" data-reveal="right"><div class="frame">{img(OWN_BATH,"Bright bathroom at Harmony Living House with a wide vanity and fresh towels")}</div></div>
+  <div class="f-media" data-reveal="right"><div class="frame">{img(OWN_BED,"A resident bedroom with a made bed, nightstand and lamp")}</div></div>
 </div></section>
 <section class="section" style="padding-bottom:0"><div class="wrap">{hint("Site hint","Not sure whether your loved one qualifies for Medicaid-paid care? Start with our guide to paying for care in Washington on the Resources page.")}</div></section>
-{cta("Ready for step one?","Call or message us today. We'll talk through your situation and arrange a time to visit.",OWN_FRONT,"Front porch of Harmony Living House")}
+{cta("Ready for step one?","Call or message us today. We'll talk through your situation and arrange a time to visit.",OWN_SEAT,"Sunny seating corner on the back deck")}
 '''
 
 # ───────────────────────── OUR HOME (gallery) ─────────────────────────
 GAL = [
- (OWN_LIVING,"Living room, dining &amp; kitchen","The heart of the home: an open, single-level space with a large cream sectional sofa, warm wood-look floors and plenty of overhead lighting. The dining table sits right beside the kitchen, so meals are shared together and residents can see and smell dinner being made.",
-  "Open-plan living room with a cream sectional sofa, wood-look floors, a dining table and a white kitchen beyond"),
- (OWN_BATH,"Bathroom","A bright bathroom finished in soft grey, with a wide vanity and plenty of counter space, white storage cabinets, fresh towels and marble-look tile. Caregivers assist with bathing and showering here, with privacy and dignity always respected.",
-  "Bathroom with a grey vanity, large mirror, white wall cabinet, towels and marble-look tile floor"),
- (OWN_FRONT,"Front entrance &amp; porch","A welcoming blue single-story home with white porch railings and a level concrete walkway to the front door. On pleasant days, the porch is a favorite spot for fresh air and conversation.",
-  "Blue single-story house with white porch railings and a concrete walkway, photographed at sunset"),
- (OWN_STREET,"Our quiet street","Harmony Living House sits on a calm residential street in Chehalis, with a green front lawn, an attached garage and easy parking for visiting family.",
-  "The house seen from the street, with a green lawn, attached garage and neighboring homes"),
+ (OWN_WIDE,"Front of the home","A single-story blue home with crisp white trim and a covered front porch. A long ramp with white railings runs along the front of the house, so residents using walkers or wheelchairs can come and go easily. A wide green lawn sits in front, with tall evergreens behind.",
+  "Blue single-story house with a covered porch and a long white-railed ramp, behind a green lawn"),
+ (OWN_RAMP,"Ramp entrance &amp; garage","The corner view shows the gently sloped ramp up to the front porch, a concrete walkway along neat red-mulch beds, lantern-style lights and a two-car garage. Family visitors have easy parking right at the door.",
+  "Corner of the blue house showing the house number 120, railed ramp, American flag and two-car garage"),
+ (OWN_LIVING,"Living room","The heart of the home: a big open room with a cream reclining sectional, warm wood-look floors and bright recessed lighting. The dining table and kitchen sit just beyond, so residents are never far from company.",
+  "Large open living room with a cream sectional sofa, wood-look floors, dining table and kitchen beyond"),
+ (OWN_TV,"TV corner","Looking back across the living room from the TV wall. A wall-mounted TV for favorite shows, fresh flowers, natural light from the windows and a wall-mounted heating and cooling unit keep the space comfortable all year.",
+  "Living room with a wall-mounted TV, flowers on a console, a cream sectional and the kitchen in the background"),
+ (OWN_KITCHEN,"Kitchen &amp; dining","Home-cooked meals are made in this full kitchen with a large island, stainless appliances and a farmhouse sink, then served at the dining table under the chandelier. The wood-plank wall with family photos makes it feel like home.",
+  "Open kitchen with white cabinets, island, stainless fridge and a dining table set beneath a chandelier"),
+ (OWN_BED,"Resident bedroom","A calm, freshly painted bedroom with a sleigh bed, white quilt, nightstand and lamp, window blinds and soft overhead lighting. Residents are encouraged to bring photos and favorite things to make it their own.",
+  "Bedroom with a dark wood sleigh bed, white bedding, nightstand with lamp and a window with blinds"),
+ (OWN_BATH,"Bathroom","A bright bathroom with a long grey vanity, quartz counter, plenty of light, a wall cabinet and fresh towels. Caregivers assist with bathing here with privacy and dignity always respected.",
+  "Bathroom with a grey vanity, large mirror, three-light fixture, white wall cabinet and towels"),
+ (OWN_SHOWER,"Walk-in shower with grab bars","Designed for safe bathing: a walk-in shower with several sturdy grab bars, a handheld shower head on a slide bar, a built-in niche for toiletries and textured hexagon floor tile.",
+  "Walk-in shower with black and white marble-look tile, multiple grab bars and a handheld shower head"),
+ (OWN_DECK,"Back deck","A large back deck stretches across the rear of the house with white safety railings and sliding doors from inside, making it easy to step out for sunshine and fresh air.",
+  "Wide back deck with white railings along the back of the blue house under a clear sky"),
+ (OWN_UMBRELLA,"Shaded patio table","A big umbrella shades the outdoor table and chairs, perfect for coffee, lunch outside or a visit with family. A fire extinguisher is mounted close by.",
+  "Outdoor table and white chairs under a large grey umbrella on the deck"),
+ (OWN_SEAT,"Sunny seating corner","A quiet corner of the deck with chairs around a small table, a favorite spot to sit in the sun and chat.",
+  "Four white chairs around a small round table on the deck beside the blue house"),
+ (OWN_GATE,"Deck steps &amp; safety gate","Steps with handrails lead up to the deck, with a black safety gate at the top so the deck stays a secure space.",
+  "Grey steps with white handrails leading to a black safety gate on the deck"),
+ (OWN_GAZEBO,"View from the gazebo","From the backyard gazebo, strung with lights, you can see the whole deck. It's a lovely place for warm evenings and family gatherings.",
+  "View through a wooden gazebo with string lights toward the gated deck"),
+ (OWN_FRONT,"Evening at Harmony","The home at sunset, with the railed ramp, porch and mature trees and shrubs along the street.",
+  "The blue house at sunset with a railed ramp, flag and landscaped trees"),
+ (OWN_STREET,"Our quiet street","A calm residential street near Newaukum Golf Club and the Newaukum River, where neighbors walk their dogs in the evening.",
+  "Street view of the house with a green lawn, garage and people walking a dog on the road"),
 ]
 gal_items = ''.join(f'''<div class="g-item" tabindex="0" role="button" aria-label="Enlarge photo: {t}" data-caption="{t}: {alt}." data-reveal="up" style="--d:{(i%2)*0.12:.2f}s">
   <figure>{img(src, alt)}<span class="zoom">{sicon("expand")}</span></figure>
@@ -273,10 +300,10 @@ gal_items = ''.join(f'''<div class="g-item" tabindex="0" role="button" aria-labe
 
 ourhome = page_hero("Our Home","Take a look around","A bright, single-level home made for <em>comfort</em>",
   "Real photos of Harmony Living House in Chehalis. Every space is designed to feel like home, not a facility.",
-  OWN_LIVING,"Living room at Harmony Living House") + f'''
+  OWN_KITCHEN,"Kitchen and dining area at Harmony Living House") + f'''
 <section class="section"><div class="wrap">
   {sec_head("Photo gallery","Inside &amp; outside <em>Harmony</em>","Tap any photo to see it larger.")}
-  <div class="gallery">{gal_items}</div>
+  <div class="gallery g3gal">{gal_items}</div>
 </div></section>
 <div class="lightbox" role="dialog" aria-label="Photo viewer"><button class="lb-close" type="button" aria-label="Close">{sicon("x")}</button><img src="" alt=""><p></p></div>
 
@@ -296,16 +323,19 @@ ourhome = page_hero("Our Home","Take a look around","A bright, single-level home
     <h2 data-split>Designed to feel safe, <em>not clinical</em></h2>
     <div class="divider" data-reveal="left"></div>
     {checks(["<b>Single-level living</b> with no stairs between bedroom, bathroom and living areas",
+             "<b>Ramp entrance</b> with railings at the front door",
+             "<b>Walk-in shower with grab bars</b> and a handheld shower head",
+             "<b>Gated back deck</b> with safety railings",
              "<b>Caregivers on site 24/7</b>, including overnight",
              "<b>Emergency and evacuation plan</b> for every resident, as Washington requires",
              "<b>Open common areas</b> where staff can keep a gentle eye on everyone",
              "<b>Clean, bright rooms</b> that residents are encouraged to personalize"])}
     <div class="btn-row" data-reveal="up">{btn("Book an In-Person Tour","contact.html")}</div>
   </div>
-  <div class="f-media" data-reveal="right"><div class="frame">{img(OWN_FRONT,"Harmony Living House front porch with white railings")}</div></div>
+  <div class="f-media" data-reveal="right"><div class="frame">{img(OWN_SHOWER,"Walk-in shower with grab bars")}</div></div>
 </div></section>
 <section class="section" style="padding-top:0;padding-bottom:0"><div class="wrap">{hint("Tour tip","Visit around a mealtime if you can. It's the best way to see how residents and caregivers interact, and to taste the food.")}</div></section>
-{cta("Photos only tell half the story","Come and feel the atmosphere for yourself. Tours are by appointment, any day of the week.",OWN_STREET,"Harmony Living House viewed from the street")}
+{cta("Photos only tell half the story","Come and feel the atmosphere for yourself. Tours are by appointment, any day of the week.",OWN_GAZEBO,"Gazebo view of the back deck")}
 '''
 
 # ───────────────────────── PAYMENT ─────────────────────────

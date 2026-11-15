@@ -87,8 +87,7 @@ SOCIAL_SVG = {
 }
 
 def social(cls=''):
-    items = [('facebook', SITE['fb'], 'Harmony Living House on Facebook', True),
-             ('whatsapp', SITE['wa'], 'Message us on WhatsApp', True),
+    items = [('whatsapp', SITE['wa'], 'Message us on WhatsApp', True),
              ('mail', 'mailto:'+SITE['email'], 'Email us', False),
              ('phone', 'tel:'+SITE['tel'], 'Call us', False)]
     out = []
@@ -200,7 +199,7 @@ HINTS = {}
 def layout(slug, title, desc, content, hint_pop=None):
     s = SITE
     hp = ''
-    if hint_pop:
+    if False:
         hp = f'<div class="hint-pop" role="status" data-key="{slug}"><div class="hp-ico">{sicon("bulb")}</div><div><b>Site hint</b><p>{hint_pop}</p></div><button class="x" type="button" aria-label="Dismiss hint">{sicon("x")}</button></div>'
     full_title = title if slug == 'index.html' else f'{title} | Harmony Living House'
     return f'''<!DOCTYPE html>
@@ -267,7 +266,9 @@ def layout(slug, title, desc, content, hint_pop=None):
       <li>{sicon('pin')}<a href="{s['maps']}" target="_blank" rel="noopener">{s['addr1']}<br>{s['addr2']}</a></li>
       <li>{sicon('phone')}<a href="tel:{s['tel']}">{s['phone']}</a></li>
       <li>{sicon('mail')}<a href="mailto:{s['email']}">{s['email']}</a></li>
-      <li>{sicon('clock')}<span>Caregivers on site 24/7<br>Tours by appointment</span></li></ul></div>
+      <li>{sicon('clock')}<span>Caregivers on site 24/7<br>Tours by appointment</span></li></ul>
+      <p class="f-near">{sicon('leaf')}<span>Next to <b>Newaukum Golf Club</b> and the <b>Newaukum River</b>, in a quiet Chehalis neighborhood.</span></p>
+      <div class="f-map"><iframe title="Small map of Harmony Living House near Newaukum Golf Club, Chehalis WA" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=120%20Newaukum%20Village%20Dr%2C%20Chehalis%2C%20WA%2098532&z=14&output=embed"></iframe></div></div>
   </div>
   <div class="f-bottom"><span>&copy; <span data-year>2026</span> Harmony Living House Adult Family Home LLC. All rights reserved.</span><span>Licensed by Washington State DSHS &middot; Adult Family Home License #{s['license']}</span></div>
 </div></footer>
