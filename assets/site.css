@@ -546,3 +546,5 @@ html.lb-lock,html.lb-lock body{overflow:hidden!important;touch-action:none}
 .f-badge strong{font-size:1.1rem;line-height:1.15}
 .f-badge span{font-size:.76rem;line-height:1.3;white-space:nowrap}
 @media (max-width:760px){.f-badge{width:auto;max-width:calc(100% - 24px)}.f-badge span{white-space:normal}}
+
+@media (min-width:761px){.topbar .social a[href^="mailto:"]{display:none}}
