@@ -93,7 +93,8 @@ def social(cls=''):
     out = []
     for i,(k,href,label,ext) in enumerate(items):
         tgt = ' target="_blank" rel="noopener"' if ext else ''
-        out.append(f'<a href="{href}" aria-label="{label}"{tgt} data-reveal="zoom" style="--d:{i*0.08:.2f}s">{SOCIAL_SVG[k]}</a>')
+        rv = f' data-reveal="zoom" style="--d:{i*0.08:.2f}s"' if cls == 'lg' else ''
+        out.append(f'<a href="{href}" aria-label="{label}"{tgt}{rv}>{SOCIAL_SVG[k]}</a>')
     return f'<div class="social {cls}">{"".join(out)}</div>'
 
 def U(pid, w=1200):
@@ -227,10 +228,12 @@ def layout(slug, title, desc, content, hint_pop=None):
 <div class="topbar"><div class="wrap">
   <div class="tb-left">
     <a class="tb-phone" href="tel:{s['tel']}">{sicon('phone')}{s['phone']}</a>
-    <a href="mailto:{s['email']}">{sicon('mail')}{s['email']}</a>
-    <a href="{s['maps']}" target="_blank" rel="noopener">{sicon('pin')}{s['addr1']}, Chehalis</a>
   </div>
-  {social()}
+  <div class="tb-right">
+    <a class="tb-extra" href="mailto:{s['email']}">{sicon('mail')}{s['email']}</a>
+    <a class="tb-extra" href="{s['maps']}" target="_blank" rel="noopener">{sicon('pin')}{s['addr1']}, Chehalis</a>
+    {social()}
+  </div>
 </div></div>
 <header class="site-header"><div class="wrap">
   <a class="brand" href="index.html" aria-label="Harmony Living House home"><img src="assets/img/logo.png" alt="Harmony Living House Adult Family Home logo" width="385" height="300"></a>

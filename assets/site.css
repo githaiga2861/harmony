@@ -535,3 +535,14 @@ body{border-top:3px solid transparent;border-image:var(--gold-grad) 1;border-lef
 .lightbox{overscroll-behavior:contain}
 .lightbox img{visibility:visible!important;max-height:78vh;width:auto;object-fit:contain}
 html.lb-lock,html.lb-lock body{overflow:hidden!important;touch-action:none}
+
+/* v4 tweaks */
+.topbar .tb-right{display:flex;align-items:center;gap:26px}
+@media (max-width:760px){.topbar .tb-extra{display:none}}
+.hero-name::after{background:linear-gradient(90deg,rgba(20,24,31,.12) 0%,rgba(20,24,31,.55) 45%,#14181F 100%)}
+.f-badge{max-width:none;width:max-content;padding:7px 16px 7px 8px;gap:10px;border-radius:14px}
+.f-badge .ico-badge{width:38px;height:38px;border-radius:11px}
+.f-badge .ico{width:20px;height:20px}
+.f-badge strong{font-size:1.1rem;line-height:1.15}
+.f-badge span{font-size:.76rem;line-height:1.3;white-space:nowrap}
+@media (max-width:760px){.f-badge{width:auto;max-width:calc(100% - 24px)}.f-badge span{white-space:normal}}
