@@ -26,7 +26,7 @@ home = f'''
 <section class="hero">
   <div class="hero-media">{img(OWN_WIDE, "Harmony Living House: a blue single-story home with white trim, a covered porch and a railed ramp to the front door", eager=True)}</div>
   <div class="wrap"><div class="hero-copy">
-    <span class="hero-name" data-reveal="zoom">Harmony Living House</span>
+    <span class="hero-name" data-reveal="zoom">HARMONY LIVING HOUSE</span>
     <span class="eyebrow" data-reveal="up">Licensed Adult Family Home &middot; Chehalis, Washington</span>
     <h1 data-split style="--d:.1s">A real home, with <em>caring hands</em> around the clock</h1>
     <p class="lead" data-reveal="blur" style="--d:.55s">Harmony Living House is a small, state-licensed adult family home in Lewis County. Your loved one gets personal attention, 24/7 support and the warmth of family life, in a home that is calm, bright and truly lived in.</p>

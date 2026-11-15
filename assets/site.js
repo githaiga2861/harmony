@@ -123,6 +123,17 @@
     });
   }
 
+  /* Keep the hero name on one line */
+  function fitName() {
+    document.querySelectorAll('.hero-name').forEach(function (el) {
+      el.style.fontSize = '';
+      var size = parseFloat(getComputedStyle(el).fontSize), guard = 0;
+      while (el.scrollWidth > el.clientWidth + 1 && guard++ < 40) { size -= 1; el.style.fontSize = size + 'px'; }
+    });
+  }
+  fitName(); window.addEventListener('resize', fitName);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitName);
+
   /* Year */
   document.querySelectorAll('[data-year]').forEach(function (y) { y.textContent = new Date().getFullYear(); });
 })();

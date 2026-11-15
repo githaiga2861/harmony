@@ -454,7 +454,8 @@ body{border-top:3px solid transparent;border-image:var(--gold-grad) 1;border-lef
 .hero{min-height:clamp(620px,92vh,900px);text-align:center}
 .hero::before{background:radial-gradient(ellipse at center,rgba(251,248,241,.92) 0%,rgba(251,248,241,.84) 45%,rgba(251,248,241,.5) 100%)}
 .hero-media img{object-position:center}
-.hero-copy{max-width:780px;margin-inline:auto}
+.hero-copy{max-width:940px;margin-inline:auto}
+.hero h1{max-width:780px}
 .hero-mark{width:clamp(190px,22vw,270px);height:auto;margin:0 auto 18px;filter:drop-shadow(0 10px 24px rgba(164,126,34,.22))}
 .hero h1{margin:18px auto 20px}
 .hero .lead,.hero p{margin-inline:auto}
@@ -516,5 +517,12 @@ body{border-top:3px solid transparent;border-image:var(--gold-grad) 1;border-lef
 }
 
 /* hero wordmark (name in caps) */
-.hero-name{display:block;font-family:var(--display);font-weight:600;font-size:clamp(1.5rem,3.4vw,2.4rem);letter-spacing:.22em;text-transform:uppercase;line-height:1.15;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin:0 auto 14px;padding-left:.22em}
-.hero-name::after{content:"";display:block;width:90px;height:1px;margin:14px auto 0;background:var(--gold-grad)}
+.hero-name{display:block;font-family:var(--body);font-weight:700;font-size:min(5.7vw,4rem);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;line-height:1.1;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin:0 auto 14px;padding-left:.08em;max-width:100%}
+.hero-name::after{content:"";display:block;width:90px;height:1.5px;margin:14px auto 0;background:var(--gold-grad)}
+/* smaller overlay badge on the welcome photo */
+.f-badge{padding:11px 15px;gap:10px;max-width:230px;border-radius:14px;bottom:24px}
+.f-badge .ico-badge{width:44px;height:44px;border-radius:13px}
+.f-badge .ico{width:22px;height:22px}
+.f-badge strong{font-size:1.15rem}
+.f-badge span{font-size:.74rem;line-height:1.4;display:block}
+@media (max-width:760px){.f-badge{left:12px;right:auto;bottom:-18px;max-width:220px}}
