@@ -80,9 +80,9 @@ p{max-width:68ch}
 .site-header.scrolled{box-shadow:0 8px 30px rgba(29,34,43,.08);border-color:var(--line)}
 .site-header .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:10px 0;transition:padding .4s var(--ease)}
 .brand{display:flex;align-items:center;flex-shrink:0}
-.brand img{height:118px;width:auto;transition:height .45s var(--ease),transform .5s var(--ease);filter:drop-shadow(0 6px 14px rgba(164,126,34,.18))}
+.brand img{height:88px;width:auto;transition:height .45s var(--ease),transform .5s var(--ease);filter:drop-shadow(0 6px 14px rgba(164,126,34,.18))}
 .brand:hover img{transform:scale(1.04)}
-.site-header.scrolled .brand img{height:78px}
+.site-header.scrolled .brand img{height:60px}
 .nav{display:flex;align-items:center;gap:4px}
 .nav>li{list-style:none;position:relative}
 .nav>li>a,.nav>li>button{display:flex;align-items:center;gap:6px;padding:10px 13px;font-size:.92rem;font-weight:500;color:var(--ink-2);border-radius:999px;position:relative;transition:color .3s}
@@ -386,8 +386,8 @@ p{max-width:68ch}
 @media (max-width:1180px){
   .nav,.header-cta .btn{display:none}
   .burger{display:grid}
-  .brand img{height:96px}
-  .site-header.scrolled .brand img{height:70px}
+  .brand img{height:72px}
+  .site-header.scrolled .brand img{height:54px}
 }
 @media (max-width:980px){
   .g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -428,7 +428,7 @@ p{max-width:68ch}
   .tile{min-height:320px}
 }
 @media (max-width:380px){
-  .brand img{height:80px}
+  .brand img{height:60px}
   .facts{grid-template-columns:1fr}
   .fact+.fact{border-left:0;border-top:1px solid var(--line)}
   .mini-steps{grid-template-columns:1fr}
@@ -514,3 +514,7 @@ body{border-top:3px solid transparent;border-image:var(--gold-grad) 1;border-lef
   .f-contact li,.f-near{justify-content:center;text-align:left}
   .f-bottom{justify-content:center;text-align:center}
 }
+
+/* hero wordmark (name in caps) */
+.hero-name{display:block;font-family:var(--display);font-weight:600;font-size:clamp(1.5rem,3.4vw,2.4rem);letter-spacing:.22em;text-transform:uppercase;line-height:1.15;background:var(--gold-grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin:0 auto 14px;padding-left:.22em}
+.hero-name::after{content:"";display:block;width:90px;height:1px;margin:14px auto 0;background:var(--gold-grad)}
