@@ -1,488 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="description" content="Harmony Living House is a Washington State DSHS licensed adult family home in Chehalis, WA, offering 24/7 personal care in a warm home setting."/>
-<link rel="icon" href="favicon.ico"/>
-<title>Harmony Living House — Compassionate Home Healthcare in Chehalis</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<style>
-:root {
-  --navy:       #0E1B2E;
-  --navy-mid:   #162336;
-  --navy-lit:   #1E3250;
-  --cream:      #F9F5EE;
-  --cream-dk:   #EFE9DC;
-  --gold-a:     #C9A84C;
-  --gold-b:     #E8CB7A;
-  --gold-c:     #A8832A;
-  --gold-grad:  linear-gradient(135deg,#C9A84C 0%,#E8CB7A 48%,#A8832A 100%);
-  --white:      #FFFFFF;
-  --ink:        #0E1B2E;
-  --ink-mid:    #2C3E55;
-  --ink-soft:   #4A5A6E;
-  --border:     rgba(201,168,76,.22);
-  --shad-gold:  0 8px 40px rgba(201,168,76,.28);
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{font-family:'Jost',sans-serif;font-weight:400;background:var(--cream);color:var(--ink);overflow-x:hidden;line-height:1.6}
-
-/* ─ UTIL ─ */
-.gold-text{background:var(--gold-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.eyebrow{display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--gold-a);margin-bottom:18px}
-.section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3rem);font-weight:500;line-height:1.12;color:var(--ink);margin-bottom:20px}
-.section-title em{font-style:italic;background:var(--gold-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.section-title.on-dark{color:var(--white)}
-.divider{width:52px;height:2px;background:var(--gold-grad);margin:24px 0 28px}
-.body-p{font-size:1rem;font-weight:400;line-height:1.85;color:var(--ink-mid);max-width:520px}
-.body-p.on-dark{color:rgba(255,255,255,.75)}
-
-/* ─ BUTTONS ─ */
-.btn-gold{display:inline-flex;align-items:center;gap:9px;padding:15px 34px;background:var(--gold-grad);color:var(--navy);font-family:'Jost',sans-serif;font-weight:600;font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;border:none;border-radius:60px;cursor:pointer;text-decoration:none;box-shadow:var(--shad-gold);transition:transform .35s ease,box-shadow .35s ease;white-space:nowrap}
-.btn-gold:hover{transform:translateY(-3px);box-shadow:0 14px 48px rgba(201,168,76,.42)}
-.btn-outline{display:inline-flex;align-items:center;gap:9px;padding:14px 34px;background:transparent;color:var(--white);font-family:'Jost',sans-serif;font-weight:500;font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;border:1.5px solid rgba(255,255,255,.55);border-radius:60px;cursor:pointer;text-decoration:none;transition:all .35s ease}
-.btn-outline:hover{border-color:var(--gold-b);color:var(--gold-b);background:rgba(201,168,76,.07)}
-
-/* ─ HEADER ─ */
-header{position:fixed;inset:0 0 auto;z-index:999;display:flex;align-items:center;justify-content:space-between;padding:0 5vw;height:80px;background:rgba(14,27,46,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);transition:box-shadow .4s ease}
-.logo-wrap{display:flex;align-items:center;gap:14px;text-decoration:none}
-.logo-icon{width:40px;height:40px;flex-shrink:0}
-.logo-name{font-family:'Cormorant Garamond',serif;font-size:1.18rem;font-weight:500;color:var(--white);letter-spacing:.06em;display:block;line-height:1.2}
-.logo-sub{font-size:.58rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-a);display:block;margin-top:3px}
-nav{display:flex;align-items:center;gap:36px}
-nav a{font-size:.72rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;color:rgba(255,255,255,.78);transition:color .3s ease}
-nav a:hover{color:var(--gold-b)}
-
-/* ─ HERO ─ */
-.hero{min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.hero-bg{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(14,27,46,.70) 0%,rgba(14,27,46,.44) 55%,rgba(14,27,46,.68) 100%),url('hero.jpg') center/cover no-repeat;animation:hzoom 14s ease-in-out infinite alternate}
-@keyframes hzoom{from{transform:scale(1)}to{transform:scale(1.05)}}
-.hero-content{position:relative;text-align:center;padding:0 6vw;max-width:880px;opacity:0;animation:rise 1.4s .3s ease forwards}
-@keyframes rise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
-.hero-eyebrow{font-size:.7rem;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--gold-b);margin-bottom:22px;display:block}
-.hero-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,6.5vw,5.5rem);font-weight:500;line-height:1.08;color:var(--white);letter-spacing:-.01em;margin-bottom:22px}
-.hero-h1 em{font-style:italic;background:var(--gold-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{font-family:'Cormorant Garamond',serif;font-size:clamp(1.15rem,2.2vw,1.5rem);font-style:italic;font-weight:400;color:rgba(255,255,255,.92);margin-bottom:48px;letter-spacing:.03em}
-.hero-btns{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
-.hero-scroll{position:absolute;bottom:38px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;animation:rise 1.6s 1.2s ease forwards}
-.hero-scroll span{font-size:.6rem;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:rgba(255,255,255,.55)}
-.scroll-bar{width:1px;height:52px;background:linear-gradient(to bottom,var(--gold-a),transparent);animation:spulse 2.2s ease-in-out infinite}
-@keyframes spulse{0%,100%{opacity:.5}50%{opacity:1}}
-
-/* ─ ABOUT ─ */
-.about-section{padding:120px 5vw;background:var(--cream)}
-.about-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:8vw;align-items:center}
-.img-wrap{position:relative}
-.about-img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;filter:contrast(1.04) brightness(1.06)}
-.img-frame{position:absolute;bottom:-22px;right:-22px;width:62%;aspect-ratio:1;border:1.5px solid rgba(201,168,76,.38);pointer-events:none}
-.img-badge{position:absolute;top:32px;left:-24px;background:var(--navy);padding:22px 26px;box-shadow:0 12px 44px rgba(14,27,46,.35)}
-.badge-num{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:500;line-height:1;background:var(--gold-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.badge-lbl{font-size:.62rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-top:5px;line-height:1.5}
-
-/* ─ STATS ─ */
-.stats-bar{background:var(--navy)}
-.stats-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr)}
-.stat-cell{padding:56px 36px;text-align:center;border-right:1px solid rgba(255,255,255,.07);transition:background .35s ease}
-.stat-cell:last-child{border-right:none}
-.stat-cell:hover{background:var(--navy-lit)}
-.stat-num{font-family:'Cormorant Garamond',serif;font-size:3.6rem;font-weight:500;line-height:1;background:var(--gold-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.stat-lbl{font-size:.7rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-top:12px;line-height:1.6}
-
-/* ─ GALLERY ─ */
-.gallery-section{background:var(--navy);padding:120px 5vw}
-.gallery-head{max-width:1200px;margin:0 auto 56px;display:flex;justify-content:space-between;align-items:flex-end;gap:32px}
-.gallery-note{font-size:.88rem;font-weight:400;color:rgba(255,255,255,.58);max-width:220px;line-height:1.75;text-align:right}
-.ss-wrap{max-width:1200px;margin:0 auto;position:relative}
-.slideshow{position:relative;aspect-ratio:16/7;overflow:hidden}
-.slide{position:absolute;inset:0;opacity:0;transition:opacity .9s ease-in-out}
-.slide.active{opacity:1}
-.slide img{width:100%;height:100%;object-fit:cover;display:block;filter:contrast(1.04) brightness(1.05)}
-.slide-cap{position:absolute;bottom:0;left:0;right:0;padding:28px 36px;background:linear-gradient(to top,rgba(14,27,46,.82) 0%,transparent 100%);display:flex;align-items:flex-end;justify-content:space-between}
-.cap-name{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-style:italic;font-weight:400;color:var(--white)}
-.cap-cnt{font-size:.65rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold-b)}
-.s-arrow{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;background:rgba(14,27,46,.7);border:1px solid rgba(201,168,76,.35);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .35s ease;opacity:0;z-index:5;color:var(--white);font-size:1.1rem;line-height:1}
-.s-arrow.prev{left:20px}
-.s-arrow.next{right:20px}
-.ss-wrap:hover .s-arrow{opacity:1}
-.s-arrow:hover{background:var(--gold-a);border-color:var(--gold-a);color:var(--navy)}
-.gdots{display:flex;gap:10px;justify-content:center;margin-top:26px}
-.gdot{height:3px;width:24px;background:rgba(255,255,255,.2);border:none;cursor:pointer;transition:all .4s ease;border-radius:2px;padding:0}
-.gdot.active{width:44px;background:var(--gold-grad)}
-
-/* ─ SERVICES ─ */
-.services-section{padding:120px 5vw;background:var(--cream-dk)}
-.svc-head{max-width:1200px;margin:0 auto 68px}
-.svc-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.svc-card{background:var(--white);padding:44px 36px;border:1px solid rgba(201,168,76,.16);position:relative;overflow:hidden;transition:transform .4s ease,box-shadow .4s ease}
-.svc-card::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:3px;background:var(--gold-grad);transform:scaleX(0);transform-origin:left;transition:transform .4s ease}
-.svc-card:hover{transform:translateY(-6px);box-shadow:0 24px 64px rgba(14,27,46,.12)}
-.svc-card:hover::after{transform:scaleX(1)}
-.svc-icon-box{width:52px;height:52px;background:rgba(201,168,76,.10);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:28px}
-.svc-icon{width:26px;height:26px}
-.svc-name{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:500;color:var(--ink);margin-bottom:14px}
-.svc-desc{font-size:.9rem;font-weight:400;line-height:1.82;color:var(--ink-soft)}
-
-/* ─ TESTIMONIALS ─ */
-.testi-section{padding:120px 5vw;background:var(--navy);text-align:center}
-.testi-inner{max-width:800px;margin:0 auto}
-.testi-section .eyebrow{display:block;margin-bottom:12px}
-.testi-item{display:none}
-.testi-item.active{display:block;animation:fadeUp .7s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-.q-mark{font-family:'Cormorant Garamond',serif;font-size:6rem;line-height:.5;background:var(--gold-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;margin-bottom:28px}
-.q-text{font-family:'Cormorant Garamond',serif;font-size:clamp(1.3rem,2.4vw,1.75rem);font-weight:400;font-style:italic;line-height:1.65;color:rgba(255,255,255,.94);margin-bottom:38px}
-.q-author{font-size:.72rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-a)}
-.q-role{font-size:.68rem;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.44);margin-top:5px;display:block}
-.tdots{display:flex;gap:10px;justify-content:center;margin-top:48px}
-.tdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.18);border:none;cursor:pointer;transition:all .35s ease;padding:0}
-.tdot.active{background:var(--gold-grad);width:24px;border-radius:4px}
-
-/* ─ CONTACT ─ */
-.contact-section{padding:120px 5vw;background:var(--cream)}
-.contact-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:8vw;align-items:start}
-.c-list{margin-top:40px;display:flex;flex-direction:column;gap:32px}
-.c-label{font-size:.62rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-a);display:block;margin-bottom:7px}
-.c-val{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:500;color:var(--ink);line-height:1.5}
-.c-val a{color:var(--ink);text-decoration:none;transition:color .3s ease}
-.c-val a:hover{color:var(--gold-a)}
-.map-box{margin-top:36px;border:1px solid rgba(201,168,76,.22);overflow:hidden}
-.map-box iframe{display:block;width:100%;height:220px;border:none;filter:saturate(.7) contrast(1.1)}
-.form-card{background:var(--navy);padding:52px 44px}
-.form-title{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:500;color:var(--white);margin-bottom:36px}
-.form-title em{font-style:italic;background:var(--gold-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.form-group{margin-bottom:20px}
-.form-lbl{display:block;font-size:.65rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-bottom:9px}
-.form-inp,.form-sel,.form-ta{width:100%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.18);padding:15px 18px;font-family:'Jost',sans-serif;font-size:.88rem;font-weight:400;color:var(--white);outline:none;transition:border-color .3s ease,background .3s ease;appearance:none}
-.form-inp::placeholder,.form-ta::placeholder{color:rgba(255,255,255,.32)}
-.form-inp:focus,.form-sel:focus,.form-ta:focus{border-color:var(--gold-a);background:rgba(201,168,76,.08)}
-.form-sel{color:rgba(255,255,255,.72);cursor:pointer}
-.form-sel option{background:var(--navy);color:var(--white)}
-.form-ta{resize:none;height:110px}
-.btn-submit{width:100%;margin-top:8px;justify-content:center}
-.form-ok{display:none;text-align:center;font-size:.82rem;font-weight:500;color:#7DD6A0;letter-spacing:.1em;margin-top:14px}
-
-/* ─ FOOTER ─ */
-footer{background:#080F1A;padding:80px 5vw 40px}
-.footer-grid{max-width:1200px;margin:0 auto 56px;display:grid;grid-template-columns:2fr 1fr 1fr;gap:6vw}
-.f-brand{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:500;color:var(--white);margin-bottom:14px}
-.f-desc{font-size:.85rem;font-weight:400;line-height:1.82;color:rgba(255,255,255,.46);max-width:280px}
-.f-col-title{font-size:.62rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-a);display:block;margin-bottom:22px}
-.f-links{list-style:none;display:flex;flex-direction:column;gap:14px}
-.f-links a{font-size:.85rem;font-weight:400;color:rgba(255,255,255,.5);text-decoration:none;transition:color .3s ease}
-.f-links a:hover{color:var(--gold-b)}
-.f-links .plain{font-size:.85rem;color:rgba(255,255,255,.46);line-height:1.7}
-.footer-bottom{max-width:1200px;margin:0 auto;padding-top:28px;border-top:1px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:.72rem;font-weight:400;color:rgba(255,255,255,.28);letter-spacing:.06em;flex-wrap:wrap}
-
-/* ─ RESPONSIVE ─ */
-@media(max-width:960px){
-  nav{display:none}
-  .about-inner,.contact-inner,.footer-grid{grid-template-columns:1fr}
-  .svc-grid{grid-template-columns:repeat(2,1fr)}
-  .stats-inner{grid-template-columns:repeat(2,1fr)}
-  .img-badge{left:-8px}
-  .img-frame{display:none}
-  .gallery-head{flex-direction:column;align-items:flex-start}
-  .gallery-note{text-align:left}
-  .form-row{grid-template-columns:1fr}
-}
-@media(max-width:600px){
-  .svc-grid{grid-template-columns:1fr}
-  .stats-inner{grid-template-columns:1fr 1fr}
-  .stat-num{font-size:2.3rem}
-  .stat-cell{min-width:0}
-  .footer-bottom{flex-direction:column;text-align:center}
-  .form-card{padding:36px 24px}
-}
-</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Harmony Living House | Adult Family Home in Chehalis, WA</title>
+<meta name="description" content="A Washington State licensed adult family home in Chehalis, WA offering 24/7 personal care, medication management, meals and memory support in a warm family home.">
+<meta name="theme-color" content="#FBF8F1">
+<meta property="og:title" content="Harmony Living House | Adult Family Home in Chehalis, WA">
+<meta property="og:description" content="A Washington State licensed adult family home in Chehalis, WA offering 24/7 personal care, medication management, meals and memory support in a warm family home.">
+<meta property="og:image" content="https://harmonylivinghouse.com/assets/img/home/exterior-front.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="harmony_living_house_logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://images.unsplash.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
-
-<!-- HEADER -->
-<header id="main-header">
-  <a href="#" class="logo-wrap" aria-label="Harmony Living House home">
-  <img src="harmony_living_house_logo.png" alt="Harmony Living House Logo" style="height:50px;">
-</a>
-
-  <nav aria-label="Main navigation">
-    <a href="#about">About</a>
-    <a href="#services">Services</a>
-    <a href="#contact">Contact</a>
-  </nav>
-
-  <a href="tel:+19514467774" class="btn-gold" aria-label="Call us now">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
-      <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.6a2 2 0 0 1-.5 2.1L8.1 9.6a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.8.3 1.7.6 2.6.7A2 2 0 0 1 22 16.9z"/>
-    </svg>
-    Call Now
-  </a>
-</header>
-
-<!-- HERO -->
-<section class="hero" aria-label="Welcome to Harmony Living House">
-  <div class="hero-bg" role="img" aria-label="Elegant sunlit residential interior"></div>
-  <div class="hero-content">
-    <span class="hero-eyebrow">Chehalis, Washington · Licensed Adult Family Home</span>
-    <h1 class="hero-h1">Compassionate Home<br>Healthcare in <em>Chehalis</em></h1>
-    <p class="hero-sub">Redefining the Golden Years with Grace &amp; Dignity</p>
-    <div class="hero-btns">
-      <a href="#contact" class="btn-gold">Schedule a Visit</a>
-      <a href="#about"   class="btn-outline">Our Story</a>
-    </div>
+<a class="skip" href="#main">Skip to content</a>
+<div class="topbar"><div class="wrap">
+  <div class="tb-left">
+    <a class="tb-phone" href="tel:+19514467774"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>(951) 446-7774</a>
+    <a href="mailto:hello@harmonylivinghouse.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg>hello@harmonylivinghouse.com</a>
+    <a href="https://www.google.com/maps/search/?api=1&query=120+Newaukum+Village+Dr+Chehalis+WA+98532" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>120 Newaukum Village Dr, Chehalis</a>
   </div>
-  <div class="hero-scroll" aria-hidden="true">
-    <span>Discover</span>
-    <div class="scroll-bar"></div>
+  <div class="social "><a href="https://www.facebook.com/harmonylivinghouse" aria-label="Harmony Living House on Facebook" target="_blank" rel="noopener" data-reveal="zoom" style="--d:0.00s"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 8.5V6.8c0-.8.5-1.3 1.4-1.3H17V2.2h-2.6C11.6 2.2 10.6 4 10.6 6.5v2H8v3.3h2.6V22H14V11.8h2.6l.5-3.3z"/></svg></a><a href="https://wa.me/19514467774" aria-label="Message us on WhatsApp" target="_blank" rel="noopener" data-reveal="zoom" style="--d:0.08s"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 2.5a9.5 9.5 0 0 0-8.2 14.3L2.5 21.5l4.8-1.3A9.5 9.5 0 1 0 12 2.5z"/><path fill="currentColor" d="M8.7 7.7c.2-.4.4-.4.7-.4h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .6l-.5.7c-.1.2-.2.4 0 .6.4.8 1 1.5 1.7 2.1.7.6 1.4.9 1.8 1.1.2.1.4.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.4.4.1.3 0 1.2-.5 1.7-.5.5-1.3.9-2.1.8-.8 0-2.6-.6-4.3-2.2-1.7-1.6-2.6-3.4-2.8-4.2-.2-.8.1-1.7.4-2z"/></svg></a><a href="mailto:hello@harmonylivinghouse.com" aria-label="Email us" data-reveal="zoom" style="--d:0.16s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg></a><a href="tel:+19514467774" aria-label="Call us" data-reveal="zoom" style="--d:0.24s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></a></div>
+</div></div>
+<header class="site-header"><div class="wrap">
+  <a class="brand" href="index.html" aria-label="Harmony Living House home"><img src="assets/img/logo.png" alt="Harmony Living House Adult Family Home logo" width="385" height="300"></a>
+  <nav aria-label="Main"><ul class="nav"><li><a href="index.html" aria-current=page>Home</a></li><li><a href="about.html">About</a></li><li class="has-drop"><button type="button" aria-haspopup="true">Care & Services<svg class=chev viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="drop"><a href="services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="M7 20l1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.8-2.8l-4.2 3.9"/><path d="M2 15l6 6"/><path d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.7 2.7 0 0 0 16 4a2.7 2.7 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12z"/></svg>Our Services</a><a href="how-it-works.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M16.2 7.8l-2.1 6.4-6.4 2.1 2.1-6.4z"/></svg>How It Works</a><a href="payment.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.1 10.4A6 6 0 1 1 10.3 18"/><path d="M7 6h1v4"/></svg>Payment & Admissions</a></div></li><li><a href="our-home.html">Our Home</a></li><li class="has-drop"><button type="button" aria-haspopup="true">Resources<svg class=chev viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="drop"><a href="resources.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Guides & Articles</a><a href="faqs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>FAQs</a><a href="careers.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Careers</a></div></li><li><a href="contact.html">Contact</a></li></ul></nav>
+  <div class="header-cta">
+    <a class="btn btn-gold" href="contact.html">Schedule a Tour <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <button class="burger" type="button" aria-label="Open menu" aria-expanded="false" data-menu-open><span></span></button>
   </div>
-</section>
-
-<!-- ABOUT -->
-<section class="about-section" id="about" aria-labelledby="about-h">
-  <div class="about-inner">
-    <div class="img-wrap">
-      <img class="about-img"
-        src="harmony_living_house_logo.png"
-        alt="Harmony Living House logo" style="object-fit:contain;background:#fff;padding:40px" loading="lazy"/>
-      <div class="img-frame" aria-hidden="true"></div>
-      <div class="img-badge">
-        <div class="badge-num">24/7</div>
-        <div class="badge-lbl">Care &amp;<br>Supervision</div>
-      </div>
-    </div>
-    <div>
-      <span class="eyebrow">Our Story</span>
-      <h2 class="section-title" id="about-h">A home that feels<br>like <em>truly yours</em></h2>
-      <div class="divider" aria-hidden="true"></div>
-      <p class="body-p" style="margin-bottom:20px">Harmony Living House was founded on a simple belief: every person deserves to age with dignity, surrounded by warmth and genuine compassion. Our residence in Chehalis is not a medical institution — it is a home, thoughtfully designed to feel safe, serene, and deeply personal.</p>
-      <p class="body-p" style="margin-bottom:44px">Our dedicated caregivers bring not only clinical excellence but an enduring commitment to human connection. Exceptional care begins with listening — to the stories, preferences, and rhythms of each resident's life.</p>
-      <a href="#contact" class="btn-gold">Request a Consultation</a>
-    </div>
+</div></header>
+<div class="drawer" aria-hidden="false">
+  <div class="scrim" data-menu-close></div>
+  <div class="panel" role="dialog" aria-label="Menu">
+    <div class="panel-top"><img src="assets/img/logo.png" alt="Harmony Living House"><button class="panel-close" type="button" aria-label="Close menu" data-menu-close><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <nav><a href="index.html" aria-current=page><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</a><a href="about.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg>About</a><a href="services.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="M7 20l1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.8-2.8l-4.2 3.9"/><path d="M2 15l6 6"/><path d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.7 2.7 0 0 0 16 4a2.7 2.7 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12z"/></svg>Our Services</a><a href="how-it-works.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M16.2 7.8l-2.1 6.4-6.4 2.1 2.1-6.4z"/></svg>How It Works</a><a href="payment.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.1 10.4A6 6 0 1 1 10.3 18"/><path d="M7 6h1v4"/></svg>Payment & Admissions</a><a href="our-home.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Our Home</a><a href="resources.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Guides & Articles</a><a href="faqs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>FAQs</a><a href="careers.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Careers</a><a href="contact.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg>Contact</a></nav>
+    <div class="panel-foot"><a class="btn btn-gold" href="contact.html">Schedule a Tour <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn btn-line" href="tel:+19514467774">Call (951) 446-7774 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></a><div class="social "><a href="https://www.facebook.com/harmonylivinghouse" aria-label="Harmony Living House on Facebook" target="_blank" rel="noopener" data-reveal="zoom" style="--d:0.00s"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 8.5V6.8c0-.8.5-1.3 1.4-1.3H17V2.2h-2.6C11.6 2.2 10.6 4 10.6 6.5v2H8v3.3h2.6V22H14V11.8h2.6l.5-3.3z"/></svg></a><a href="https://wa.me/19514467774" aria-label="Message us on WhatsApp" target="_blank" rel="noopener" data-reveal="zoom" style="--d:0.08s"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 2.5a9.5 9.5 0 0 0-8.2 14.3L2.5 21.5l4.8-1.3A9.5 9.5 0 1 0 12 2.5z"/><path fill="currentColor" d="M8.7 7.7c.2-.4.4-.4.7-.4h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .6l-.5.7c-.1.2-.2.4 0 .6.4.8 1 1.5 1.7 2.1.7.6 1.4.9 1.8 1.1.2.1.4.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.4.4.1.3 0 1.2-.5 1.7-.5.5-1.3.9-2.1.8-.8 0-2.6-.6-4.3-2.2-1.7-1.6-2.6-3.4-2.8-4.2-.2-.8.1-1.7.4-2z"/></svg></a><a href="mailto:hello@harmonylivinghouse.com" aria-label="Email us" data-reveal="zoom" style="--d:0.16s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg></a><a href="tel:+19514467774" aria-label="Call us" data-reveal="zoom" style="--d:0.24s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></a></div></div>
   </div>
-</section>
-
-<!-- STATS -->
-<div class="stats-bar" aria-label="Key facts">
-  <div class="stats-inner">
-    <div class="stat-cell"><div class="stat-num">24/7</div><div class="stat-lbl">Around-the-Clock<br>Care</div></div>
-    <div class="stat-cell"><div class="stat-num">DSHS</div><div class="stat-lbl">Licensed Adult<br>Family Home</div></div>
-    <div class="stat-cell"><div class="stat-num">NCP</div><div class="stat-lbl">Personal Care Plan<br>for Every Resident</div></div>
-    <div class="stat-cell"><div class="stat-num">Medicaid</div><div class="stat-lbl">&amp; Private Pay<br>Accepted</div></div>
-    </div>
 </div>
+<main id="main">
 
-<!-- SERVICES -->
-<section class="services-section" id="services" aria-labelledby="svc-h">
-  <div class="svc-head">
-    <span class="eyebrow">What We Offer</span>
-    <h2 class="section-title" id="svc-h">Care crafted around<br><em>each individual</em></h2>
-    <div class="divider" aria-hidden="true"></div>
-    <p class="body-p">Every service we provide is guided by one principle: this is your home. We adapt our care to your rhythm, your preferences, and your story.</p>
-  </div>
-  <div class="svc-grid">
-    <article class="svc-card">
-      <div class="svc-icon-box">
-        <svg class="svc-icon" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-          <defs><linearGradient id="sg1" x1="0" y1="0" x2="26" y2="26" gradientUnits="userSpaceOnUse"><stop stop-color="#C9A84C"/><stop offset="1" stop-color="#A8832A"/></linearGradient></defs>
-          <circle cx="13" cy="13" r="10" stroke="url(#sg1)" stroke-width="1.5"/>
-          <path d="M13 8v5l3 2" stroke="url(#sg1)" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <h3 class="svc-name">24/7 Personal Care</h3>
-      <p class="svc-desc">Around-the-clock support for daily living activities, medication management, and personal hygiene — delivered with discretion and warmth.</p>
-    </article>
-    <article class="svc-card">
-      <div class="svc-icon-box">
-        <svg class="svc-icon" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-          <defs><linearGradient id="sg2" x1="0" y1="0" x2="26" y2="26" gradientUnits="userSpaceOnUse"><stop stop-color="#C9A84C"/><stop offset="1" stop-color="#A8832A"/></linearGradient></defs>
-          <path d="M5 21L13 5l8 16" stroke="url(#sg2)" stroke-width="1.5" stroke-linejoin="round"/>
-          <path d="M7.5 16h11" stroke="url(#sg2)" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <h3 class="svc-name">Medical Coordination</h3>
-      <p class="svc-desc">Seamless coordination with physicians, specialists, and pharmacies so families can focus on connection — not administration.</p>
-    </article>
-    <article class="svc-card">
-      <div class="svc-icon-box">
-        <svg class="svc-icon" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-          <defs><linearGradient id="sg3" x1="0" y1="0" x2="26" y2="26" gradientUnits="userSpaceOnUse"><stop stop-color="#C9A84C"/><stop offset="1" stop-color="#A8832A"/></linearGradient></defs>
-          <path d="M5 13Q13 5 21 13Q13 21 5 13z" stroke="url(#sg3)" stroke-width="1.5"/>
-          <circle cx="13" cy="13" r="3" stroke="url(#sg3)" stroke-width="1.5"/>
-        </svg>
-      </div>
-      <h3 class="svc-name">Memory Care</h3>
-      <p class="svc-desc">A structured, nurturing environment for residents with Alzheimer's and dementia — combining evidence-based protocols with compassionate routines.</p>
-    </article>
-    <article class="svc-card">
-      <div class="svc-icon-box">
-        <svg class="svc-icon" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-          <defs><linearGradient id="sg4" x1="0" y1="0" x2="26" y2="26" gradientUnits="userSpaceOnUse"><stop stop-color="#C9A84C"/><stop offset="1" stop-color="#A8832A"/></linearGradient></defs>
-          <rect x="5" y="10" width="16" height="13" rx="1.5" stroke="url(#sg4)" stroke-width="1.5"/>
-          <path d="M9 10V8a4 4 0 018 0v2" stroke="url(#sg4)" stroke-width="1.5"/>
-        </svg>
-      </div>
-      <h3 class="svc-name">Respite Care</h3>
-      <p class="svc-desc">Short-term planned stays that give family caregivers essential rest while your loved one receives uninterrupted, exceptional care.</p>
-    </article>
-    <article class="svc-card">
-      <div class="svc-icon-box">
-        <svg class="svc-icon" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-          <defs><linearGradient id="sg5" x1="0" y1="0" x2="26" y2="26" gradientUnits="userSpaceOnUse"><stop stop-color="#C9A84C"/><stop offset="1" stop-color="#A8832A"/></linearGradient></defs>
-          <path d="M4 22Q13 4 22 22" stroke="url(#sg5)" stroke-width="1.5" fill="none"/>
-          <circle cx="13" cy="12" r="3.5" stroke="url(#sg5)" stroke-width="1.5"/>
-        </svg>
-      </div>
-      <h3 class="svc-name">Social &amp; Wellness Programs</h3>
-      <p class="svc-desc">Thoughtfully designed activities — gentle movement, music therapy, gardening, and social gatherings — that nurture purpose and joy.</p>
-    </article>
-    <article class="svc-card">
-      <div class="svc-icon-box">
-        <svg class="svc-icon" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-          <defs><linearGradient id="sg6" x1="0" y1="0" x2="26" y2="26" gradientUnits="userSpaceOnUse"><stop stop-color="#C9A84C"/><stop offset="1" stop-color="#A8832A"/></linearGradient></defs>
-          <path d="M13 3L23 9v14H3V9Z" stroke="url(#sg6)" stroke-width="1.5" stroke-linejoin="round"/>
-          <path d="M9 23V17h8v6" stroke="url(#sg6)" stroke-width="1.5"/>
-        </svg>
-      </div>
-      <h3 class="svc-name">Palliative &amp; Comfort Care</h3>
-      <p class="svc-desc">Compassionate end-of-life support focused on dignity, comfort, and the quality of every remaining moment — for residents and their families.</p>
-    </article>
-  </div>
+<section class="hero">
+  <div class="hero-media"><img src="https://images.unsplash.com/photo-1765896387398-1e1ae8d2eb85?auto=format&fit=crop&w=2000&q=80" alt="A smiling caregiver in green scrubs leaning in to talk with an elderly resident" loading="eager" decoding="async"></div>
+  <div class="wrap"><div class="hero-copy">
+    <span class="eyebrow" data-reveal="up">Licensed Adult Family Home &middot; Chehalis, Washington</span>
+    <h1 data-split style="--d:.1s">A real home, with <em>caring hands</em> around the clock</h1>
+    <p class="lead" data-reveal="blur" style="--d:.55s">Harmony Living House is a small, state-licensed adult family home in Lewis County. Your loved one gets personal attention, 24/7 support and the warmth of family life, in a home that is calm, bright and truly lived in.</p>
+    <div class="btn-row" data-reveal="up" style="--d:.75s"><a class="btn btn-gold" href="contact.html">Schedule a Tour <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn btn-line" href="services.html">Explore Our Services <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <div class="trust" data-stagger=".1">
+      <span class="chip" data-reveal="up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>DSHS Licensed #758581</span>
+      <span class="chip" data-reveal="up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Caregivers on site 24/7</span>
+      <span class="chip" data-reveal="up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M18.1 10.4A6 6 0 1 1 10.3 18"/><path d="M7 6h1v4"/></svg>Medicaid &amp; Private Pay</span>
+    </div>
+  </div></div>
+  <img class="hero-logo" src="assets/img/logo.png" alt="Harmony Living House logo">
 </section>
 
-<!-- CONTACT -->
-<section class="contact-section" id="contact" aria-labelledby="contact-h">
-  <div class="contact-inner">
-    <div>
-      <span class="eyebrow">Get In Touch</span>
-      <h2 class="section-title" id="contact-h">We would love to<br><em>welcome you</em></h2>
-      <div class="divider" aria-hidden="true"></div>
-      <p class="body-p">Every journey to Harmony begins with a conversation. Reach out to arrange a personal tour or to speak with our care team — at any time.</p>
-      <div class="c-list">
-        <div>
-          <span class="c-label">Phone</span>
-          <div class="c-val"><a href="tel:+19514467774">(951) 446-7774</a></div>
-        </div>
-        <div>
-          <span class="c-label">Email</span>
-          <div class="c-val"><a href="mailto:hello@harmonylivinghouse.com">hello@harmonylivinghouse.com</a></div>
-        </div>
-        <div>
-          <span class="c-label">Address</span>
-          <div class="c-val">120 Newaukum Village Dr<br>Chehalis, WA 98532</div>
-        </div>
-        <div>
-          <span class="c-label">WhatsApp</span>
-          <div class="c-val"><a href="https://wa.me/19514467774" target="_blank" rel="noopener">Message us on WhatsApp</a></div>
-          <p style="font-size:.9rem;font-weight:400;color:var(--ink-soft);margin-top:4px">Care team on site 24 hours, 7 days a week. Tours by appointment.</p>
-        </div>
-      </div>
-      <div class="map-box">
-        <iframe src="https://maps.google.com/maps?q=120%20Newaukum%20Village%20Dr%2C%20Chehalis%2C%20WA%2098532&z=15&output=embed"
-          title="Location of Harmony Living House in Chehalis WA" loading="lazy"></iframe>
-      </div>
-    </div>
-    <div class="form-card">
-      <p class="form-title">Request a <em>Personal Tour</em></p>
-      <form onsubmit="submitForm(event)" novalidate aria-label="Tour request form">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-lbl" for="fn">Full Name</label>
-            <input class="form-inp" id="fn" type="text" placeholder="Jane Smith" required autocomplete="name"/>
-          </div>
-          <div class="form-group">
-            <label class="form-lbl" for="fp">Phone</label>
-            <input class="form-inp" id="fp" type="tel" placeholder="(360) 555-0100" autocomplete="tel"/>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-lbl" for="fe">Email Address</label>
-          <input class="form-inp" id="fe" type="email" placeholder="jane@example.com" required autocomplete="email"/>
-        </div>
-        <div class="form-group">
-          <label class="form-lbl" for="fs">Care Interest</label>
-          <select class="form-sel" id="fs">
-            <option value="" disabled selected>Select a service…</option>
-            <option>24/7 Personal Care</option>
-            <option>Memory Care</option>
-            <option>Respite Care</option>
-            <option>Palliative &amp; Comfort Care</option>
-            <option>Social &amp; Wellness Programs</option>
-            <option>General Inquiry</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-lbl" for="fm">Message</label>
-          <textarea class="form-ta" id="fm" placeholder="Tell us a little about your situation…"></textarea>
-        </div>
-        <button type="submit" class="btn-gold btn-submit">Send Inquiry</button>
-        <p class="form-ok" id="form-ok" role="status">Your email app has opened with your message. Press Send there to reach us, or call (951) 446-7774.</p>
-      </form>
-    </div>
+<section class="section" style="padding-top:20px"><div class="wrap">
+  <div class="facts" data-reveal="up">
+    <div class="fact"><b>24/7</b><span>Awake, attentive care</span></div>
+    <div class="fact"><b>DSHS</b><span>State-licensed home</span></div>
+    <div class="fact"><b>1:1</b><span>Personal care plan</span></div>
+    <div class="fact"><b>Home</b><span>Not a facility</span></div>
   </div>
-</section>
+</div></section>
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-grid">
-    <div>
-      <div class="f-brand">
-  <img src="harmony_living_house_logo.png" alt="Harmony Living House Logo" style="height:40px; margin-bottom:10px;">
-  <div>Harmony Living House</div>
-</div>
-      <p class="f-desc">Compassionate home healthcare in Chehalis, Washington. Where every resident is family, and every day is lived with grace and purpose.</p>
-    </div>
-    <div>
-      <span class="f-col-title">Navigate</span>
-      <ul class="f-links">
-        <li><a href="#about">About Us</a></li>
-        <li><a href="#services">Our Services</a></li>
-        <li><a href="#contact">Contact Us</a></li>
-        <li><a href="https://www.facebook.com/harmonylivinghouse" target="_blank" rel="noopener">Facebook</a></li>
-        <li><a href="staff.html">Staff Login</a></li>
-      </ul>
-    </div>
-    <div>
-      <span class="f-col-title">Contact</span>
-      <ul class="f-links">
-        <li><a href="tel:+19514467774">(951) 446-7774</a></li>
-        <li><a href="mailto:hello@harmonylivinghouse.com">hello@harmonylivinghouse.com</a></li>
-        <li class="plain">120 Newaukum Village Dr<br>Chehalis, WA 98532</li>
-      </ul>
-    </div>
+<section class="section"><div class="wrap feature">
+  <div class="f-media" data-reveal="left">
+    <div class="frame"><img src="assets/img/home/living-room.jpg" alt="The open living room at Harmony Living House with a large sectional sofa, dining table and kitchen" loading="lazy" decoding="async"></div>
+    <div class="f-badge" data-reveal="up" style="--d:.4s"><div class="ico-badge" data-draw><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div><div><strong>Real home</strong><span>Living room, kitchen &amp; dining together</span></div></div>
   </div>
-  <div class="footer-bottom">
-    <span>© 2026 Harmony Living House. All rights reserved.</span>
-    <span>Licensed by Washington State DSHS · Adult Family Home License #758581</span>
+  <div>
+    <span class="eyebrow" data-reveal="up">Welcome to Harmony</span>
+    <h2 data-split>Where care feels like <em>family</em></h2>
+    <div class="divider" data-reveal="left"></div>
+    <p class="lead" data-reveal="blur">Moving a parent or spouse into care is one of the biggest decisions a family makes. We built Harmony Living House to make that decision feel right: a real house on a quiet street, a small group of residents, and caregivers who know each person by name, story and smile.</p>
+    <ul class="checks"><li data-reveal="left" style="--d:0.00s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg><span><b>Daily living help</b> with bathing, dressing, grooming, toileting and moving safely</span></li><li data-reveal="left" style="--d:0.08s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg><span><b>Medication support</b> given on time and documented every day</span></li><li data-reveal="left" style="--d:0.16s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg><span><b>Home-cooked meals</b> served at the family table</span></li><li data-reveal="left" style="--d:0.24s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg><span><b>A care plan written for one person</b>, reviewed as needs change</span></li></ul>
+    <div class="btn-row" data-reveal="up"><a class="btn btn-gold" href="about.html">Our Story <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn btn-line" href="our-home.html">See the Home <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></a></div>
   </div>
-</footer>
+</div></section>
 
-<script>
-/* Form */
-function submitForm(e){
- e.preventDefault();
- const v=id=>(document.getElementById(id).value||'').trim();
- const name=v('fn'),phone=v('fp'),email=v('fe'),svc=v('fs'),msg=v('fm');
- if(!name||(!phone&&!email)){alert('Please enter your name and a phone number or email so we can reach you.');return;}
- const body='Name: '+name+'\nPhone: '+phone+'\nEmail: '+email+'\nCare interest: '+(svc||'General inquiry')+'\n\n'+msg;
- window.location.href='mailto:hello@harmonylivinghouse.com?subject='+encodeURIComponent('Tour request from '+name)+'&body='+encodeURIComponent(body);
- document.getElementById('form-ok').style.display='block';
-}
+<section class="section tint"><div class="wrap">
+  <div class="sec-head center"><span class="eyebrow" data-reveal="up">What we offer</span><h2 data-split>Care that covers <em>every part</em> of the day</h2><p class="lead" data-reveal="blur" style="--d:.2s">From the first cup of coffee to a safe, settled night, our caregivers support the everyday tasks that have become hard to manage alone.</p></div>
+  <div class="grid g3">
+    <article class="card" data-reveal="up" data-draw style="--d:0.00s">
+  <div class="card-media"><img src="https://images.unsplash.com/photo-1773227055624-07b515ba87c5?auto=format&fit=crop&w=1200&q=80" alt="Caregiver helping an elderly woman walk with her walker" loading="lazy" decoding="async"><span class="shine"></span></div>
+  <div class="card-body"><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path pathLength="1" d="M7 20l1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.8-2.8l-4.2 3.9"/><path pathLength="1" d="M2 15l6 6"/><path pathLength="1" d="M19.5 8.5c.7-.7 1.5-1.6 1.5-2.7A2.7 2.7 0 0 0 16 4a2.7 2.7 0 0 0-5 1.8c0 1.2.8 2 1.5 2.8L16 12z"/></svg></div>
+    <h3>Personal Care</h3><p>Gentle, respectful help with bathing, dressing, grooming, toileting and getting around, at your loved one's pace.</p><a class="card-link" href="services.html#personal">Learn more <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+</article>
+    <article class="card" data-reveal="up" data-draw style="--d:0.10s">
+  <div class="card-media"><img src="https://images.unsplash.com/photo-1563213126-a4273aed2016?auto=format&fit=crop&w=1200&q=80" alt="Hand reaching into a weekly pill organizer" loading="lazy" decoding="async"><span class="shine"></span></div>
+  <div class="card-body"><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M10.5 20.5l10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7z"/><path pathLength="1" d="M8.5 8.5l7 7"/></svg></div>
+    <h3>Medication Management</h3><p>Medications given as prescribed, recorded on a daily log and coordinated with pharmacies and physicians.</p><a class="card-link" href="services.html#medication">Learn more <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+</article>
+    <article class="card" data-reveal="up" data-draw style="--d:0.20s">
+  <div class="card-media"><img src="https://images.unsplash.com/photo-1790470743855-e7eba908d5c3?auto=format&fit=crop&w=1200&q=80" alt="Elderly woman enjoying a meal at a round table by a sunny window" loading="lazy" decoding="async"><span class="shine"></span></div>
+  <div class="card-body"><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M3 2v7a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V2"/><path pathLength="1" d="M7 2v20"/><path pathLength="1" d="M21 15V2a5 5 0 0 0-5 5v6a2 2 0 0 0 2 2h3v7"/></svg></div>
+    <h3>Meals &amp; Nutrition</h3><p>Fresh, home-cooked meals and snacks shaped around preferences, appetite and doctor's orders.</p><a class="card-link" href="services.html#meals">Learn more <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+</article>
+    <article class="card" data-reveal="up" data-draw style="--d:0.00s">
+  <div class="card-media"><img src="https://images.unsplash.com/photo-1758691031158-8d19bc43fcf8?auto=format&fit=crop&w=1200&q=80" alt="Seniors sharing coffee and working on a puzzle together" loading="lazy" decoding="async"><span class="shine"></span></div>
+  <div class="card-body"><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M12 5a3 3 0 1 0-6 .1 4 4 0 0 0-2.5 5.8 4 4 0 0 0 .6 6.6A4 4 0 1 0 12 18z"/><path pathLength="1" d="M12 5a3 3 0 1 1 6 .1 4 4 0 0 1 2.5 5.8 4 4 0 0 1-.6 6.6A4 4 0 1 1 12 18z"/><path pathLength="1" d="M12 5v13"/></svg></div>
+    <h3>Memory Support</h3><p>Calm routines, gentle reminders and patient redirection for residents living with memory loss.</p><a class="card-link" href="services.html#memory">Learn more <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+</article>
+    <article class="card" data-reveal="up" data-draw style="--d:0.10s">
+  <div class="card-media"><img src="https://images.unsplash.com/photo-1631815590058-860e4f83c1e8?auto=format&fit=crop&w=1200&q=80" alt="Healthcare worker checking a woman&#x27;s blood pressure" loading="lazy" decoding="async"><span class="shine"></span></div>
+  <div class="card-body"><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 12 0V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path pathLength="1" d="M8 15v1a6 6 0 0 0 12 0v-4"/><circle pathLength="1" cx="20" cy="10" r="2"/></svg></div>
+    <h3>Health Coordination</h3><p>Vital signs, appointment scheduling and clear updates between doctors, nurses and family.</p><a class="card-link" href="services.html#coordination">Learn more <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+</article>
+    <article class="card" data-reveal="up" data-draw style="--d:0.20s">
+  <div class="card-media"><img src="https://images.unsplash.com/photo-1764173039543-f9f197744e1b?auto=format&fit=crop&w=1200&q=80" alt="Three seniors talking and smiling together" loading="lazy" decoding="async"><span class="shine"></span></div>
+  <div class="card-body"><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle pathLength="1" cx="9" cy="7" r="4"/><path pathLength="1" d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></div>
+    <h3>Social &amp; Emotional Support</h3><p>Conversation, music, games and quiet companionship, because feeling connected is part of good care.</p><a class="card-link" href="services.html#social">Learn more <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+</article>
+  </div>
+  <div class="center" style="margin-top:44px" data-reveal="up"><a class="btn btn-gold" href="services.html">View All Services <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+</div></section>
 
-/* Header shadow */
-window.addEventListener('scroll',()=>{
-  document.getElementById('main-header').style.boxShadow=window.scrollY>12?'0 4px 32px rgba(0,0,0,.28)':'none';
-},{passive:true});
+<section class="section"><div class="wrap">
+  <div class="sec-head center"><span class="eyebrow" data-reveal="up">Why families choose us</span><h2 data-split>Small home. <em>Big attention.</em></h2><p class="lead" data-reveal="blur" style="--d:.2s">An adult family home sits between living alone and a large facility. Here is what that difference feels like day to day.</p></div>
+  <div class="grid g4">
+    <article class="tile" data-reveal="up" data-draw style="--d:0.00s"><img src="https://images.unsplash.com/photo-1586324304780-c9a5031a3599?auto=format&fit=crop&w=1200&q=80" alt="Two people holding hands, one in a blue shirt" loading="lazy" decoding="async">
+  <div class="tile-body"><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></div><h3>Fewer residents</h3><p>A small group means caregivers notice the little changes that matter: a skipped meal, a quiet mood, a new ache.</p></div>
+</article>
+    <article class="tile" data-reveal="up" data-draw style="--d:0.10s"><img src="https://images.unsplash.com/photo-1593100126453-19b562a800c1?auto=format&fit=crop&w=1200&q=80" alt="An elderly woman with white hair hugging a young child" loading="lazy" decoding="async">
+  <div class="tile-body"><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle pathLength="1" cx="9" cy="7" r="4"/><path pathLength="1" d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></div><h3>Family is welcome</h3><p>Visits, calls and holidays together. You stay part of every decision about your loved one's care.</p></div>
+</article>
+    <article class="tile" data-reveal="up" data-draw style="--d:0.20s"><img src="https://images.unsplash.com/photo-1758874960056-07aa3d0afa3b?auto=format&fit=crop&w=1200&q=80" alt="Elderly woman preparing a fresh salad in a kitchen" loading="lazy" decoding="async">
+  <div class="tile-body"><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M3 2v7a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V2"/><path pathLength="1" d="M7 2v20"/><path pathLength="1" d="M21 15V2a5 5 0 0 0-5 5v6a2 2 0 0 0 2 2h3v7"/></svg></div><h3>Home-cooked food</h3><p>Meals made in a real kitchen and shared at one table, never a cafeteria line.</p></div>
+</article>
+    <article class="tile" data-reveal="up" data-draw style="--d:0.30s"><img src="https://images.unsplash.com/photo-1769506551162-f56c343f0642?auto=format&fit=crop&w=1200&q=80" alt="Two people sitting together looking out at a green garden" loading="lazy" decoding="async">
+  <div class="tile-body"><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10z"/><path pathLength="1" d="M2 21c0-3 1.9-5.4 5.1-6"/></svg></div><h3>Calm surroundings</h3><p>A quiet Chehalis neighborhood with fresh air, a porch and a lawn to enjoy on good days.</p></div>
+</article>
+  </div>
+</div></section>
 
-/* Scroll reveal */
-const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)'}})},{threshold:.1});
-document.querySelectorAll('.svc-card,.stat-cell,.about-inner>div,.c-list>div').forEach((el,i)=>{
-  el.style.opacity='0';el.style.transform='translateY(22px)';
-  el.style.transition=`opacity .65s ${i*.08}s ease,transform .65s ${i*.08}s ease`;
-  obs.observe(el);
-});
-</script>
+<section class="section grey"><div class="wrap">
+  <div class="sec-head center"><span class="eyebrow" data-reveal="up">How it works</span><h2 data-split>From first call to <em>moving in</em></h2><p class="lead" data-reveal="blur" style="--d:.2s">Four simple steps. We guide you through each one and answer every question along the way.</p></div>
+  <div class="mini-steps" data-stagger=".12">
+    <div class="mini" data-reveal="up" data-draw><span class="n">01</span><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></div><h3>Call or message</h3><p>Tell us about your loved one and what you're looking for.</p></div>
+    <div class="mini" data-reveal="up" data-draw><span class="n">02</span><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path pathLength="1" d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></div><h3>Tour the home</h3><p>Meet the caregivers, see the rooms and ask anything.</p></div>
+    <div class="mini" data-reveal="up" data-draw><span class="n">03</span><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect pathLength="1" x="8" y="2" width="8" height="4" rx="1"/><path pathLength="1" d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path pathLength="1" d="M9 12h6M9 16h4"/></svg></div><h3>Plan the care</h3><p>We review the assessment and write a personal care plan together.</p></div>
+    <div class="mini" data-reveal="up" data-draw><span class="n">04</span><div class="ico-badge"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle pathLength="1" cx="7.5" cy="15.5" r="5.5"/><path pathLength="1" d="M21 2l-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg></div><h3>Settle in</h3><p>Move-in day is gentle and well prepared, with check-ins for the family.</p></div>
+  </div>
+  <div class="center" style="margin-top:40px" data-reveal="up"><a class="btn btn-line" href="how-it-works.html">See the Full Process <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M16.2 7.8l-2.1 6.4-6.4 2.1 2.1-6.4z"/></svg></a></div>
+</div></section>
+
+<section class="section"><div class="wrap feature rev">
+  <div class="f-media" data-reveal="right">
+    <div class="frame"><img src="assets/img/home/exterior-front.jpg" alt="Front of Harmony Living House: a blue single-story home with white porch railings at sunset" loading="lazy" decoding="async"></div>
+  </div>
+  <div>
+    <span class="eyebrow" data-reveal="up">Our home in Chehalis</span>
+    <h2 data-split>Bright rooms, a <em>quiet street</em>, and a porch for sunny days</h2>
+    <div class="divider" data-reveal="left"></div>
+    <p class="lead" data-reveal="blur">Harmony Living House is a single-story home in the Newaukum Village neighborhood. Everything is on one level, with an open living and dining area at its heart. Take a look around before you visit.</p>
+    <div class="btn-row" data-reveal="up" style="margin-top:28px"><a class="btn btn-gold" href="our-home.html">Open the Gallery <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+  </div>
+</div></section>
+
+<section class="section tint"><div class="wrap">
+  <div class="sec-head center"><span class="eyebrow" data-reveal="up">Questions families ask</span><h2 data-split>Quick <em>answers</em></h2></div>
+  <div class="faq"><details data-reveal="up" style="--d:0.00s"><summary>What is an adult family home?<span class="pm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span></summary><div class="ans"><p>An adult family home (AFH) is a regular house licensed by Washington State DSHS to provide room, board and personal care to a small number of adults. Residents get 24-hour supervision and help with daily living in a family-style setting.</p></div></details><details data-reveal="up" style="--d:0.06s"><summary>Do you accept Medicaid?<span class="pm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span></summary><div class="ans"><p>Yes. We accept Washington Medicaid as well as private pay. Long-term care insurance and veterans' benefits may also help. See Payment &amp; Admissions for details.</p></div></details><details data-reveal="up" style="--d:0.12s"><summary>Can we visit before deciding?<span class="pm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span></summary><div class="ans"><p>Absolutely, and we encourage it. Call or message us to book a tour at a time that suits your family.</p></div></details><details data-reveal="up" style="--d:0.18s"><summary>Is someone there at night?<span class="pm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span></summary><div class="ans"><p>Yes. Caregivers are in the home 24 hours a day, seven days a week.</p></div></details></div>
+  <div class="center" style="margin-top:34px" data-reveal="up"><a class="btn btn-line" href="faqs.html">All FAQs <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></a></div>
+</div></section>
+
+<section class="section" style="padding-bottom:0"><div class="wrap"><aside class="hint" data-reveal="up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg><div><b>Helpful hint</b><p>When you tour any adult family home, ask to see its Disclosure of Charges (DSHS form 15-449). It lists the home's rates, services and policies. Ours is on the Payment &amp; Admissions page.</p></div></aside></div></section>
+<section class="section"><div class="wrap"><div class="cta" data-reveal="zoom"><img src="assets/img/home/exterior-street.jpg" alt="Harmony Living House seen from the street, with its lawn and garage" loading="lazy" decoding="async">
+  <span class="eyebrow" data-reveal="up">Come see for yourself</span>
+  <h2 data-split>Let's find the right care, together</h2>
+  <p class="lead" data-reveal="blur">Call, message or book a tour. We'll listen first, answer honestly and help you decide what's best for your family.</p>
+  <div class="btn-row" data-reveal="up"><a class="btn btn-gold" href="contact.html">Schedule a Tour <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn btn-line" href="tel:+19514467774">Call (951) 446-7774 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></a></div>
+</div></div></section>
+
+</main>
+<footer class="footer"><div class="wrap">
+  <div class="f-grid">
+    <div class="f-brand" data-reveal="up">
+      <img src="assets/img/logo.png" alt="Harmony Living House Adult Family Home logo" loading="lazy">
+      <p>A Washington State licensed adult family home in Chehalis, where every resident is cared for like family, around the clock.</p>
+      <div class="social lg"><a href="https://www.facebook.com/harmonylivinghouse" aria-label="Harmony Living House on Facebook" target="_blank" rel="noopener" data-reveal="zoom" style="--d:0.00s"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 8.5V6.8c0-.8.5-1.3 1.4-1.3H17V2.2h-2.6C11.6 2.2 10.6 4 10.6 6.5v2H8v3.3h2.6V22H14V11.8h2.6l.5-3.3z"/></svg></a><a href="https://wa.me/19514467774" aria-label="Message us on WhatsApp" target="_blank" rel="noopener" data-reveal="zoom" style="--d:0.08s"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 2.5a9.5 9.5 0 0 0-8.2 14.3L2.5 21.5l4.8-1.3A9.5 9.5 0 1 0 12 2.5z"/><path fill="currentColor" d="M8.7 7.7c.2-.4.4-.4.7-.4h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .6l-.5.7c-.1.2-.2.4 0 .6.4.8 1 1.5 1.7 2.1.7.6 1.4.9 1.8 1.1.2.1.4.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.4.4.1.3 0 1.2-.5 1.7-.5.5-1.3.9-2.1.8-.8 0-2.6-.6-4.3-2.2-1.7-1.6-2.6-3.4-2.8-4.2-.2-.8.1-1.7.4-2z"/></svg></a><a href="mailto:hello@harmonylivinghouse.com" aria-label="Email us" data-reveal="zoom" style="--d:0.16s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg></a><a href="tel:+19514467774" aria-label="Call us" data-reveal="zoom" style="--d:0.24s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></a></div>
+    </div>
+    <div class="f-col" data-reveal="up" style="--d:.1s"><h4>Explore</h4><ul>
+      <li><a href="about.html">About Us</a></li><li><a href="services.html">Our Services</a></li><li><a href="how-it-works.html">How It Works</a></li><li><a href="our-home.html">Our Home</a></li><li><a href="payment.html">Payment &amp; Admissions</a></li></ul></div>
+    <div class="f-col" data-reveal="up" style="--d:.2s"><h4>Help</h4><ul>
+      <li><a href="resources.html">Guides &amp; Articles</a></li><li><a href="faqs.html">FAQs</a></li><li><a href="careers.html">Careers</a></li><li><a href="contact.html">Contact</a></li><li><a href="staff.html">Staff Login</a></li></ul></div>
+    <div class="f-col" data-reveal="up" style="--d:.3s"><h4>Visit &amp; Call</h4><ul class="f-contact">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg><a href="https://www.google.com/maps/search/?api=1&query=120+Newaukum+Village+Dr+Chehalis+WA+98532" target="_blank" rel="noopener">120 Newaukum Village Dr<br>Chehalis, WA 98532</a></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg><a href="tel:+19514467774">(951) 446-7774</a></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg><a href="mailto:hello@harmonylivinghouse.com">hello@harmonylivinghouse.com</a></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Caregivers on site 24/7<br>Tours by appointment</span></li></ul></div>
+  </div>
+  <div class="f-bottom"><span>&copy; <span data-year>2026</span> Harmony Living House Adult Family Home LLC. All rights reserved.</span><span>Licensed by Washington State DSHS &middot; Adult Family Home License #758581</span></div>
+</div></footer>
+<nav class="mbar" aria-label="Quick actions">
+  <a href="tel:+19514467774"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>Call</a>
+  <a href="https://wa.me/19514467774" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 2.5a9.5 9.5 0 0 0-8.2 14.3L2.5 21.5l4.8-1.3A9.5 9.5 0 1 0 12 2.5z"/><path fill="currentColor" d="M8.7 7.7c.2-.4.4-.4.7-.4h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .6l-.5.7c-.1.2-.2.4 0 .6.4.8 1 1.5 1.7 2.1.7.6 1.4.9 1.8 1.1.2.1.4.1.6-.1l.7-.9c.2-.2.4-.2.6-.1l1.8.9c.2.1.4.2.4.4.1.3 0 1.2-.5 1.7-.5.5-1.3.9-2.1.8-.8 0-2.6-.6-4.3-2.2-1.7-1.6-2.6-3.4-2.8-4.2-.2-.8.1-1.7.4-2z"/></svg>WhatsApp</a>
+  <a class="go" href="contact.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Book a Tour</a>
+</nav>
+<button class="totop" type="button" aria-label="Back to top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+<div class="hint-pop" role="status" data-key="index.html"><div class="hp-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg></div><div><b>Site hint</b><p>Tap "Schedule a Tour" at any time to tell us when you would like to visit.</p></div><button class="x" type="button" aria-label="Dismiss hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+<script src="assets/site.js" defer></script>
 </body>
 </html>
