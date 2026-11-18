@@ -48,6 +48,19 @@ home = f'''
   </div>
 </div></section>
 
+<section class="section" style="padding-top:30px;padding-bottom:0"><div class="wrap">
+  <div class="founder mini-founder" data-reveal="up">
+    <div class="founder-photo">{img("assets/img/penninah-nyandia.jpg","Penninah Nyandia, founder and lead caregiver, in Harmony Living House scrubs")}</div>
+    <div class="founder-body">
+      <span class="eyebrow">Founder-led care</span>
+      <h3 data-split>Penninah Nyandia, NAC/CNA</h3>
+      <p class="founder-role">Founder &amp; Lead Caregiver</p>
+      <p data-reveal="blur">Harmony isn't run from an office. Our founder, a Nursing Assistant Certified, is in the home caring alongside her team, so every resident gets skilled hands and a warm heart.</p>
+      <div class="btn-row">{btn("Meet Our Founder","about.html")}</div>
+    </div>
+  </div>
+</div></section>
+
 <section class="section"><div class="wrap feature">
   <div class="f-media" data-reveal="left">
     <div class="frame">{img(OWN_LIVING, "The open living room at Harmony Living House with a large sectional sofa, dining table and kitchen")}</div>
@@ -138,11 +151,33 @@ about = page_hero("About Us","About Harmony Living House","Rooted in <em>dignity
     <h2 data-split>A home first, a <em>care provider</em> always</h2>
     <div class="divider" data-reveal="left"></div>
     <p data-reveal="blur">Harmony Living House was created for families who want more than a room and a schedule. Our home is not a medical institution. It is a house with a kitchen that smells like dinner, a living room where residents share the afternoon, and caregivers who treat each person the way they would want their own parents treated.</p>
-    <p data-reveal="blur" style="margin-top:14px">The home is led by provider <b>Penninah Nyandia</b>, who oversees daily care, staffing and every resident's plan. Our caregivers are trained, background-checked and supported to deliver care with patience, discretion and warmth.</p>
+    <p data-reveal="blur" style="margin-top:14px">The home was founded and is led by <b>Penninah Nyandia, NAC/CNA</b>, who is hands-on with residents every day and oversees care, staffing and every resident's plan. Our caregivers are trained, background-checked and supported to deliver care with patience, discretion and warmth.</p>
   </div>
 </div></section>
 
+
 <section class="section tint"><div class="wrap">
+  {sec_head("Meet our founder","The heart behind <em>Harmony</em>")}
+  <article class="founder" data-reveal="up">
+    <div class="founder-photo" data-reveal="zoom">{img("assets/img/penninah-nyandia.jpg","Penninah Nyandia, founder and lead caregiver of Harmony Living House, smiling in navy Harmony scrubs with a stethoscope")}
+      <span class="founder-tag">{sicon("award")}NAC / CNA</span></div>
+    <div class="founder-body" data-draw>
+      <span class="eyebrow" data-reveal="up">Founder &amp; Lead Caregiver</span>
+      <h3 data-split>Penninah Nyandia</h3>
+      <p class="founder-role" data-reveal="up">Nursing Assistant Certified (NAC/CNA) &middot; Adult Family Home Provider</p>
+      <div class="founder-chips" data-reveal="up">
+        <span class="chip">{sicon("heart")}Hands-on, every day</span>
+        <span class="chip">{sicon("shield")}DSHS-licensed provider</span>
+        <span class="chip">{sicon("users")}Family-first care</span>
+      </div>
+      <p data-reveal="blur">Some people choose caregiving; Penninah was made for it. As a Nursing Assistant Certified, she brings clinical know-how to every task, from careful medication routines to safe transfers. What families remember most, though, is her warmth: the smile that greets residents each morning, the patience that turns a hard day into a good one, and the way she notices the small things before anyone has to ask.</p>
+      <p data-reveal="blur">Penninah founded Harmony Living House on a simple promise: to care for every resident as if they were her own family. She doesn't run the home from behind a desk. She is right there with residents, leading her caregivers by example, keeping families close and making sure every person in her care feels safe, seen and truly at home.</p>
+      <blockquote class="founder-quote" data-reveal="up">{sicon("quote")}<span>Care isn't a task on a checklist. It's how someone feels when you walk into the room.</span></blockquote>
+      <div class="btn-row" data-reveal="up">{btn("Meet Penninah at a Tour","contact.html")}{btn("Call "+S["phone"],"tel:"+S["tel"],"line","phone")}</div>
+    </div>
+  </article>
+</div></section>
+<section class="section"><div class="wrap">
   {sec_head("What guides us","Mission, vision &amp; <em>promise</em>")}
   <div class="grid g3">
     {card("Our Mission","To provide safe, personal, around-the-clock care in a true home, so every resident can live each day with dignity and purpose.",AB_MISSION,"Two elderly women walking side by side on a stone path","heart",d=0)}
