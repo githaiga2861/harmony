@@ -52,7 +52,7 @@ home = f'''
 <section class="section"><div class="wrap feature">
   <div class="f-media" data-reveal="left">
     <div class="frame">{img(OWN_LIVING, "The open living room at Harmony Living House with a large sectional sofa, dining table and kitchen")}</div>
-    <div class="f-badge" data-reveal="up" style="--d:.4s"><div class="ico-badge" data-draw>{icon("home")}</div><div><strong>Real home</strong><span>Living room, kitchen &amp; dining together</span></div></div>
+    <div class="f-badge" data-reveal="up" style="--d:.4s"><div class="ico-badge" data-draw>{icon("home")}</div><div><strong>Real home</strong><span>Shared meals, warm hearts, helping hands</span></div></div>
   </div>
   <div>
     <span class="eyebrow" data-reveal="up">Welcome to Harmony</span>
