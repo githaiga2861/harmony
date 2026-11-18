@@ -122,7 +122,7 @@ home = f'''
   <div class="center" style="margin-top:34px" data-reveal="up">{btn("All FAQs","faqs.html","line","chat")}</div>
 </div></section>
 
-<section class="section" style="padding-bottom:0"><div class="wrap">{hint("Helpful hint","When you tour any adult family home, ask to see its Disclosure of Charges (DSHS form 15-449). It lists the home's rates, services and policies. Ours is on the Payment &amp; Admissions page.")}</div></section>
+<section class="section" style="padding-bottom:0"><div class="wrap">{hint("Helpful hint","When you tour any adult family home, ask to see its Disclosure of Charges (DSHS form 15-449). It lists the home's rates, services and policies. Ours is available on request: just call or email us.")}</div></section>
 {cta("Let's find the right care, together","Call, message or book a tour. We'll listen first, answer honestly and help you decide what's best for your family.",OWN_UMBRELLA,"Shaded table and chairs under a large umbrella on the back deck")}
 '''
 
@@ -359,10 +359,10 @@ payment = page_hero("Payment &amp; Admissions","Paying for care","Clear options,
     <span class="eyebrow" data-reveal="up">Documents</span>
     <h2 data-split>Read our policies <em>before</em> you decide</h2>
     <div class="divider" data-reveal="left"></div>
-    <p data-reveal="blur">Washington requires every adult family home to give families a written disclosure of its charges and policies. Ours are available to download right now.</p>
+    <p data-reveal="blur">Washington requires every adult family home to give families a written disclosure of its charges and policies. Our Disclosure of Charges and Private Pay Policy are available on request. Call or email us and we'll send copies or go through them with you at your tour.</p>
     <div class="c-cards" style="margin-top:26px">
-      <a class="c-card" href="documents/Harmony_DSHS_15-449_Disclosure_of_Charges.pdf" target="_blank" rel="noopener" data-reveal="left" data-draw><div class="ico-badge">{icon("file")}</div><div><small>DSHS 15-449 &middot; PDF</small><strong>Disclosure of Charges</strong></div></a>
-      <a class="c-card" href="documents/Harmony_Private_Pay_Policy.pdf" target="_blank" rel="noopener" data-reveal="left" data-draw style="--d:.1s"><div class="ico-badge">{icon("file")}</div><div><small>House policy &middot; PDF</small><strong>Private Pay Policy</strong></div></a>
+      <a class="c-card" href="mailto:{S['email']}?subject=Request%20for%20Disclosure%20of%20Charges%20and%20Private%20Pay%20Policy" data-reveal="left" data-draw><div class="ico-badge">{icon("mail")}</div><div><small>Available on request</small><strong>Email us for copies</strong></div></a>
+      <a class="c-card" href="tel:{S['tel']}" data-reveal="left" data-draw style="--d:.1s"><div class="ico-badge">{icon("phone")}</div><div><small>Prefer to talk?</small><strong>Call {S['phone']}</strong></div></a>
     </div>
   </div>
   <div>
@@ -382,9 +382,9 @@ payment = page_hero("Payment &amp; Admissions","Paying for care","Clear options,
 
 PAGES_A = [
  ('index.html','Harmony Living House | Adult Family Home in Chehalis, WA','A Washington State licensed adult family home in Chehalis, WA offering 24/7 personal care, medication management, meals and memory support in a warm family home.',home,'Tap "Schedule a Tour" at any time to tell us when you would like to visit.'),
- ('about.html','About Us','Learn about Harmony Living House, a DSHS-licensed adult family home in Chehalis, WA, our mission, values and the people behind the care.',about,'You can download our Disclosure of Charges from the Payment &amp; Admissions page.'),
+ ('about.html','About Us','Learn about Harmony Living House, a DSHS-licensed adult family home in Chehalis, WA, our mission, values and the people behind the care.',about,'You can request our Disclosure of Charges from the Payment &amp; Admissions page.'),
  ('services.html','Care & Services','Personal care, medication management, meals, memory support, health coordination, respite and comfort care at Harmony Living House in Chehalis, WA.',services,'Each service card opens a detailed list. Ask us about anything not shown here.'),
  ('how-it-works.html','How It Works','The six steps from your first call to move-in day at Harmony Living House adult family home in Chehalis, WA.',how,'Bring your questions to the tour. Nothing is too small to ask.'),
  ('our-home.html','Our Home','Photo gallery of Harmony Living House, a bright single-level adult family home in Chehalis, Washington.',ourhome,'Tap any photo to enlarge it and read its description.'),
- ('payment.html','Payment & Admissions','Medicaid, private pay, long-term care insurance, VA benefits and WA Cares at Harmony Living House adult family home in Chehalis, WA.',payment,'Our Disclosure of Charges PDF lists rates and what is included.'),
+ ('payment.html','Payment & Admissions','Medicaid, private pay, long-term care insurance, VA benefits and WA Cares at Harmony Living House adult family home in Chehalis, WA.',payment,'Ask us for our Disclosure of Charges, which lists rates and what is included.'),
 ]

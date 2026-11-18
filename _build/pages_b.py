@@ -60,7 +60,7 @@ GROUPS = [
  ]),
  ("Cost &amp; payment","coins",[
   ("Do you accept Medicaid?","Yes. We accept Washington Medicaid as well as private pay. Long-term care insurance, VA benefits and WA Cares may also help."),
-  ("How much does care cost?","Private pay rates depend on the level of care. Our Disclosure of Charges (DSHS form 15-449) lists rates and what's included, and you can download it from the Payment &amp; Admissions page."),
+  ("How much does care cost?","Private pay rates depend on the level of care. Our Disclosure of Charges (DSHS form 15-449) lists rates and what's included, and it's available on request. Call or email us for a copy."),
   ("Can someone start private pay and switch to Medicaid?","Yes. Private pay residents need at least 12 months of private funds before converting to Medicaid, as explained in our disclosure."),
  ]),
  ("Visiting &amp; moving in","key",[
