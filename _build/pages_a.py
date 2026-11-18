@@ -48,18 +48,6 @@ home = f'''
   </div>
 </div></section>
 
-<section class="section" style="padding-top:30px;padding-bottom:0"><div class="wrap">
-  <div class="founder mini-founder" data-reveal="up">
-    <div class="founder-photo">{img("assets/img/penninah-nyandia.jpg","Penninah Nyandia, founder and lead caregiver, in Harmony Living House scrubs")}</div>
-    <div class="founder-body">
-      <span class="eyebrow">Founder-led care</span>
-      <h3 data-split>Penninah Nyandia, NAC/CNA</h3>
-      <p class="founder-role">Founder &amp; Lead Caregiver</p>
-      <p data-reveal="blur">Harmony isn't run from an office. Our founder, a Nursing Assistant Certified, is in the home caring alongside her team, so every resident gets skilled hands and a warm heart.</p>
-      <div class="btn-row">{btn("Meet Our Founder","about.html")}</div>
-    </div>
-  </div>
-</div></section>
 
 <section class="section"><div class="wrap feature">
   <div class="f-media" data-reveal="left">
@@ -102,6 +90,18 @@ home = f'''
   </div>
 </div></section>
 
+<section class="section" style="padding-top:0"><div class="wrap">
+  <div class="founder mini-founder" data-reveal="up">
+    <div class="founder-photo">{img("assets/img/penninah-nyandia.jpg","Penninah Nyandia, founder and lead caregiver, in Harmony Living House scrubs")}</div>
+    <div class="founder-body">
+      <span class="eyebrow">Founder-led care</span>
+      <h3 data-split>Penninah Nyandia, NAC/CNA</h3>
+      <p class="founder-role">Founder &amp; Lead Caregiver</p>
+      <p data-reveal="blur">Harmony isn't run from an office. Our founder, a Nursing Assistant Certified, is in the home caring alongside her team, so every resident gets skilled hands and a warm heart.</p>
+      <div class="btn-row">{btn("Meet Our Founder","about.html")}</div>
+    </div>
+  </div>
+</div></section>
 <section class="section grey"><div class="wrap">
   {sec_head("How it works","From first call to <em>moving in</em>","Four simple steps. We guide you through each one and answer every question along the way.")}
   <div class="mini-steps" data-stagger=".12">
