@@ -120,20 +120,66 @@
     lb.addEventListener('wheel', function (e) { e.preventDefault(); }, { passive: false });
   }
 
-  /* Contact form → opens email */
+  /* ── Supabase (public, insert-only for tour requests; read-only settings) ── */
+  var SB_URL = 'https://gkmvglzjrsneqkrlvohp.supabase.co';
+  var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdrbXZnbHpqcnNuZXFrcmx2b2hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2OTU0NTMsImV4cCI6MjA5MDI3MTQ1M30.bcGB06-v9xmJmgkY-4KbnHPgi13qP7_ng-BJHifd0UY';
+  function sb(path, opts) {
+    opts = opts || {};
+    opts.headers = Object.assign({ apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, opts.headers || {});
+    return fetch(SB_URL + '/rest/v1/' + path, opts);
+  }
+
+  /* Tour request form → saved for the team (email fallback) */
   var form = document.querySelector('#tour-form');
   if (form) {
+    var started = Date.now();
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var v = function (n) { var f = form.elements[n]; return f ? String(f.value || '').trim() : ''; };
       var name = v('name'), phone = v('phone'), email = v('email');
+      var ok = form.querySelector('.form-ok'), btn = form.querySelector('button[type=submit]');
       if (!name || (!phone && !email)) { alert('Please enter your name and a phone number or email so we can reach you.'); return; }
-      var lines = ['Name: ' + name, 'Phone: ' + phone, 'Email: ' + email, 'I am inquiring for: ' + (v('who') || '-'),
-        'Care interest: ' + (v('interest') || 'General inquiry'), 'Preferred tour time: ' + (v('when') || '-'), '', v('message')];
-      window.location.href = 'mailto:hello@harmonylivinghouse.com?subject=' + encodeURIComponent('Tour request from ' + name) + '&body=' + encodeURIComponent(lines.join('\n'));
-      var ok = form.querySelector('.form-ok'); if (ok) ok.style.display = 'block';
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { alert('Please check your email address.'); return; }
+      if (v('website') || Date.now() - started < 2500) { form.reset(); ok.textContent = 'Thank you! We\'ll be in touch soon.'; ok.style.display = 'block'; return; } // spam trap
+      var row = { name: name.slice(0, 120), phone: phone.slice(0, 40) || null, email: email.slice(0, 160) || null,
+        inquiring_for: v('who').slice(0, 80) || null, interest: v('interest').slice(0, 80) || null,
+        preferred_time: v('when').slice(0, 120) || null, message: v('message').slice(0, 4000) || null, page: location.pathname.slice(0, 120) };
+      btn.disabled = true; btn.style.opacity = '.7';
+      sb('website_inquiries', { method: 'POST', headers: { Prefer: 'return=minimal' }, body: JSON.stringify(row) })
+        .then(function (r) {
+          if (!r.ok) throw new Error('save failed');
+          form.reset();
+          ok.innerHTML = '<b>Thank you, ' + name.split(' ')[0].replace(/[<>&"]/g, '') + '!</b> Your request has reached our team. We\'ll contact you soon to arrange your visit. For anything urgent, call (951) 446-7774.';
+          ok.style.display = 'block';
+        })
+        .catch(function () {
+          var lines = ['Name: ' + name, 'Phone: ' + phone, 'Email: ' + email, 'I am inquiring for: ' + (v('who') || '-'),
+            'Care interest: ' + (v('interest') || 'General inquiry'), 'Preferred tour time: ' + (v('when') || '-'), '', v('message')];
+          window.location.href = 'mailto:hello@harmonylivinghouse.com?subject=' + encodeURIComponent('Tour request from ' + name) + '&body=' + encodeURIComponent(lines.join('\n'));
+          ok.textContent = 'We couldn\'t send the form just now, so your email app has opened with your message. Press send there, or call (951) 446-7774.';
+          ok.style.display = 'block';
+        })
+        .then(function () { btn.disabled = false; btn.style.opacity = ''; });
     });
   }
+
+  /* Announcement bar + availability, managed from the staff portal */
+  sb('website_settings?select=key,value').then(function (r) { return r.ok ? r.json() : []; }).then(function (rows) {
+    var S = {}; (rows || []).forEach(function (x) { S[x.key] = x.value || ''; });
+    var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    if (S.announcement_enabled === 'true' && S.announcement_text) {
+      var bar = document.createElement('div'); bar.className = 'announce';
+      bar.innerHTML = '<div class="wrap"><span>' + esc(S.announcement_text) + '</span><a href="contact">Contact us</a></div>';
+      document.body.insertBefore(bar, document.body.firstChild);
+    }
+    var labels = { accepting: 'Now accepting new residents', limited: 'Limited availability, call us', waitlist: 'Currently full, join our waitlist' };
+    var st = S.availability_status;
+    if (labels[st]) {
+      document.querySelectorAll('[data-availability]').forEach(function (slot) {
+        slot.innerHTML = '<span class="avail avail-' + st + '"><i></i>' + esc(labels[st]) + (S.availability_note ? ' &middot; ' + esc(S.availability_note) : '') + '</span>';
+      });
+    }
+  }).catch(function () {});
 
   /* Keep the hero name on one line */
   function fitName() {

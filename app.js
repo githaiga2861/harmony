@@ -523,7 +523,7 @@ document.getElementById('login-password').addEventListener('keydown', e => { if 
 // ══════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════
-const pageTitles = { dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Financials — Income & Expenses', staff: 'Staff', 'staff-profile': 'Staff Profile', staffdocs: 'Staff Documents', contacts: 'Quick Contacts', 'facility-numbers': 'Facility Numbers', alerts: '🔔 Alerts & Automated Notifications' };
+const pageTitles = { website: 'Website', dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Financials — Income & Expenses', staff: 'Staff', 'staff-profile': 'Staff Profile', staffdocs: 'Staff Documents', contacts: 'Quick Contacts', 'facility-numbers': 'Facility Numbers', alerts: '🔔 Alerts & Automated Notifications' };
 
 async function showPage(name) {
   if (name !== 'profile') localStorage.setItem('hlh_last_page', name);
@@ -551,6 +551,7 @@ async function showPage(name) {
   if (name === 'contacts') { setTimeout(function(){ loadContactsPage(); }, 0); }
   if (name === 'facility-numbers') { setTimeout(function(){ loadFacilityNumbersPage(); }, 0); }
   if (name === 'staff') { renderStaffTable(); }
+  if (name === 'website' && typeof renderWebsitePage === 'function') { renderWebsitePage(); }
 }
 // ══════════════════════════════════
 // DASHBOARD

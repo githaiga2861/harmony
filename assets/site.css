@@ -572,3 +572,14 @@ html.lb-lock,html.lb-lock body{overflow:hidden!important;touch-action:none}
   .founder-photo{min-height:0;aspect-ratio:4/4.6}
   .mini-founder .founder-photo{min-height:0;aspect-ratio:4/4}
 }
+
+/* announcement bar + availability (managed in staff portal) */
+.announce{background:var(--ink);color:#F6EDD3;font-size:.88rem}
+.announce .wrap{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;padding:9px 0;text-align:center}
+.announce a{color:var(--gold-light);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.avail{display:inline-flex;align-items:center;gap:9px;padding:8px 16px;border-radius:999px;font-size:.85rem;font-weight:500;background:#fff;border:1px solid var(--line);color:var(--ink-2);box-shadow:var(--shadow-sm)}
+.avail i{width:9px;height:9px;border-radius:50%;background:#3E9B5B;box-shadow:0 0 0 0 rgba(62,155,91,.5);animation:pulse 2.2s infinite}
+.avail-limited i{background:#C9A23F;box-shadow:0 0 0 0 rgba(201,162,63,.5)}
+.avail-waitlist i{background:#9A6B5B;animation:none}
+@keyframes pulse{70%{box-shadow:0 0 0 9px rgba(62,155,91,0)}100%{box-shadow:0 0 0 0 rgba(62,155,91,0)}}
+.form-ok{display:none}

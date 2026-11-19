@@ -128,9 +128,11 @@ contact = page_hero("Contact","Contact &amp; tours","We'd love to <em>welcome</e
     </div>
     <div class="map" data-reveal="zoom"><iframe title="Map to Harmony Living House, 120 Newaukum Village Dr, Chehalis WA" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://maps.google.com/maps?q=120%20Newaukum%20Village%20Dr%2C%20Chehalis%2C%20WA%2098532&z=15&output=embed"></iframe></div>
   </div>
-  <form class="form" id="tour-form" novalidate data-reveal="right" aria-label="Tour request form">
+  <form class="form" id="tour-form" novalidate data-reveal="right" aria-label="Tour request form" style="position:relative">
     <h3 data-split>Request a <em>personal tour</em></h3>
-    <p class="form-note">Fill this in and press send. Your email app will open with your message ready to go.</p>
+    <p class="form-note">Fill this in and press send. Our team will get back to you to arrange your visit.</p>
+    <div data-availability style="text-align:center"></div>
+    <div aria-hidden="true" style="position:absolute;left:-5000px;width:1px;height:1px;overflow:hidden"><label>Leave this empty<input name="website" tabindex="-1" autocomplete="off"></label></div>
     <div class="row"><div class="field"><label for="f-name">Your name</label><input id="f-name" name="name" autocomplete="name" required></div>
     <div class="field"><label for="f-phone">Phone</label><input id="f-phone" name="phone" type="tel" autocomplete="tel"></div></div>
     <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email"></div>
