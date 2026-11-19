@@ -376,14 +376,32 @@ async function migrateVitalsRecorder() {
 // ══════════════════════════════════
 // AUTH
 // ══════════════════════════════════
+// Sign-in lockout: 5 wrong tries within 30 minutes locks sign-in for 30 minutes
+const LOGIN_MAX_TRIES = 5, LOGIN_WINDOW_MS = 30 * 60 * 1000;
+function loginAttempts() { try { return JSON.parse(localStorage.getItem('hlh_login_attempts')) || { fails: [], lockedUntil: 0 }; } catch { return { fails: [], lockedUntil: 0 }; } }
 function doLogin() {
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pass = document.getElementById('login-password').value;
-  const user = USERS.find(u => u.email === email && u.password === pass);
-  if (!user) {
-    document.getElementById('auth-error').style.display = 'block';
+  const errEl = document.getElementById('auth-error');
+  const a = loginAttempts(), now = Date.now();
+  if (a.lockedUntil > now) {
+    const mins = Math.ceil((a.lockedUntil - now) / 60000);
+    errEl.textContent = 'Too many wrong attempts. Try again in ' + mins + ' minute' + (mins === 1 ? '' : 's') + '.';
+    errEl.style.display = 'block';
     return;
   }
+  const user = USERS.find(u => u.email === email && u.password === pass);
+  if (!user) {
+    a.fails = (a.fails || []).filter(t => now - t < LOGIN_WINDOW_MS).concat(now);
+    if (a.fails.length >= LOGIN_MAX_TRIES) { a.lockedUntil = now + LOGIN_WINDOW_MS; a.fails = []; }
+    localStorage.setItem('hlh_login_attempts', JSON.stringify(a));
+    const left = LOGIN_MAX_TRIES - a.fails.length;
+    errEl.textContent = a.lockedUntil > now ? 'Too many wrong attempts. Sign-in is locked for 30 minutes.'
+      : 'Invalid credentials. ' + left + ' attempt' + (left === 1 ? '' : 's') + ' left before a 30-minute lock.';
+    errEl.style.display = 'block';
+    return;
+  }
+  localStorage.removeItem('hlh_login_attempts');
   currentUser = user;
   localStorage.setItem('hlh_session', JSON.stringify(user));
   document.getElementById('auth-screen').style.display = 'none';

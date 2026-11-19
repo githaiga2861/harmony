@@ -98,7 +98,7 @@ home = f'''
       <span class="eyebrow">Founder-led care</span>
       <h3 data-split>Penninah Nyandia</h3>
       <p class="founder-role">Founder &amp; Lead Caregiver</p>
-      <p data-reveal="blur">Harmony isn't run from an office. Our founder is in the home every day, caring alongside her team, so every resident gets skilled hands and a warm heart.</p>
+      <p data-reveal="blur">Harmony isn't run from an office. With seven years of caring for older adults and people in mental health settings, our founder is in the home every day alongside her team, so every resident gets skilled hands and a warm heart.</p>
       <div class="btn-row">{btn("Meet Our Founder","about.html")}</div>
     </div>
   </div>
@@ -166,11 +166,12 @@ about = page_hero("About Us","About Harmony Living House","Rooted in <em>dignity
       <span class="eyebrow" data-reveal="up">Founder &amp; Lead Caregiver</span>
       <h3 data-split>Penninah Nyandia</h3>
             <div class="founder-chips" data-reveal="up">
+        <span class="chip">{sicon("award")}7 years of caregiving</span>
         <span class="chip">{sicon("heart")}Hands-on, every day</span>
         <span class="chip">{sicon("shield")}DSHS-licensed provider</span>
         <span class="chip">{sicon("users")}Family-first care</span>
       </div>
-      <p data-reveal="blur">Some people choose caregiving; Penninah was made for it. She brings skill and steady hands to every task, from careful medication routines to safe transfers. What families remember most, though, is her warmth: the smile that greets residents each morning, the patience that turns a hard day into a good one, and the way she notices the small things before anyone has to ask.</p>
+      <p data-reveal="blur">Some people choose caregiving; Penninah was made for it. For seven years she has cared for older adults and supported people in mental health facilities, and that experience shows in every task, from careful medication routines to calm, patient support on difficult days. What families remember most, though, is her warmth: the smile that greets residents each morning, the patience that turns a hard day into a good one, and the way she notices the small things before anyone has to ask.</p>
       <p data-reveal="blur">Penninah founded Harmony Living House on a simple promise: to care for every resident as if they were her own family. She doesn't run the home from behind a desk. She is right there with residents, leading her caregivers by example, keeping families close and making sure every person in her care feels safe, seen and truly at home.</p>
       <blockquote class="founder-quote" data-reveal="up">{sicon("quote")}<span>Care isn't a task on a checklist. It's how someone feels when you walk into the room.</span></blockquote>
       <div class="btn-row" data-reveal="up">{btn("Meet Penninah at a Tour","contact.html")}{btn("Call "+S["phone"],"tel:"+S["tel"],"line","phone")}</div>

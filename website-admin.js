@@ -64,11 +64,15 @@
   window.renderWebsitePage = async function () {
     const root = document.getElementById('website-admin-root');
     if (!root) return;
+    if (!getPin() && typeof currentUser !== 'undefined' && currentUser && currentUser.password) {
+      // Try the signed-in admin's password first, so the admin isn't asked twice
+      try { if (await rpc('web_admin_check', { p_pin: currentUser.password })) sessionStorage.setItem(PIN_KEY, currentUser.password); } catch (e) {}
+    }
     if (!getPin()) return renderLocked(root);
     root.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text3);">Loading website data…</div>';
     try {
       const ok = await rpc('web_admin_check', { p_pin: getPin() });
-      if (!ok) { sessionStorage.removeItem(PIN_KEY); return renderLocked(root, 'That PIN is no longer correct. Please enter it again.'); }
+      if (!ok) { sessionStorage.removeItem(PIN_KEY); return renderLocked(root, 'That password is no longer correct. Please enter it again.'); }
       const [list, sres] = await Promise.all([
         rpc('web_list_inquiries', { p_pin: getPin() }),
         db.from('website_settings').select('key,value,updated_at,updated_by'),
@@ -96,7 +100,7 @@
 
   function renderSetupNeeded(root) {
     root.innerHTML = header(true) + `<div style="${card}"><div style="font-weight:700;color:var(--text);margin-bottom:6px;">One-time setup needed</div>
-      <div style="font-size:13.5px;color:var(--text2);line-height:1.6;">The website tables are not in the database yet. Run <b>website_admin_setup.sql</b> in the Supabase SQL Editor (after choosing your PIN), then refresh this page.</div></div>`;
+      <div style="font-size:13.5px;color:var(--text2);line-height:1.6;">The website tables are not in the database yet. Run <b>website_admin_setup.sql</b> in the Supabase SQL Editor, then refresh this page.</div></div>`;
   }
 
   async function renderLocked(root, err) {
@@ -104,10 +108,10 @@
       if (/does not exist|Could not find|schema cache/i.test(e.message)) return renderSetupNeeded(root);
     }
     root.innerHTML = header(true) + `<div style="${card}max-width:460px;">
-      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;">🔒 Enter the website PIN</div>
-      <div style="font-size:13px;color:var(--text3);margin-bottom:14px;">${n != null ? `<b style="color:var(--accent)">${n}</b> new tour request${n === 1 ? '' : 's'} waiting. ` : ''}Tour requests contain families' contact details, so they are protected by a separate PIN.</div>
+      <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;">🔒 Enter the admin password</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:14px;">${n != null ? `<b style="color:var(--accent)">${n}</b> new tour request${n === 1 ? '' : 's'} waiting. ` : ''}Tour requests contain families' contact details, so this section asks for the admin password.</div>
       <form onsubmit="event.preventDefault();websiteUnlock()" style="display:flex;gap:8px;">
-        <input id="web-pin" type="password" autocomplete="current-password" placeholder="Website PIN" style="${input}">
+        <input id="web-pin" type="password" autocomplete="current-password" placeholder="Admin password" style="${input}">
         <button type="submit" style="${btnStyle('primary')}">Unlock</button>
       </form>
       ${err ? `<div style="margin-top:10px;font-size:12.5px;color:var(--danger);">${esc(err)}</div>` : ''}
@@ -120,7 +124,7 @@
     if (!pin) return;
     try {
       const ok = await rpc('web_admin_check', { p_pin: pin });
-      if (!ok) return renderLocked(document.getElementById('website-admin-root'), 'Wrong PIN. After 5 wrong tries the website section locks for 15 minutes.');
+      if (!ok) return renderLocked(document.getElementById('website-admin-root'), 'Wrong password. After 5 wrong tries this section locks for 30 minutes.');
       sessionStorage.setItem(PIN_KEY, pin);
       renderWebsitePage();
     } catch (e) { renderLocked(document.getElementById('website-admin-root'), e.message); }
@@ -151,7 +155,6 @@
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start;">
           ${settingsCard()}
           ${pagesCard()}
-          ${pinCard()}
         </div>
       </div>`;
     renderList();

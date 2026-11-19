@@ -2,7 +2,7 @@
   "name": "Harmony Living House Admin",
   "short_name": "HLH Admin",
   "description": "Harmony Living House Adult Family LLC — Staff Admin Portal",
-  "start_url": "./staff.html",
+  "start_url": "/staff",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#b8860b",
@@ -20,5 +20,7 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "id": "/staff",
+  "scope": "/staff"
 }
