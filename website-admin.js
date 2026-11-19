@@ -156,7 +156,13 @@
     renderList();
   }
 
-  window.websiteFilter = function (k) { filter = k; renderUnlocked(document.getElementById('website-admin-root')); };
+  window.websiteFilter = function (k, fromBack) {
+    const prev = filter;
+    if (prev === k) return;
+    filter = k;
+    renderUnlocked(document.getElementById('website-admin-root'));
+    if (!fromBack && typeof pushSubNav === 'function') pushSubNav(() => websiteFilter(prev, true));
+  };
   window.websiteSearch = function (q) { search = q; renderList(); };
 
   function renderList() {
@@ -316,4 +322,6 @@
       sessionStorage.setItem(PIN_KEY, newP); say('PIN changed'); renderWebsitePage();
     } catch (e) { say('Could not change PIN: ' + e.message); }
   };
+  // If the portal reopened straight onto the Website page, draw it now
+  if (document.getElementById('page-website')?.classList.contains('active')) setTimeout(() => window.renderWebsitePage(), 0);
 })();

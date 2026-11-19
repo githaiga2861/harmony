@@ -547,27 +547,63 @@ document.getElementById('login-password').addEventListener('keydown', e => { if 
 const pageTitles = { website: 'Website', dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Financials — Income & Expenses', staff: 'Staff', 'staff-profile': 'Staff Profile', staffdocs: 'Staff Documents', contacts: 'Quick Contacts', 'facility-numbers': 'Facility Numbers', alerts: '🔔 Alerts & Automated Notifications' };
 
 // ── In-app Back navigation (the installed app has no browser Back button) ──
+// navStack holds previous pages (strings) and in-page steps such as tabs/filters ({undo}).
 let navStack = [];
 let currentPageName = null;
+let inShowPage = false, inUndo = false;
 function updateBackBtn() {
   const b = document.getElementById('nav-back-btn');
-  if (b) b.style.display = navStack.length ? 'inline-flex' : 'none';
+  if (b) b.style.display = (navStack.length || (currentPageName && currentPageName !== 'dashboard')) ? 'inline-flex' : 'none';
+}
+function pushSubNav(undo) {
+  if (inShowPage || inUndo) return;
+  navStack.push({ undo, page: currentPageName });
+  if (navStack.length > 40) navStack.shift();
+  updateBackBtn();
 }
 function goBack() {
   const prev = navStack.pop();
-  if (prev) showPage(prev, { fromBack: true });
+  if (!prev) { if (currentPageName !== 'dashboard') showPage('dashboard', { fromBack: true }); return; }
+  if (typeof prev === 'object') {
+    inUndo = true;
+    try { if (prev.page && prev.page !== currentPageName) showPage(prev.page, { fromBack: true }); prev.undo(); }
+    finally { inUndo = false; }
+  } else {
+    showPage(prev, { fromBack: true });
+  }
   updateBackBtn();
 }
 document.addEventListener('keydown', e => { if (e.altKey && e.key === 'ArrowLeft') { e.preventDefault(); goBack(); } });
 document.addEventListener('mouseup', e => { if (e.button === 3) { e.preventDefault(); goBack(); } });
+// Remember tab switches inside a page so Back returns to the previous tab
+function trackTabs(fnName, pageName, initial) {
+  const orig = window[fnName];
+  if (typeof orig !== 'function') return;
+  let current = initial;
+  window[fnName] = function (tab, ...rest) {
+    const prev = current;
+    const r = orig.apply(this, [tab, ...rest]);
+    if (prev && prev !== tab && currentPageName === pageName) pushSubNav(() => window[fnName](prev));
+    current = tab;
+    return r;
+  };
+}
+document.addEventListener('DOMContentLoaded', () => {
+  trackTabs('switchProfileTab', 'profile', 'notes');
+  trackTabs('switchFinTab', 'payments', localStorage.getItem('hlh_fin_tab') || 'income');
+});
 
 async function showPage(name, opts) {
-  if (!(opts && opts.fromBack) && currentPageName && currentPageName !== name) {
+  if (!(opts && opts.fromBack) && !inUndo && currentPageName && currentPageName !== name) {
     navStack.push(currentPageName);
-    if (navStack.length > 30) navStack.shift();
+    if (navStack.length > 40) navStack.shift();
   }
   currentPageName = name;
   updateBackBtn();
+  inShowPage = true;
+  try { await showPageInner(name); } finally { inShowPage = false; }
+}
+async function showPageInner(name) {
   if (name !== 'profile') localStorage.setItem('hlh_last_page', name);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
