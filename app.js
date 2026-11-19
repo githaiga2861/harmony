@@ -202,10 +202,7 @@ function subscribeMaintenanceRealtime() {
 // ══════════════════════════════════
 // DATA LAYER — localStorage
 // ══════════════════════════════════
-const USERS = [
-  { email: 'hello@harmonylivinghouse.com', password: 'harmony2026', name: 'Penninah Nyandia' },
-  { email: 'josegithaigajose6218@gmail.com', password: 'staff2026', name: 'Githaiga Njoroge' }
-];
+// Staff passwords are checked inside the database (staff_login function); none are stored in this file.
 
 let currentUser = null;
 let currentResidentId = null;
@@ -376,32 +373,37 @@ async function migrateVitalsRecorder() {
 // ══════════════════════════════════
 // AUTH
 // ══════════════════════════════════
-// Sign-in lockout: 5 wrong tries within 30 minutes locks sign-in for 30 minutes
-const LOGIN_MAX_TRIES = 5, LOGIN_WINDOW_MS = 30 * 60 * 1000;
-function loginAttempts() { try { return JSON.parse(localStorage.getItem('hlh_login_attempts')) || { fails: [], lockedUntil: 0 }; } catch { return { fails: [], lockedUntil: 0 }; } }
-function doLogin() {
+// Sign-in is checked by the database (staff_login): passwords are stored there only as hashes,
+// and 5 wrong tries lock that account for 30 minutes.
+let loginBusy = false;
+async function doLogin() {
+  if (loginBusy) return;
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const pass = document.getElementById('login-password').value;
   const errEl = document.getElementById('auth-error');
-  const a = loginAttempts(), now = Date.now();
-  if (a.lockedUntil > now) {
-    const mins = Math.ceil((a.lockedUntil - now) / 60000);
-    errEl.textContent = 'Too many wrong attempts. Try again in ' + mins + ' minute' + (mins === 1 ? '' : 's') + '.';
+  if (!email || !pass) { errEl.textContent = 'Enter your email and password.'; errEl.style.display = 'block'; return; }
+  loginBusy = true;
+  let res;
+  try {
+    const { data, error } = await db.rpc('staff_login', { p_email: email, p_password: pass });
+    if (error) throw error;
+    res = data || {};
+  } catch (e) {
+    loginBusy = false;
+    errEl.textContent = /function|schema cache|does not exist/i.test(e.message || '') ?
+      'Sign-in is being set up. Ask your IT contact to run staff_login_setup.sql.' :
+      'Could not reach the server. Check the internet connection and try again.';
     errEl.style.display = 'block';
     return;
   }
-  const user = USERS.find(u => u.email === email && u.password === pass);
-  if (!user) {
-    a.fails = (a.fails || []).filter(t => now - t < LOGIN_WINDOW_MS).concat(now);
-    if (a.fails.length >= LOGIN_MAX_TRIES) { a.lockedUntil = now + LOGIN_WINDOW_MS; a.fails = []; }
-    localStorage.setItem('hlh_login_attempts', JSON.stringify(a));
-    const left = LOGIN_MAX_TRIES - a.fails.length;
-    errEl.textContent = a.lockedUntil > now ? 'Too many wrong attempts. Sign-in is locked for 30 minutes.'
-      : 'Invalid credentials. ' + left + ' attempt' + (left === 1 ? '' : 's') + ' left before a 30-minute lock.';
-    errEl.style.display = 'block';
-    return;
+  loginBusy = false;
+  if (!res.ok) { errEl.textContent = res.message || 'Invalid credentials. Please try again.'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+  const user = { email: res.email, name: res.name };
+  // If this account's password also opens the Website section, unlock it for this tab
+  if (res.email === 'hello@harmonylivinghouse.com') {
+    try { const { data: webOk } = await db.rpc('web_admin_check', { p_pin: pass }); if (webOk) sessionStorage.setItem('hlh_web_pin', pass); } catch (e) {}
   }
-  localStorage.removeItem('hlh_login_attempts');
   currentUser = user;
   localStorage.setItem('hlh_session', JSON.stringify(user));
   document.getElementById('auth-screen').style.display = 'none';
@@ -424,6 +426,7 @@ function checkSession() {
   if (s) {
     try {
       currentUser = JSON.parse(s);
+      if (currentUser && currentUser.password) { delete currentUser.password; localStorage.setItem('hlh_session', JSON.stringify(currentUser)); }
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
       initApp();

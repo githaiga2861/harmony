@@ -64,10 +64,6 @@
   window.renderWebsitePage = async function () {
     const root = document.getElementById('website-admin-root');
     if (!root) return;
-    if (!getPin() && typeof currentUser !== 'undefined' && currentUser && currentUser.password) {
-      // Try the signed-in admin's password first, so the admin isn't asked twice
-      try { if (await rpc('web_admin_check', { p_pin: currentUser.password })) sessionStorage.setItem(PIN_KEY, currentUser.password); } catch (e) {}
-    }
     if (!getPin()) return renderLocked(root);
     root.innerHTML = '<div style="padding:30px;text-align:center;color:var(--text3);">Loading website data…</div>';
     try {
