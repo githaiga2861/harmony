@@ -546,7 +546,28 @@ document.getElementById('login-password').addEventListener('keydown', e => { if 
 // ══════════════════════════════════
 const pageTitles = { website: 'Website', dashboard: 'Dashboard', residents: 'Residents', profile: 'Resident Profile', notes: 'All Notes', analytics: 'Analytics', incidents: 'All Incident Reports', payments: 'Financials — Income & Expenses', staff: 'Staff', 'staff-profile': 'Staff Profile', staffdocs: 'Staff Documents', contacts: 'Quick Contacts', 'facility-numbers': 'Facility Numbers', alerts: '🔔 Alerts & Automated Notifications' };
 
-async function showPage(name) {
+// ── In-app Back navigation (the installed app has no browser Back button) ──
+let navStack = [];
+let currentPageName = null;
+function updateBackBtn() {
+  const b = document.getElementById('nav-back-btn');
+  if (b) b.style.display = navStack.length ? 'inline-flex' : 'none';
+}
+function goBack() {
+  const prev = navStack.pop();
+  if (prev) showPage(prev, { fromBack: true });
+  updateBackBtn();
+}
+document.addEventListener('keydown', e => { if (e.altKey && e.key === 'ArrowLeft') { e.preventDefault(); goBack(); } });
+document.addEventListener('mouseup', e => { if (e.button === 3) { e.preventDefault(); goBack(); } });
+
+async function showPage(name, opts) {
+  if (!(opts && opts.fromBack) && currentPageName && currentPageName !== name) {
+    navStack.push(currentPageName);
+    if (navStack.length > 30) navStack.shift();
+  }
+  currentPageName = name;
+  updateBackBtn();
   if (name !== 'profile') localStorage.setItem('hlh_last_page', name);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
