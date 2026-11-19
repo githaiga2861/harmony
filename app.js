@@ -391,7 +391,7 @@ async function doLogin() {
   } catch (e) {
     loginBusy = false;
     errEl.textContent = /function|schema cache|does not exist/i.test(e.message || '') ?
-      'Sign-in is being set up. Ask your IT contact to run staff_login_setup.sql.' :
+      'Sign-in is being set up. Ask your IT contact to run staff_login_setup.sql. (' + (e.message || '') + ')' :
       'Could not reach the server. Check the internet connection and try again.';
     errEl.style.display = 'block';
     return;
